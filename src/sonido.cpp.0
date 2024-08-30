@@ -1,0 +1,86 @@
+#include <Arduino.h>
+
+#include "config.h"
+#include "display.h"
+#include "sound.h"
+
+void setup()
+{
+    pinMode(LED, OUTPUT);
+    digitalWrite(LED, LOW);
+
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
+
+    lcd_init();
+}
+
+uint16_t count;
+bool isButtonClicked;
+unsigned long start, end, x;
+void loop()
+{
+    if(!digitalRead(BUTTON_PIN)){
+        delay(25);
+        if(digitalRead(BUTTON_PIN))
+            isButtonClicked = true;
+    }
+    if (isButtonClicked){
+        isButtonClicked = false;
+
+        lcd.setCursor(0 ,0);
+        lcd.print("       ");
+        lcd.setCursor(0 ,0);
+
+        switch(count%4){
+            case 0:
+                    x = 0;
+                    start = millis();
+                    tone(BUZZER_PIN, 4000);
+                    delay(40);
+                    tone(BUZZER_PIN, 4500);
+                    delay(40);
+                    tone(BUZZER_PIN, 5000);
+                    delay(40);
+                    noTone(BUZZER_PIN);
+                    end = millis();
+                    break;
+            case 1:
+                    x = 1;
+                    start = millis();
+                    tone1(BUZZER_PIN, 4000, 40);
+                    tone1(BUZZER_PIN, 4500, 40);
+                    tone1(BUZZER_PIN, 5000, 40);
+                    end = millis();
+                    break;
+            case 2:
+                    x = 2;
+                    start = millis();
+                    tone(BUZZER_PIN, 436);
+                    delay(100);
+                    tone(BUZZER_PIN, 200);
+                    delay(75);
+                    tone(BUZZER_PIN, 100);
+                    delay(100);
+                    noTone(BUZZER_PIN);
+                    end = millis();
+                    break;
+            case 3:
+                    x = 3;
+                    start = millis();
+                    tone1(BUZZER_PIN, 436, 100);
+                    tone1(BUZZER_PIN, 200, 75);
+                    tone1(BUZZER_PIN, 100, 100);
+                    end = millis();
+                    break;
+        }
+
+
+        digitalWrite(LED, digitalRead(LED)?LOW:HIGH);
+
+        count++;
+        lcd.print(x);
+        lcd.print(" - ");
+        lcd.print(end-start);
+        lcd.display();
+    }
+}
