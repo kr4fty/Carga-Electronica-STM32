@@ -1,0 +1,79 @@
+IMPLEMENTACION DE UN DAC (BluePill no cuenta con DAC)
+-----------------------------------------------------
+    Generar una salida PWM + filtro pasa bajos. Tener en cuenta la frecuencia 
+    del PWM y la frecuencia de corte del filtro para la tasa de bits maxima del
+    PWM en nuestra placa BluePill. A su vez la salida este MCU tiene una salida
+    logica de 3.3V, por lo que el filtro debera tener una ganacia, dependiendo
+    de la Vgs Threshold del mosfet
+    SOLUCION:
+            Se utliza un Filtro Activo tipo Bessel de 2do Orden con una 
+            ganancia de 1.51
+            http://sim.okawa-denshi.jp/en/OPseikiLowkeisan.htm
+
+Manejo de un LCD [ ECHO ]
+-------------------------
+    Se usara un lcd de un Nokia 3310
+
+Control de el mofet que activa el Cooler Fan, driving
+-----------------------------------------------------
+    Como la salida logica del STM32 es 3.3V, tendria que cambiar este IRF540N 
+    por un 2N7002, por ejemplo. Revisar cuanto consume el cooler!!!
+    SOLUCION:
+            Se implementa un driver simple mediante un transistor NPN
+            https://www.laboratoriogluon.com/controlar-mosfets-de-potencia-irfz44n-con-3-3v/
+
+
+Sensores de Tension de la Bateria
+-----------------------------------------
+    Se utliza un divisor resistivo
+
+Sensor de corriente ASC712
+--------------------------
+    La tensión de salida (Vout) del ACS712-05B se puede calcular utilizando la
+    siguiente fórmula:
+
+        Vout = Vcc/2 + (Sensibilidad x Corriente)
+
+    donde Vcc es la tensión de alimentación del sensor (que es de 5V en este caso),
+    Sensibilidad es la sensibilidad del sensor (que es de 0,185 V/A para el ACS712-05B) y 
+    Corriente es la corriente que se está midiendo.
+
+    Si asumimos que la tensión de alimentación es de 5V, la fórmula se convierte en:
+
+        Vout = 2,5V + (0,185V/A x Corriente)
+
+    Para una corriente de 5A, la tensión de salida sería:
+
+        Vout = 2,5V + (0,185V/A x 5A)
+        Vout = 2,5V + 0,925V
+        Vout = 3,425V
+
+Sensor de Temperatura LM35
+--------------------------
+    Rango de salida: de 0 a 1.5V maximo, en la configuracion basica (2 a 150ºC)
+            NO haria falta un conversor de niveles 3.3 a 5V
+            http://www.ocfreaks.com/interfacing-lm35-sensor-lpc2148/
+
+Interrupciones del PWM cuando se usa tone()
+-------------------------------------------
+    Al invocar la función tone() de Arduino y mientras se tiene activa otra 
+    salida PWM, se observa que se produce una interrupción en la salida de 
+    dicho pin.
+    SOLUCION:
+            Se implemento una funcion tone() personalizada, utilizando el TIM2,
+            canal 2, perteneciente al gpio PA1
+
+Interfaz
+--------
+    Estando apagado(a la espera)
+        Mostrar la corriente de Carga deseada
+    
+    Estando encendido
+        * Mostrar de alguna manera (por presion larga del boton, por ejemplo), 
+          la corriente de salida seleccionada
+        * Posibilidad de modificar dicha corriente de salida
+        SOLUCION IMPLEMENTADA:
+                                Al girar el Encoder, se modificara
+                                automaticamente el nuevo Setpoint. No hace
+                                falta presionar el boton. Por ahora :|
+

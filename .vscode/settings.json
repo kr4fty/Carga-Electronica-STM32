@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.0": "c",
+        "string": "cpp"
+    }
+}
