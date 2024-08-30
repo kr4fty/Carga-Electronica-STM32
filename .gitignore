@@ -3,3 +3,8 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+test
+src/main copy.cpp.0
+src/sonido.cpp.0
+lib/README
+include/README
