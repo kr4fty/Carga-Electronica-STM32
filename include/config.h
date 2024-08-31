@@ -8,8 +8,8 @@
  *      BUTTON_PIN  |o|PB15          NRST|o|
  *                  |o|PA8           PB11|o|
  *                  |o|PA9           PB10|o|  
- *                  |o|PA10           PB1|o|  PWM_PIN
- *                  |o|PA11           PB0|o|  
+ *                  |o|PA10           PB1|o|  PWM_PIN [PWM_PIN1]
+ *                  |o|PA11           PB0|o|  [PWM_PIN2]
  *                  |o|PA12           PA7|o|  
  *                  |o|PA15    /\     PA6|o|  
  *                  |o|PB3    /  \    PA5|o|  IBATT_SENSE_PIN
