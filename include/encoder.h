@@ -23,7 +23,7 @@ void encoder_init()
     bool circleValues = true;
     encoder.setBoundaries(0, RESOLUTION, circleValues); //minValue, maxValue, circleValues true|false (when max go to min and vice versa)
     //encoder.disableAcceleration(); //acceleration is now enabled by default - disable if you dont need it
-    encoder.setAcceleration(RESOLUTION/4); //or set the value - larger number = more accelearation; 0 or 1 means disabled acceleration
+    encoder.setAcceleration(RESOLUTION/6); //or set the value - larger number = more accelearation; 0 or 1 means disabled acceleration
     encoder.setEncoderValue(0);
 }
 

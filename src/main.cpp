@@ -41,12 +41,7 @@ void setup() {
   //sets the period, in Millisecond
   myPID.SetSampleTime(100);
 
-  windowStartTime = millis();
-
-  tone(BUZZER_PIN, 434, 100);
-  lcd_printBaseFrame();
-
-  // Lectura inicial de los sensores
+    // Lectura inicial de los sensores
   vBattRawOld = analogRead(VBATT_SENSE_PIN)-.01; // le resto un pequeño valor para que imprima la tension cuando
   iBattRawOld = analogRead(IBATT_SENSE_PIN);
 
@@ -58,7 +53,8 @@ void setup() {
     while(!encoder.isEncoderButtonClicked()){
       AdcRaw_1A = analogRead(IBATT_SENSE_PIN);
       //AdcRaw_1A = (double)((_X_I*iBattRawOld + AdcRaw_1A)/(_X_I+1));
-      AdcRaw_1A = ALPHA_I*AdcRaw_1A + (1-ALPHA_I)*iBattRawOld;
+      //AdcRaw_1A = ALPHA_I*AdcRaw_1A + (1-ALPHA_I)*iBattRawOld;
+      AdcRaw_1A = iBattRawOld + MU * (AdcRaw_1A - iBattRawOld);
       iBattRawOld = AdcRaw_1A;
       delay(5);
     }
@@ -68,11 +64,17 @@ void setup() {
     ADCOffset = ADCOFFSET;
     AdcRaw_1A = ADCRAW_1A;
   }
+
+  windowStartTime = millis();
+
+  tone(BUZZER_PIN, 434, 100);
+  lcd_printBaseFrame();
 }
 
-bool isPowerOn = false;
+bool isPowerOn = false; // TRUE: en funcionamiento, False: no ejecutandose
 double vBattRaw, iBattRaw;
 float iIn, vIn, iOut, vOut;
+bool wasVUpdated, wasIUpdated; //True: Si los valores cambiaron, para re imprimir
 uint16_t mosfetTempRaw, oldMofetTempRaw;
 float mosfetTemp;
 long timeToUpdateDisplay=millis()+DISPLAY_UPDATE_WINDOW;
@@ -80,7 +82,7 @@ unsigned long powerStateMessageTime, showMessageDuringThisTime = 2000; // 2 seg
 bool printStatusMessage= false;
 bool isItOverheating=false;
 bool isPrintTime;
-bool isThereNewSetpointValue; // Para tener prioridad al mostrar nuevo setpoint
+bool isTheSetpointUpdated; // Para tener prioridad al mostrar nuevo setpoint
 unsigned long timeToPrintNewSetpoint, windowNewSetpoint=1000;
 
 void loop() {
@@ -94,18 +96,21 @@ void loop() {
     /*lcd.setTextSize(1);
     lcd.setCursor(LCDWIDTH/2-4, LCDHEIGHT/2-4); // para pruebas
     lcd.print(dutyCycle);                       // para pruebas
-    updateDisplay = true;                       // para pruebas*/
+    updateDisplay = true;                       // para pruebas
     dutyCycle = Setpoint;                       // para pruebas
-    pwm_setDuty(dutyCycle);                     // para pruebas
+    pwm_setDuty(dutyCycle);                     // para pruebas*/
 
     lcd_printNewSetpoint(Setpoint);
     tone(BUZZER_PIN, 600, 10);
-    isThereNewSetpointValue = true;
+    isTheSetpointUpdated = true;    
+
+    if(isPowerOn) // Solo actualizo y esta en ejecucion la carga electronica
+      pwm_setDuty(Setpoint);
 
     timeToPrintNewSetpoint = millis() + windowNewSetpoint;
   }
-  if(isThereNewSetpointValue && (millis()>timeToPrintNewSetpoint)){
-      isThereNewSetpointValue = false;
+  if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint)){
+      isTheSetpointUpdated = false;
       lcd_printBaseFrame();
       if(isPowerOn){
         tone(BUZZER_PIN, 7000, 20);
@@ -126,6 +131,8 @@ void loop() {
       delay(20);
       tone(BUZZER_PIN, 5000, 50);
 
+      pwm_setDuty(Setpoint);
+
       coolerFan_powerOn();      
     }
     // APAGADO
@@ -134,6 +141,8 @@ void loop() {
       //pwm_setDuty(0);
       tone(BUZZER_PIN, 436, 100);
       tone(BUZZER_PIN, 200, 150);
+
+      pwm_setDuty(0);
 
       coolerFan_powerOff();
     }
@@ -188,8 +197,10 @@ void loop() {
   //vBattRaw = ALPHA_V*vBattRaw + (1-ALPHA_V)*vBattRawOld;
   // Filtro de Wiener, Adaptativo
   vBattRaw = vBattRawOld + MU * (vBattRaw - vBattRawOld);
-
-  vBattRawOld = vBattRaw;
+  if(vBattRaw!=vBattRawOld){// si cambio V entonces actualizo valor en el LCD
+    wasVUpdated = true;
+    vBattRawOld = vBattRaw;
+  }
 
   
   iBattRaw = (double)analogRead(IBATT_SENSE_PIN);
@@ -198,8 +209,10 @@ void loop() {
   //iBattRaw = ALPHA_I*iBattRaw + (1-ALPHA_I)*iBattRawOld;
   // Filtro de Wiener, Adaptativo
   iBattRaw = iBattRawOld + MU * (iBattRaw - iBattRawOld);
-  iBattRawOld = iBattRaw;
-  
+  if(iBattRaw!=iBattRawOld){ // si cambio I entonces actualizo valor en el LCD
+    wasIUpdated = true;
+    iBattRawOld = iBattRaw;
+  }
 
   // Conversion ADC a valores de Vin o Iin
   //vIn = random(1000)/100.0;
@@ -233,7 +246,7 @@ void loop() {
   /***************************************************************************/
   /*                            Refresco la Pantalla                         */
   /***************************************************************************/
-  if(millis()>timeToUpdateDisplay && !isThereNewSetpointValue){
+  if(millis()>timeToUpdateDisplay && !isTheSetpointUpdated){
     // Se muestra el nuevo estado del dispositivo, solo por 2seg
     if(printStatusMessage){
       if(millis()>powerStateMessageTime){
@@ -259,22 +272,22 @@ void loop() {
     }
 
     // Imprimo los Watts-Hora y Ampere-Hora
-    if( (vBattRawOld != vBattRaw) || (iBattRawOld != iBattRaw) ){
+    if( wasVUpdated || wasIUpdated ){
       lcd_printWattHour(vIn*iIn);
       lcd_printAmpHour(iIn);
     }
     
     // Imprimo Tension y Corriente
-    //if(vBattRawOld != vBattRaw)
+    if(wasVUpdated)
     {
       // Calculo Vin
       vOut = (double)(vBattRaw/1024.0)*V3_3;
       vIn = vOut/GAIN_V;
       // Print Vin
       lcd_printVin(vIn);
-      //vBattRawOld = vBattRaw;
+      wasVUpdated = false;
     }
-    //if(iBattRawOld != iBattRaw)
+    if(wasIUpdated)
     {
       // Calculo iIn
       //iOut = ((iBattRaw-ADCOffset)/1024.0) * ((V3_3 + VD)/GAIN_I);
@@ -283,7 +296,7 @@ void loop() {
 
       // Print Iin
       lcd_printIin(iIn);
-      //iBattRawOld = iBattRaw;
+      wasIUpdated = false;
     }
 
     
