@@ -25,10 +25,21 @@ void lcd_init()
     lcd.setCursor(8, LCDHEIGHT/2-4);
     lcd.print("INICIANDO...");
     lcd.display();
-    delay(1000);
+    //delay(1000);
     lcd.clearDisplay();
     //lcd.setTextSize(1);
 }
+
+void lcd_printCalibration()
+{
+    lcd.clearDisplay();
+    lcd.print("CALIBRACION");
+    lcd.setCursor(0*6, 2*8);
+    lcd.setTextSize(1);
+    lcd.print("Coloque una carga de 1A y presione para finalizar");
+    lcd.display();
+}
+
 void lcd_printBaseFrame()
 {
     lcd.clearDisplay();

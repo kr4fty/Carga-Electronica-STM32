@@ -70,8 +70,6 @@
 // VBATT IBATT
 #define VBATT_SENSE_PIN     PA4
 #define IBATT_SENSE_PIN     PA5
-#define _X_V                  3 // 
-#define _X_I                  5
 
 //PID
 #define RESOLUTION PWM_RESOLUTION

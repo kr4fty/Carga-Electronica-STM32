@@ -27,4 +27,9 @@ void encoder_init()
     encoder.setEncoderValue(0);
 }
 
+bool isButtonDown()
+{
+    return digitalRead(BUTTON_PIN) ? false : true;
+}
+
 #endif
