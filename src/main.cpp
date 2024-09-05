@@ -13,9 +13,9 @@ int dutyCycle = 0;
 
 double Setpoint, Input, Output; // Parametro PID
 //Specify the links and initial tuning parameters
-double Kp=2, Ki=5, Kd=1;
+double Kp=KP, Ki=KI, Kd=KD;
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
-int WindowSize = 200;
+int WindowSize = 20;
 unsigned long windowStartTime;
 
 double vBattRawOld, iBattRawOld;
@@ -34,12 +34,11 @@ void setup() {
   
   //initialize the variables we're linked to
   Setpoint = 0;
-  //tell the PID to range between 0 and the full window size
-  myPID.SetOutputLimits(0, RESOLUTION);
+  myPID.SetOutputLimits(0, 412);
   //turn the PID on
   myPID.SetMode(AUTOMATIC);
   //sets the period, in Millisecond
-  myPID.SetSampleTime(100);
+  myPID.SetSampleTime(10);
 
     // Lectura inicial de los sensores
   vBattRawOld = analogRead(VBATT_SENSE_PIN)-.01; // le resto un pequeño valor para que imprima la tension cuando
@@ -67,6 +66,8 @@ void setup() {
 
   windowStartTime = millis();
 
+  encoder.setEncoderValue(2685);
+
   tone(BUZZER_PIN, 434, 100);
   lcd_printBaseFrame();
 }
@@ -91,21 +92,13 @@ void loop() {
   /***************************************************************************/
   if (encoder.encoderChanged())
   {
-    Setpoint = encoder.readEncoder();
-
-    /*lcd.setTextSize(1);
-    lcd.setCursor(LCDWIDTH/2-4, LCDHEIGHT/2-4); // para pruebas
-    lcd.print(dutyCycle);                       // para pruebas
-    updateDisplay = true;                       // para pruebas
-    dutyCycle = Setpoint;                       // para pruebas
-    pwm_setDuty(dutyCycle);                     // para pruebas*/
-
-    lcd_printNewSetpoint(Setpoint);
+    dutyCycle = encoder.readEncoder();
+    lcd_printNewSetpoint(dutyCycle);
+    if(isPowerOn){
+      Setpoint = dutyCycle;
+    }
     tone(BUZZER_PIN, 600, 10);
-    isTheSetpointUpdated = true;    
-
-    if(isPowerOn) // Solo actualizo y esta en ejecucion la carga electronica
-      pwm_setDuty(Setpoint);
+    isTheSetpointUpdated = true;
 
     timeToPrintNewSetpoint = millis() + windowNewSetpoint;
   }
@@ -131,7 +124,9 @@ void loop() {
       delay(20);
       tone(BUZZER_PIN, 5000, 50);
 
-      pwm_setDuty(Setpoint);
+      //pwm_setDuty(Setpoint);
+
+      Setpoint = encoder.readEncoder();
 
       coolerFan_powerOn();      
     }
@@ -143,6 +138,8 @@ void loop() {
       tone(BUZZER_PIN, 200, 150);
 
       pwm_setDuty(0);
+
+      Setpoint = 0;
 
       coolerFan_powerOff();
     }
@@ -226,7 +223,8 @@ void loop() {
   {
     windowStartTime += WindowSize;
     // Actuo en base al Output computado
-    //pwm_setDuty(dutyCycle);
+    if(isPowerOn)
+      pwm_setDuty(Output+2685);
   } 
   // FIN PID
 
@@ -295,7 +293,7 @@ void loop() {
       iIn = (iBattRaw - ADCOffset) / ADCRAW_1A;
 
       // Print Iin
-      lcd_printIin(iIn);
+      lcd_printIin(Output);
       wasIUpdated = false;
     }
 

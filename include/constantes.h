@@ -22,4 +22,16 @@
 #define _X_V              3 // Cte. filtro de Media Ponderada, X generalmente
 #define _X_I              3 // corresponde al numero de muestras
 
+// PID
+// https://pidtuner.com/
+//  Proportional Gain= 4
+//  Integral Time= 0.35
+//  Derivative Time= 0.05
+//  Integral Gain= 11.428571428571429
+//  Derivative Gain= 0.2
+
+#define KP                4
+#define KI         11.42857
+#define KD              0.2
+
 #endif
