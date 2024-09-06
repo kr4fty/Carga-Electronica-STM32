@@ -8,6 +8,7 @@
 #include "tclock.h"
 #include "constantes.h"
 #include "coolerfan.h"
+#include "conversion.h"
 
 int dutyCycle = 0;
 
@@ -15,11 +16,11 @@ double Setpoint, Input, Output; // Parametro PID
 //Specify the links and initial tuning parameters
 double Kp=KP, Ki=KI, Kd=KD;
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
-int WindowSize = 20;
+int WindowSize = 10;
 unsigned long windowStartTime;
 
 double vBattRawOld, iBattRawOld;
-uint16_t ADCOffset; // Lectura del ADC medida en vacio (0 A)
+uint16_t iAdcOffset; // Lectura del ADC medida en vacio (0 A)
 float AdcRaw_1A;    // Lectura del ADC midiendo 1A
 
 void setup() {
@@ -34,11 +35,11 @@ void setup() {
   
   //initialize the variables we're linked to
   Setpoint = 0;
-  myPID.SetOutputLimits(0, 412);
+  myPID.SetOutputLimits(VGS_THRESHOLE, 4095);
   //turn the PID on
-  myPID.SetMode(AUTOMATIC);
+  //myPID.SetMode(AUTOMATIC);
   //sets the period, in Millisecond
-  myPID.SetSampleTime(10);
+  myPID.SetSampleTime(WindowSize);
 
     // Lectura inicial de los sensores
   vBattRawOld = analogRead(VBATT_SENSE_PIN)-.01; // le resto un pequeño valor para que imprima la tension cuando
@@ -60,13 +61,14 @@ void setup() {
     AdcRaw_1A -= 512;
   }
   else{
-    ADCOffset = ADCOFFSET;
+    iAdcOffset = IADCOFFSET;
     AdcRaw_1A = ADCRAW_1A;
   }
 
   windowStartTime = millis();
 
-  encoder.setEncoderValue(2685);
+  dutyCycle = encoder.readEncoder();
+  Setpoint = dutycycleToADC(dutyCycle);
 
   tone(BUZZER_PIN, 434, 100);
   lcd_printBaseFrame();
@@ -93,10 +95,10 @@ void loop() {
   if (encoder.encoderChanged())
   {
     dutyCycle = encoder.readEncoder();
-    lcd_printNewSetpoint(dutyCycle);
-    if(isPowerOn){
-      Setpoint = dutyCycle;
-    }
+    lcd_printNewSetpoint(dutyCycleToAmpere(dutyCycle));
+    
+    Setpoint = dutycycleToADC(dutyCycle);
+    
     tone(BUZZER_PIN, 600, 10);
     isTheSetpointUpdated = true;
 
@@ -123,23 +125,21 @@ void loop() {
       tone(BUZZER_PIN, 4500, 50);
       delay(20);
       tone(BUZZER_PIN, 5000, 50);
-
-      //pwm_setDuty(Setpoint);
-
-      Setpoint = encoder.readEncoder();
+      
+      myPID.SetMode(AUTOMATIC); // Encendemos el PID
 
       coolerFan_powerOn();      
     }
     // APAGADO
     else{
       lcd_printPowerOffMessage();
-      //pwm_setDuty(0);
+      
       tone(BUZZER_PIN, 436, 100);
       tone(BUZZER_PIN, 200, 150);
 
       pwm_setDuty(0);
 
-      Setpoint = 0;
+      myPID.SetMode(MANUAL);  // Apagamos el PID
 
       coolerFan_powerOff();
     }
@@ -147,7 +147,6 @@ void loop() {
     powerStateMessageTime = millis() + showMessageDuringThisTime;
 
     digitalWrite(LED, digitalRead(LED)?LOW:HIGH);
-    //digitalWrite(COOLER_FAN_PIN, digitalRead(COOLER_FAN_PIN)?LOW:HIGH);
   }  
   // FIN CONFIGURACION DE CORRIENTE DE CARGA
 
@@ -189,9 +188,6 @@ void loop() {
   /*                                  PID                                    */
   /***************************************************************************/
   vBattRaw = analogRead(VBATT_SENSE_PIN);
-  //vBattRaw = (double)((_X_V*vBattRawOld + vBattRaw)/(_X_V+1));
-  // Filtro EMA
-  //vBattRaw = ALPHA_V*vBattRaw + (1-ALPHA_V)*vBattRawOld;
   // Filtro de Wiener, Adaptativo
   vBattRaw = vBattRawOld + MU * (vBattRaw - vBattRawOld);
   if(vBattRaw!=vBattRawOld){// si cambio V entonces actualizo valor en el LCD
@@ -201,30 +197,19 @@ void loop() {
 
   
   iBattRaw = (double)analogRead(IBATT_SENSE_PIN);
-  //iBattRaw = (double)((_X_I*iBattRawOld + iBattRaw)/(_X_I+1));
-  // Filtro EMA
-  //iBattRaw = ALPHA_I*iBattRaw + (1-ALPHA_I)*iBattRawOld;
   // Filtro de Wiener, Adaptativo
   iBattRaw = iBattRawOld + MU * (iBattRaw - iBattRawOld);
   if(iBattRaw!=iBattRawOld){ // si cambio I entonces actualizo valor en el LCD
     wasIUpdated = true;
     iBattRawOld = iBattRaw;
   }
-
-  // Conversion ADC a valores de Vin o Iin
-  //vIn = random(1000)/100.0;
   //iIn = random(500)/100.0;
 
   // CALCULO PID
   Input = iBattRaw;
-  myPID.Compute();
-  //dutyCycle = Output;
-  if (millis() > windowStartTime+WindowSize)
+  if(myPID.Compute()&&isPowerOn)
   {
-    windowStartTime += WindowSize;
-    // Actuo en base al Output computado
-    if(isPowerOn)
-      pwm_setDuty(Output+2685);
+    pwm_setDuty(Output);
   } 
   // FIN PID
 
@@ -287,13 +272,13 @@ void loop() {
     }
     if(wasIUpdated)
     {
+      if(!isPowerOn)
+        iAdcOffset = iBattRaw;
       // Calculo iIn
-      //iOut = ((iBattRaw-ADCOffset)/1024.0) * ((V3_3 + VD)/GAIN_I);
-      //iIn = (iOut / SENSIBILITY);
-      iIn = (iBattRaw - ADCOffset) / ADCRAW_1A;
+      iIn = (iBattRaw - iAdcOffset) / ADCRAW_1A;
 
       // Print Iin
-      lcd_printIin(Output);
+      lcd_printIin(iIn);
       wasIUpdated = false;
     }
 

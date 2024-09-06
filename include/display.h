@@ -63,8 +63,8 @@ void lcd_printBaseFrame()
 void lcd_printNewSetpoint(float value)
 {
     char buff[6];
-    sprintf(buff, "%4d", (int)value);
-    //dtostrf(value, 6, 2, buff);
+    //sprintf(buff, "%4d", (int)value);
+    dtostrf(value, 4, 2, buff);
     lcd.setTextSize(3);
     lcd.fillRect(0, ((LCDHEIGHT-3*8)/2)-1, 84, (3*8)+1, WHITE);
     lcd.setCursor(0,(LCDHEIGHT-(3*8))/2);
