@@ -71,7 +71,7 @@ void setup() {
 
 bool isPowerOn = false; // TRUE: en funcionamiento, False: no ejecutandose
 double vBattRaw, iBattRaw;
-float iIn, vIn, iOut, vOut;
+float iIn, vIn, wIn, totalAh, totalWh;
 bool wasVUpdated, wasIUpdated; //True: Si los valores cambiaron, para re imprimir
 uint16_t mosfetTempRaw, oldMofetTempRaw;
 float mosfetTemp;
@@ -183,9 +183,6 @@ void loop() {
   /*                                  PID                                    */
   /***************************************************************************/
   vBattRaw = analogRead(VBATT_SENSE_PIN);
-  //vBattRaw = (double)((_X_V*vBattRawOld + vBattRaw)/(_X_V+1));
-  // Filtro EMA
-  //vBattRaw = ALPHA_V*vBattRaw + (1-ALPHA_V)*vBattRawOld;
   // Filtro de Wiener, Adaptativo
   vBattRaw = vBattRawOld + MU * (vBattRaw - vBattRawOld);
   if(vBattRaw!=vBattRawOld){// si cambio V entonces actualizo valor en el LCD
@@ -194,9 +191,6 @@ void loop() {
   }
   
   iBattRaw = (double)analogRead(IBATT_SENSE_PIN);
-  //iBattRaw = (double)((_X_I*iBattRawOld + iBattRaw)/(_X_I+1));
-  // Filtro EMA
-  //iBattRaw = ALPHA_I*iBattRaw + (1-ALPHA_I)*iBattRawOld;
   // Filtro de Wiener, Adaptativo
   iBattRaw = iBattRawOld + MU * (iBattRaw - iBattRawOld);
   if(iBattRaw!=iBattRawOld){ // si cambio I entonces actualizo valor en el LCD
@@ -209,6 +203,18 @@ void loop() {
   if(myPID.Compute()&&isPowerOn)
   {
     pwm_setDuty(Output);
+
+    // Calulo de vIn
+    vIn = vBattRaw/ADCRAW_1V;
+    // Calculo iIn
+    iIn = (iBattRaw - iAdcOffset) / (ADCRAW_1A - iAdcOffset);
+    // Calculo wIn
+    wIn = vIn * iIn;
+    // Wh
+    totalWh += wIn * (WindowSize / 3600000.0); // Convertir milisegundos a horas
+    // Ah
+    totalAh += iIn * (WindowSize / 3600000.0); // Convertir milisegundos a horas
+
   } 
   // FIN PID
 
@@ -255,18 +261,14 @@ void loop() {
 
     // Imprimo los Watts-Hora y Ampere-Hora
     if( wasVUpdated || wasIUpdated ){
-      lcd_printWattHour(vIn*iIn);
-      lcd_printAmpHour(iIn);
+      
+      lcd_printWattHour(totalWh);
+      lcd_printAmpHour(totalAh);
     }
-    
+
     // Imprimo Tension y Corriente
     if(wasVUpdated)
     {
-      // Calculo Vin
-      //vOut = (double)(vBattRaw/1023.0)*V3_3;
-      //vIn = vOut/GAIN_V;
-      vIn = vBattRaw/ADCRAW_1V;
-
       // Print Vin
       lcd_printVin(vIn);
       wasVUpdated = false;
@@ -275,14 +277,11 @@ void loop() {
     {
       if(!isPowerOn)
         iAdcOffset = iBattRaw;
-      // Calculo iIn
-      iIn = (iBattRaw - iAdcOffset) / (ADCRAW_1A-iAdcOffset);
 
       // Print Iin
       lcd_printIin(iIn);
       wasIUpdated = false;
     }
-
     
     lcd_display();
     

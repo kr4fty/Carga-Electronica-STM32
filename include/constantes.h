@@ -16,15 +16,11 @@
 #define SENSIBILITY   0.185 // Modelo ACS712 5A
 #define IADCOFFSET      539 //541.61 // ADC medido en vacio
 #define ADCRAW_1A       589 // ADC medido con una corriente de 1A
-
-#define ALPHA_V         0.1 // Factor de suavizado (ajustar según sea necesario) 0<x<1
-#define ALPHA_I      0.0001 // numero mas cercano a 0 para mas filtrado                           
+                         
 #define MU             0.01 // Tasa de aprendizaje, Filtro Adaptativo con 0<x<1
-#define _X_V              3 // Cte. filtro de Media Ponderada, X generalmente
-#define _X_I              3 // corresponde al numero de muestras
 
 // MOSFET
-#define VGS_THRESHOLE  2650
+#define VGS_THRESHOLE  2650 // Tension minima de conduccion para este IRFZ44
 
 // PID
 //      https://pidtuner.com/
