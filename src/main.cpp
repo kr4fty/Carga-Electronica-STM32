@@ -20,8 +20,8 @@ int WindowSize = 10;
 unsigned long windowStartTime;
 
 double vBattRawOld, iBattRawOld;
-uint16_t iAdcOffset; // Lectura del ADC medida en vacio (0 A)
-float AdcRaw_1A;    // Lectura del ADC midiendo 1A
+uint16_t iAdcOffset;  // Lectura del ADC medida en vacio (0 A)
+float AdcRaw_1A;      // Lectura del ADC midiendo 1A
 
 void setup() {
   pinMode(LED, OUTPUT);
@@ -32,14 +32,10 @@ void setup() {
   pwm_init();
   coolerFan_init();
   tone_init();
-  
-  //initialize the variables we're linked to
-  Setpoint = 0;
+
   myPID.SetOutputLimits(VGS_THRESHOLE, 4095);
-  //turn the PID on
+  myPID.SetSampleTime(WindowSize);  //sets the period, in Millisecond
   //myPID.SetMode(AUTOMATIC);
-  //sets the period, in Millisecond
-  myPID.SetSampleTime(WindowSize);
 
     // Lectura inicial de los sensores
   vBattRawOld = analogRead(VBATT_SENSE_PIN)-.01; // le resto un pequeño valor para que imprima la tension cuando
@@ -52,8 +48,6 @@ void setup() {
     delay(2000);
     while(!encoder.isEncoderButtonClicked()){
       AdcRaw_1A = analogRead(IBATT_SENSE_PIN);
-      //AdcRaw_1A = (double)((_X_I*iBattRawOld + AdcRaw_1A)/(_X_I+1));
-      //AdcRaw_1A = ALPHA_I*AdcRaw_1A + (1-ALPHA_I)*iBattRawOld;
       AdcRaw_1A = iBattRawOld + MU * (AdcRaw_1A - iBattRawOld);
       iBattRawOld = AdcRaw_1A;
       delay(5);
@@ -67,6 +61,7 @@ void setup() {
 
   windowStartTime = millis();
 
+  encoder.setEncoderValue(adcToDutycycle(ADCRAW_1A)); // Seteo por defecto a 1A
   dutyCycle = encoder.readEncoder();
   Setpoint = dutycycleToADC(dutyCycle);
 
@@ -188,22 +183,26 @@ void loop() {
   /*                                  PID                                    */
   /***************************************************************************/
   vBattRaw = analogRead(VBATT_SENSE_PIN);
+  //vBattRaw = (double)((_X_V*vBattRawOld + vBattRaw)/(_X_V+1));
+  // Filtro EMA
+  //vBattRaw = ALPHA_V*vBattRaw + (1-ALPHA_V)*vBattRawOld;
   // Filtro de Wiener, Adaptativo
   vBattRaw = vBattRawOld + MU * (vBattRaw - vBattRawOld);
   if(vBattRaw!=vBattRawOld){// si cambio V entonces actualizo valor en el LCD
     wasVUpdated = true;
     vBattRawOld = vBattRaw;
   }
-
   
   iBattRaw = (double)analogRead(IBATT_SENSE_PIN);
+  //iBattRaw = (double)((_X_I*iBattRawOld + iBattRaw)/(_X_I+1));
+  // Filtro EMA
+  //iBattRaw = ALPHA_I*iBattRaw + (1-ALPHA_I)*iBattRawOld;
   // Filtro de Wiener, Adaptativo
   iBattRaw = iBattRawOld + MU * (iBattRaw - iBattRawOld);
   if(iBattRaw!=iBattRawOld){ // si cambio I entonces actualizo valor en el LCD
     wasIUpdated = true;
     iBattRawOld = iBattRaw;
   }
-  //iIn = random(500)/100.0;
 
   // CALCULO PID
   Input = iBattRaw;
@@ -264,8 +263,10 @@ void loop() {
     if(wasVUpdated)
     {
       // Calculo Vin
-      vOut = (double)(vBattRaw/1024.0)*V3_3;
-      vIn = vOut/GAIN_V;
+      //vOut = (double)(vBattRaw/1023.0)*V3_3;
+      //vIn = vOut/GAIN_V;
+      vIn = vBattRaw/ADCRAW_1V;
+
       // Print Vin
       lcd_printVin(vIn);
       wasVUpdated = false;
@@ -275,7 +276,7 @@ void loop() {
       if(!isPowerOn)
         iAdcOffset = iBattRaw;
       // Calculo iIn
-      iIn = (iBattRaw - iAdcOffset) / ADCRAW_1A;
+      iIn = (iBattRaw - iAdcOffset) / (ADCRAW_1A-iAdcOffset);
 
       // Print Iin
       lcd_printIin(iIn);

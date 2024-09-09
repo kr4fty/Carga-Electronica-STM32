@@ -77,3 +77,7 @@ Interfaz
                                 automaticamente el nuevo Setpoint. No hace
                                 falta presionar el boton. Por ahora :|
 
+EEPROM
+------
+Guardar el ultimo valor de corriente utilizado. De este modo en la proxima 
+encendida ya podemos recuperarlo facilmente.
