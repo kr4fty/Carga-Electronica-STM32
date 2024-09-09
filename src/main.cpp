@@ -69,14 +69,14 @@ void setup() {
 }
 
 bool isPowerOn = false; // TRUE: en funcionamiento, False: no ejecutandose
-double vBattRaw, iBattRaw;
-float iIn, vIn, wIn, totalmAh, totalWh;
+double vBattRaw, iBattRaw; // Valores Leidos en los ADC
+float iIn, vIn, wIn, totalmAh, totalWh; // Valores actuales de la V, I y Wh
 bool wasVUpdated, wasIUpdated, wasXhUpdated=true; //True: Si los valores cambiaron, para re imprimir
 uint16_t mosfetTempRaw, oldMofetTempRaw;
-float mosfetTemp;
+float mosfetTemp; 
 long timeToUpdateDisplay=millis()+DISPLAY_UPDATE_WINDOW;
 unsigned long powerStateMessageTime, showMessageDuringThisTime = 2000; // 2 seg
-bool printStatusMessage= false;
+bool printStatusMessage= true;
 bool isItOverheating=false;
 bool isPrintTime=true;
 bool isTheSetpointUpdated; // Para tener prioridad al mostrar nuevo setpoint
@@ -100,12 +100,7 @@ void loop() {
   }
   if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint)){
       isTheSetpointUpdated = false;
-      // Reimprimo toda la pantalla
-      lcd_printBaseFrame();
-      wasXhUpdated = true;
-      wasVUpdated = true;
-      wasIUpdated = true;
-      isPrintTime = true;
+      printStatusMessage= true;
 
       if(isPowerOn){
         tone(BUZZER_PIN, 7000, 20);
@@ -233,7 +228,7 @@ void loop() {
   // Comprueba si ha pasado el intervalo de 1 segundo
   if (currentMillis - previousMillis >= TIME_1SEG) {
     previousMillis = currentMillis;  // Guarda el tiempo actual
-    if(isPowerOn){ // Solo se actuzaliza el Tiempo si esta en funcionamiento
+    if(isPowerOn){ // Actuzalizar el Tiempo solo si esta en funcionamiento
       clock_update();
       isPrintTime = true;
     }
