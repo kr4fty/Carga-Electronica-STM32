@@ -1,1 +1,4 @@
-/home/usuario/Documentos/KiCad/Proyectos/Carga Electronica 2 Mosfet/fp-lib-table
+(fp_lib_table
+  (version 7)
+  (lib (name "BluePill")(type "KiCad")(uri "${KIPRJMOD}/blue-pill-kicad/BluePill.pretty")(options "")(descr ""))
+)
