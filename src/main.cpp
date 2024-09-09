@@ -16,7 +16,6 @@ double Setpoint, Input, Output; // Parametro PID
 //Specify the links and initial tuning parameters
 double Kp=KP, Ki=KI, Kd=KD;
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
-int WindowSize = 10;
 unsigned long windowStartTime;
 
 double vBattRawOld, iBattRawOld;
@@ -34,7 +33,7 @@ void setup() {
   tone_init();
 
   myPID.SetOutputLimits(VGS_THRESHOLE, 4095);
-  myPID.SetSampleTime(WindowSize);  //sets the period, in Millisecond
+  myPID.SetSampleTime(PID_WINDOW_SIZE);  //sets the period, in Millisecond
   //myPID.SetMode(AUTOMATIC);
 
     // Lectura inicial de los sensores
@@ -71,15 +70,15 @@ void setup() {
 
 bool isPowerOn = false; // TRUE: en funcionamiento, False: no ejecutandose
 double vBattRaw, iBattRaw;
-float iIn, vIn, wIn, totalAh, totalWh;
-bool wasVUpdated, wasIUpdated; //True: Si los valores cambiaron, para re imprimir
+float iIn, vIn, wIn, totalmAh, totalWh;
+bool wasVUpdated, wasIUpdated, wasXhUpdated=true; //True: Si los valores cambiaron, para re imprimir
 uint16_t mosfetTempRaw, oldMofetTempRaw;
 float mosfetTemp;
 long timeToUpdateDisplay=millis()+DISPLAY_UPDATE_WINDOW;
 unsigned long powerStateMessageTime, showMessageDuringThisTime = 2000; // 2 seg
 bool printStatusMessage= false;
 bool isItOverheating=false;
-bool isPrintTime;
+bool isPrintTime=true;
 bool isTheSetpointUpdated; // Para tener prioridad al mostrar nuevo setpoint
 unsigned long timeToPrintNewSetpoint, windowNewSetpoint=1000;
 
@@ -101,7 +100,13 @@ void loop() {
   }
   if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint)){
       isTheSetpointUpdated = false;
+      // Reimprimo toda la pantalla
       lcd_printBaseFrame();
+      wasXhUpdated = true;
+      wasVUpdated = true;
+      wasIUpdated = true;
+      isPrintTime = true;
+
       if(isPowerOn){
         tone(BUZZER_PIN, 7000, 20);
         delay(75);
@@ -184,7 +189,10 @@ void loop() {
   /***************************************************************************/
   vBattRaw = analogRead(VBATT_SENSE_PIN);
   // Filtro de Wiener, Adaptativo
-  vBattRaw = vBattRawOld + MU * (vBattRaw - vBattRawOld);
+  vBattRaw = vBattRawOld + MU * (vBattRaw - vBattRawOld);  
+  // Calulo de vIn
+  vIn = vBattRaw/ADCRAW_1V;
+
   if(vBattRaw!=vBattRawOld){// si cambio V entonces actualizo valor en el LCD
     wasVUpdated = true;
     vBattRawOld = vBattRaw;
@@ -193,28 +201,27 @@ void loop() {
   iBattRaw = (double)analogRead(IBATT_SENSE_PIN);
   // Filtro de Wiener, Adaptativo
   iBattRaw = iBattRawOld + MU * (iBattRaw - iBattRawOld);
+  // Calculo iIn
+  iIn = (iBattRaw - iAdcOffset) / (ADCRAW_1A - iAdcOffset);
+
   if(iBattRaw!=iBattRawOld){ // si cambio I entonces actualizo valor en el LCD
     wasIUpdated = true;
     iBattRawOld = iBattRaw;
   }
-
+  
   // CALCULO PID
   Input = iBattRaw;
   if(myPID.Compute()&&isPowerOn)
   {
     pwm_setDuty(Output);
-
-    // Calulo de vIn
-    vIn = vBattRaw/ADCRAW_1V;
-    // Calculo iIn
-    iIn = (iBattRaw - iAdcOffset) / (ADCRAW_1A - iAdcOffset);
     // Calculo wIn
     wIn = vIn * iIn;
     // Wh
-    totalWh += wIn * (WindowSize / 3600000.0); // Convertir milisegundos a horas
+    totalWh += (wIn / 360000.0);  // PID_WINDOW_SIZE / 3600000.0 = 1/360000.0
     // Ah
-    totalAh += iIn * (WindowSize / 3600000.0); // Convertir milisegundos a horas
+    totalmAh += (iIn / 360.0);    // PID_WINDOW_SIZE / 3600000.0 * 1000 = 1/360.0
 
+    wasXhUpdated = true;
   } 
   // FIN PID
 
@@ -224,10 +231,12 @@ void loop() {
   currentMillis = millis();  // Obtiene el tiempo actual
 
   // Comprueba si ha pasado el intervalo de 1 segundo
-  if (currentMillis - previousMillis >= interval) {
-      previousMillis = currentMillis;  // Guarda el tiempo actual
-      isPrintTime = true;
+  if (currentMillis - previousMillis >= TIME_1SEG) {
+    previousMillis = currentMillis;  // Guarda el tiempo actual
+    if(isPowerOn){ // Solo se actuzaliza el Tiempo si esta en funcionamiento
       clock_update();
+      isPrintTime = true;
+    }
   }
   // FIN RELOJ
 
@@ -239,7 +248,12 @@ void loop() {
     if(printStatusMessage){
       if(millis()>powerStateMessageTime){
         printStatusMessage = false;
+        // Reimprimo toda la pantalla
         lcd_printBaseFrame();
+        wasXhUpdated = true;
+        wasVUpdated = true;
+        wasIUpdated = true;
+        isPrintTime = true;
       }
     }
     else if(isItOverheating){
@@ -260,10 +274,12 @@ void loop() {
     }
 
     // Imprimo los Watts-Hora y Ampere-Hora
-    if( wasVUpdated || wasIUpdated ){
+    if(wasXhUpdated){
       
       lcd_printWattHour(totalWh);
-      lcd_printAmpHour(totalAh);
+      lcd_printAmpHour(totalmAh);
+
+      wasXhUpdated = false;
     }
 
     // Imprimo Tension y Corriente

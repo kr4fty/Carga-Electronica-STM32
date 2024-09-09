@@ -1,6 +1,9 @@
 #ifndef _CONST_H
 #define _CONST_H
 
+// Tiempo
+#define TIME_1SEG      1000 // Intervalo de 1 segundo
+
 // Medicion de Tension
 #define R1            100.0
 #define R2             20.0
@@ -32,5 +35,6 @@
 #define KP                4
 #define KI         11.42857
 #define KD              0.2
+#define PID_WINDOW_SIZE  10 // 10 mili segundos
 
 #endif

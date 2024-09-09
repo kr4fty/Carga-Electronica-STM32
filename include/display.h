@@ -25,17 +25,15 @@ void lcd_init()
     lcd.setCursor(8, LCDHEIGHT/2-4);
     lcd.print("INICIANDO...");
     lcd.display();
-    //delay(1000);
     lcd.clearDisplay();
-    //lcd.setTextSize(1);
 }
 
 void lcd_printCalibration()
 {
     lcd.clearDisplay();
+    lcd.setTextSize(1);
     lcd.print("CALIBRACION");
     lcd.setCursor(0*6, 2*8);
-    lcd.setTextSize(1);
     lcd.print("Coloque una carga de 1A y presione para finalizar");
     lcd.display();
 }
@@ -63,7 +61,6 @@ void lcd_printBaseFrame()
 void lcd_printNewSetpoint(float value)
 {
     char buff[6];
-    //sprintf(buff, "%4d", (int)value);
     dtostrf(value, 4, 2, buff);
     lcd.setTextSize(3);
     lcd.fillRect(0, ((LCDHEIGHT-3*8)/2)-1, 84, (3*8)+1, WHITE);
@@ -120,38 +117,35 @@ void lcd_printAmpHour(float a_h)
     lcd.setCursor(0*6,4*8);
     lcd.print(buff);
 
-    /*lcd.setTextSize(1);
-    if(a_h>1000)
-        lcd.setCursor(0*6,4*8);
-    else if(a_h>100)
-        lcd.setCursor(1*6,4*8);
-    else if(a_h>10)
-        lcd.setCursor(2*6,4*8);
-    else
-        lcd.setCursor(3*6,4*8);
-    lcd.print((int)a_h);*/
-
     updateDisplay = true;
 }
 
 void lcd_printWattHour(float w_h)
 {
     char buff[5];
-    sprintf(buff, "%4d",(int)w_h);
-
     lcd.setTextSize(1);
-    lcd.setCursor(8*6,4*8);
-    lcd.print(buff);
 
-    /*if(w_h>1000)
+    if(w_h<1){
         lcd.setCursor(8*6,4*8);
-    else if(w_h>100)
-        lcd.setCursor(9*6,4*8);
-    else if(w_h>10)
-        lcd.setCursor(10*6,4*8);
-    else
-        lcd.setCursor(11*6,4*8);
-    lcd.print((int)w_h);*/
+        sprintf(buff, "%3d",(int)(w_h*1000));
+        lcd.print(buff);
+        lcd.print("m");
+    }
+    else if(w_h<10){
+        lcd.setCursor(8*6,4*8);
+        dtostrf(w_h, 4, 2, buff);
+        lcd.print(buff);
+    }
+    else if(w_h<100){
+        lcd.setCursor(8*6,4*8);
+        dtostrf(w_h, 4, 1, buff);
+        lcd.print(buff);
+    }
+    else{
+        lcd.setCursor(7*6,4*8);
+        dtostrf(w_h, 4, 1, buff);
+        lcd.print(buff);
+    }
 
     updateDisplay = true;
 }
@@ -167,20 +161,6 @@ void lcd_printTime(uint8_t hs, uint8_t min, uint8_t seg)
     lcd.print(buff);
     lcd.setTextColor(BLACK, WHITE);
 
-
-    /*lcd.setCursor(0*6,5*8);
-    if(hs<10)
-        lcd.print("0"); // Relleno con 0 para que no quede vacio
-    lcd.print(hs);
-    lcd.setCursor(3*6,5*8);
-    if(min<10)
-        lcd.print("0"); // Relleno con 0 para que no quede vacio
-    lcd.print(min);
-    lcd.setCursor(6*6,5*8);
-    if(seg<10)
-        lcd.print("0"); // Relleno con 0 para que no quede vacio
-    lcd.print(seg);*/
-
     updateDisplay = true;
 }
 
@@ -192,15 +172,6 @@ void lcd_printTemperature(float mosfet_temp)
     lcd.setTextSize(1);
     lcd.setCursor(9*6,5*8);
     lcd.print(buff);
-
-    /*lcd.setTextSize(1);
-    if(mosfet_temp>=100)
-        lcd.setCursor(9*6,5*8); // Para que quede Alineado a la Derecha
-    else if(mosfet_temp>=10)
-        lcd.setCursor(10*6,5*8);// en caso de tener menos digitos
-    else
-        lcd.setCursor(11*6,5*8);//
-    lcd.print((int)mosfet_temp);*/
 
     updateDisplay = true;
 }
@@ -214,12 +185,6 @@ void lcd_printVin(float v_in)
     lcd.setCursor(2*0*6,2*0*8);
     lcd.print(buff);
 
-    /*lcd.setTextSize(2);
-    lcd.setCursor(2*0,2*0*8);
-    lcd.print("     ");
-    lcd.setCursor(2*0,2*0*8);
-    lcd.print(v_in);*/
-
     updateDisplay = true;
 }
 
@@ -231,12 +196,6 @@ void lcd_printIin(float i_in)
     lcd.setTextSize(2);
     lcd.setCursor(2*0*6,2*1*8);
     lcd.print(buff);
-
-    /*lcd.setTextSize(2);
-    lcd.setCursor(2*0,2*1*8);
-    lcd.print("     ");
-    lcd.setCursor(2*0,2*1*8);
-    lcd.print(i_in);*/
 
     updateDisplay = true;
 }

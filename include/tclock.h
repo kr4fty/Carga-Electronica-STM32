@@ -4,7 +4,6 @@
 #include <Arduino.h>
 
 unsigned long previousMillis = 0;   // Almacena el último tiempo en que se ejecutó la acción
-const long interval = 1000;         // Intervalo de 1 segundo
 unsigned long currentMillis ;       // Obtiene el tiempo actual
 
 uint8_t seconds = 0;
