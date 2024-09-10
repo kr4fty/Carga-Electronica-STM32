@@ -27,6 +27,12 @@ Sensores de Tension de la Bateria
 -----------------------------------------
     Se utliza un divisor resistivo
 
+    SOLUCION IMPLEMENTADA:
+                            Se toma el valor de la tension a 10V y luego para 
+                            calcular la V se utiliza la relacion:
+
+                            V = ADC_V_ACTUAL / ADC_10V
+
 Sensor de corriente ASC712
 --------------------------
     La tensión de salida (Vout) del ACS712-05B se puede calcular utilizando la
@@ -48,6 +54,13 @@ Sensor de corriente ASC712
         Vout = 2,5V + 0,925V
         Vout = 3,425V
 
+    SOLUCION IMPLEMENTADA:
+                            Se toma el valor de la corriente a 0A y luego como 
+                            referencia, la de 1A. Luego para calcular la I se
+                            utiliza la relacion:
+
+                            I = (ADC_I_ACTUAL-ADC_0A) / (ADC_1A-ADC_0A)
+
 Sensor de Temperatura LM35
 --------------------------
     Rango de salida: de 0 a 1.5V maximo, en la configuracion basica (2 a 150ºC)
@@ -59,6 +72,7 @@ Interrupciones del PWM cuando se usa tone()
     Al invocar la función tone() de Arduino y mientras se tiene activa otra 
     salida PWM, se observa que se produce una interrupción en la salida de 
     dicho pin.
+    
     SOLUCION:
             Se implemento una funcion tone() personalizada, utilizando el TIM2,
             canal 2, perteneciente al gpio PA1
@@ -72,6 +86,7 @@ Interfaz
         * Mostrar de alguna manera (por presion larga del boton, por ejemplo), 
           la corriente de salida seleccionada
         * Posibilidad de modificar dicha corriente de salida
+
         SOLUCION IMPLEMENTADA:
                                 Al girar el Encoder, se modificara
                                 automaticamente el nuevo Setpoint. No hace
@@ -88,8 +103,14 @@ Salida PWM multiple para el control de dos mosfet
     La idea es poder extender el rango de corriente de salida, pero por la 
     utilizacion de dos MOSFET de modo que la corriente quede divida y por lo 
     tanto cada uno calentara menos
+
     SOLUCION IMPLEMENTADA:
                             Se utliza dutycyle fijo en el segundo MOSFET, a la 
                             mitad del setpoint.
                             Output2 = VGS_THRESHOLE+(dutyCycle-VGS_THRESHOLE)/2
 
+Alarmas por caida en la fuente a testear
+----------------------------------------
+    Indicar si la fuente cae demasiado, por debajo de un 15% por ejemplo, en su
+    tension de salida. Esto para indicar la calidad y si cumple con los 
+    parametros de salida indicadas.

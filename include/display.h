@@ -15,49 +15,52 @@ char buff[20];
 
 void floatTostr(float numero, uint8_t size_buff, uint8_t decimales)
 {
-    char aux[20];
-    int parte_entera, parte_decimal;
+    if((decimales+1)<=size_buff){
+        int parte_entera, parte_decimal;
 
-    parte_entera = (int)numero; // Obtenemos parte Entera
-    switch (size_buff-decimales-1) // digitos de la parte entera
-    {
-    case 0:
-        sprintf(buff,".");
-        break;
-    case 1:
-        sprintf(buff,"%1d.",parte_entera); // Obtenemos parte Entera
-        break;
-    case 2:
-        sprintf(buff,"%2d.",parte_entera); // Obtenemos parte Entera
-        break;
-    case 3:
-        sprintf(buff,"%3d.",parte_entera); // Obtenemos parte Entera
-        break;
-    default:
-        break;
-    }
+        parte_entera = (int)numero; // Obtenemos parte Entera
+        switch (size_buff-decimales-1) // digitos de la parte entera
+        {
+        case 0:
+            sprintf(buff,".");
+            break;
+        case 1:
+            sprintf(buff,"%1d.",parte_entera); // Obtenemos parte Entera
+            break;
+        case 2:
+            sprintf(buff,"%2d.",parte_entera); // Obtenemos parte Entera
+            break;
+        case 3:
+            sprintf(buff,"%3d.",parte_entera); // Obtenemos parte Entera
+            break;
+        default:
+            break;
+        }
 
-    parte_decimal = (int)((numero - parte_entera) * pow(10,decimales));  // Multiplicamos por 10^x para obtener los decimales deseados
-    switch (decimales)
-    {
-    case 1:
-        sprintf(buff, "%s%01d", buff, parte_decimal);
-        break;
-    case 2:
-        sprintf(buff, "%s%02d", buff, parte_decimal);
-        break;
-    case 3:
-        sprintf(buff, "%s%03d", buff, parte_decimal);
-        break;
-    case 4:
-        sprintf(buff, "%s%04d", buff, parte_decimal);
-        break;
-    case 5:
-        sprintf(buff, "%s%05d", buff, parte_decimal);
-        break;
-    default:
-        break;
+        parte_decimal = (int)((numero - parte_entera) * pow(10,decimales));  // Multiplicamos por 10^x para obtener los decimales deseados
+        switch (decimales)
+        {
+        case 1:
+            sprintf(buff, "%s%01d", buff, parte_decimal);
+            break;
+        case 2:
+            sprintf(buff, "%s%02d", buff, parte_decimal);
+            break;
+        case 3:
+            sprintf(buff, "%s%03d", buff, parte_decimal);
+            break;
+        case 4:
+            sprintf(buff, "%s%04d", buff, parte_decimal);
+            break;
+        case 5:
+            sprintf(buff, "%s%05d", buff, parte_decimal);
+            break;
+        default:
+            break;
+        }
     }
+    else
+        sprintf(buff,"NULL");
 }
 
 void lcd_init()
