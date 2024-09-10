@@ -80,6 +80,7 @@ bool printStatusMessage= true;
 bool isItOverheating=false;
 bool isPrintTime=true;
 bool isTheSetpointUpdated; // Para tener prioridad al mostrar nuevo setpoint
+bool printTinySetpoint=true;
 unsigned long timeToPrintNewSetpoint, windowNewSetpoint=1000;
 
 void loop() {
@@ -89,24 +90,27 @@ void loop() {
   if (encoder.encoderChanged())
   {
     dutyCycle = encoder.readEncoder();
-    lcd_printNewSetpoint(dutyCycleToAmpere(dutyCycle));
-    
+    if(isPowerOn){
+      lcd_printNewSetpoint(dutyCycleToAmpere(dutyCycle));
+      isTheSetpointUpdated = true;
+    }
+    else{
+      printTinySetpoint = true;
+    }
+
     Setpoint = dutycycleToADC(dutyCycle);
     
     tone(BUZZER_PIN, 600, 10);
-    isTheSetpointUpdated = true;
 
     timeToPrintNewSetpoint = millis() + windowNewSetpoint;
   }
-  if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint)){
+  if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint) && isPowerOn){
       isTheSetpointUpdated = false;
       printStatusMessage= true;
 
-      if(isPowerOn){
-        tone(BUZZER_PIN, 7000, 20);
-        delay(75);
-        tone(BUZZER_PIN, 7000, 80);
-      }
+      tone(BUZZER_PIN, 7000, 20);
+      delay(75);
+      tone(BUZZER_PIN, 7000, 80);
   }
 
   if (encoder.isEncoderButtonClicked()){
@@ -201,7 +205,10 @@ void loop() {
   iIn = (iBattRaw - iAdcOffset) / (ADCRAW_1A - iAdcOffset);
 
   if(iBattRaw!=iBattRawOld){ // si cambio I entonces actualizo valor en el LCD
-    wasIUpdated = true;
+    if(isPowerOn)
+      wasIUpdated = true;
+    else
+      iAdcOffset = iBattRaw; // Corriente medida, valores de ADC, a 0A
     iBattRawOld = iBattRaw;
   }
   
@@ -284,15 +291,18 @@ void loop() {
       lcd_printVin(vIn);
       wasVUpdated = false;
     }
-    if(wasIUpdated){
-      if(!isPowerOn)
-        iAdcOffset = iBattRaw; // Corriente medida, valores de ADC, a 0A
-
-      // Print Iin
-      lcd_printIin(iIn);
-      wasIUpdated = false;
+    if(isPowerOn){ // Solo imprimo la corriente cuando esta encendido. Caso contrario, el Setpoint
+      if(wasIUpdated){
+        // Print Iin
+        lcd_printIin(iIn);
+        wasIUpdated = false;
+      }
     }
-    
+    else{
+      lcd_printTinyNewSetpoint(dutyCycleToAmpere(dutyCycle));
+      printTinySetpoint = false;
+    }
+
     lcd_display();
     
     timeToUpdateDisplay = millis()+DISPLAY_UPDATE_WINDOW;
