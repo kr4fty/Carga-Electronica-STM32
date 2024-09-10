@@ -13,19 +13,47 @@ Adafruit_PCD8544 lcd = Adafruit_PCD8544(LCD_SCLK_PIN, LCD_DIN_PIN, LCD_DC_PIN, L
 bool updateDisplay = false;
 char buff[20];
 
-void floatTostr(float numero, uint8_t sz=4)
+void floatTostr(float numero, uint8_t size_buff, uint8_t decimales)
 {
+    char aux[20];
     int parte_entera, parte_decimal;
-    parte_entera = (int)numero; // Obtenemos parte Entera
-    parte_decimal = (int)((numero - parte_entera) * 100);  // Multiplicamos por 100 para obtener dos decimales
 
-    switch (sz)
+    parte_entera = (int)numero; // Obtenemos parte Entera
+    switch (size_buff-decimales-1) // digitos de la parte entera
     {
+    case 0:
+        sprintf(buff,".");
+        break;
+    case 1:
+        sprintf(buff,"%1d.",parte_entera); // Obtenemos parte Entera
+        break;
+    case 2:
+        sprintf(buff,"%2d.",parte_entera); // Obtenemos parte Entera
+        break;
+    case 3:
+        sprintf(buff,"%3d.",parte_entera); // Obtenemos parte Entera
+        break;
+    default:
+        break;
+    }
+
+    parte_decimal = (int)((numero - parte_entera) * pow(10,decimales));  // Multiplicamos por 10^x para obtener los decimales deseados
+    switch (decimales)
+    {
+    case 1:
+        sprintf(buff, "%s%01d", buff, parte_decimal);
+        break;
+    case 2:
+        sprintf(buff, "%s%02d", buff, parte_decimal);
+        break;
+    case 3:
+        sprintf(buff, "%s%03d", buff, parte_decimal);
+        break;
     case 4:
-        sprintf(buff, "%d.%02d", parte_entera,parte_decimal);
+        sprintf(buff, "%s%04d", buff, parte_decimal);
         break;
     case 5:
-        sprintf(buff, "%2d.%02d", parte_entera,parte_decimal);
+        sprintf(buff, "%s%05d", buff, parte_decimal);
         break;
     default:
         break;
@@ -81,7 +109,7 @@ void lcd_printBaseFrame()
 
 void lcd_printNewSetpoint(float value)
 {
-    floatTostr(value);
+    floatTostr(value, 4, 2);
     //dtostrf(value, 4, 2, buff);
     lcd.setTextSize(3);
     lcd.fillRect(0, ((LCDHEIGHT-3*8)/2)-1, 84, (3*8)+1, WHITE);
@@ -101,7 +129,8 @@ void lcd_printNewSetpoint(float value)
 
 void lcd_printTinyNewSetpoint(float value)
 {
-    floatTostr(value, 5);
+    floatTostr(value, 6, 3);
+    //dtostrf(value, 6, 3, buff);
 
     lcd.setTextSize(2);
     lcd.setCursor(2*0*6,2*1*8);
@@ -165,17 +194,20 @@ void lcd_printWattHour(float w_h)
     }
     else if(w_h<10){
         lcd.setCursor(8*6,4*8);
-        dtostrf(w_h, 4, 2, buff);
+        //dtostrf(w_h, 4, 2, buff);
+        floatTostr(w_h, 4, 2);
         lcd.print(buff);
     }
     else if(w_h<100){
         lcd.setCursor(8*6,4*8);
-        dtostrf(w_h, 4, 1, buff);
+        floatTostr(w_h, 4, 1);
+        //dtostrf(w_h, 4, 1, buff);
         lcd.print(buff);
     }
     else{
         lcd.setCursor(7*6,4*8);
-        dtostrf(w_h, 4, 1, buff);
+        //dtostrf(w_h, 4, 1, buff);
+        floatTostr(w_h, 4, 1);
         lcd.print(buff);
     }
 
@@ -209,7 +241,7 @@ void lcd_printTemperature(float mosfet_temp)
 void lcd_printVin(float v_in)
 {
     //dtostrf(v_in, 6, 2, buff);
-    floatTostr(v_in, 5);
+    floatTostr(v_in, 6, 2);
 
     lcd.setTextSize(2);
     lcd.setCursor(2*0*6,2*0*8);
@@ -221,7 +253,7 @@ void lcd_printVin(float v_in)
 void lcd_printIin(float i_in)
 {
     //dtostrf(i_in, 6, 2, buff);
-    floatTostr(i_in, 5);
+    floatTostr(i_in, 6, 2);
 
     lcd.setTextSize(2);
     lcd.setCursor(2*0*6,2*1*8);

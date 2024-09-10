@@ -39,7 +39,7 @@ void setup() {
   vBattRawOld = analogRead(VBATT_SENSE_PIN)-.01; // le resto un pequeño valor para que imprima la tension cuando
   iBattRawOld = analogRead(IBATT_SENSE_PIN);
 
-  // Entrando a modo Calibracion. Medimos una corriente de 1A y luego aplicamos relacion
+  // Entrando a modo Calibracion. Medimos una corriente de 1A para luego aplicar relacion
   if(isButtonDown())
   {
     lcd_printCalibration();

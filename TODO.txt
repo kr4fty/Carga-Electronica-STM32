@@ -88,5 +88,8 @@ Salida PWM multiple para el control de dos mosfet
     La idea es poder extender el rango de corriente de salida, pero por la 
     utilizacion de dos MOSFET de modo que la corriente quede divida y por lo 
     tanto cada uno calentara menos
-    
+    SOLUCION IMPLEMENTADA:
+                            Se utliza dutycyle fijo en el segundo MOSFET, a la 
+                            mitad del setpoint.
+                            Output2 = VGS_THRESHOLE+(dutyCycle-VGS_THRESHOLE)/2
 
