@@ -34,13 +34,12 @@ void setup() {
 
   myPID.SetOutputLimits(VGS_THRESHOLE, 4095);
   myPID.SetSampleTime(PID_WINDOW_SIZE);  //sets the period, in Millisecond
-  //myPID.SetMode(AUTOMATIC);
 
-    // Lectura inicial de los sensores
+  // Lectura inicial de los sensores
   vBattRawOld = analogRead(VBATT_SENSE_PIN)-.01; // le resto un pequeño valor para que imprima la tension cuando
   iBattRawOld = analogRead(IBATT_SENSE_PIN);
 
-  //Entrando a modo Calibracion. Obtengo ADC con una corriente de 1A
+  // Entrando a modo Calibracion. Medimos una corriente de 1A y luego aplicamos relacion
   if(isButtonDown())
   {
     lcd_printCalibration();
@@ -82,6 +81,7 @@ bool isPrintTime=true;
 bool isTheSetpointUpdated; // Para tener prioridad al mostrar nuevo setpoint
 bool printTinySetpoint=true;
 unsigned long timeToPrintNewSetpoint, windowNewSetpoint=1000;
+double Output2; // Contiene el duty del segundo MOSFET. Varia con el setpoint
 
 void loop() {
   /***************************************************************************/
@@ -90,6 +90,7 @@ void loop() {
   if (encoder.encoderChanged())
   {
     dutyCycle = encoder.readEncoder();
+    Output2 = VGS_THRESHOLE + (dutyCycle-VGS_THRESHOLE)/2;
     if(isPowerOn){
       lcd_printNewSetpoint(dutyCycleToAmpere(dutyCycle));
       isTheSetpointUpdated = true;
@@ -104,7 +105,7 @@ void loop() {
 
     timeToPrintNewSetpoint = millis() + windowNewSetpoint;
   }
-  if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint) && isPowerOn){
+  if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint)){
       isTheSetpointUpdated = false;
       printStatusMessage= true;
 
@@ -216,8 +217,14 @@ void loop() {
   Input = iBattRaw;
   if(myPID.Compute()&&isPowerOn)
   {
-    pwm_setDuty1(Output);
-    pwm_setDuty2(0);
+    if(iIn<1){ // si es menor a 1A solo trabaja un MOSFET
+      pwm_setDuty1(Output);
+      pwm_setDuty2(0);
+    }
+    else{
+      pwm_setDuty1(Output);
+      pwm_setDuty2(Output2); // Valor fijo a la mitad del setpoint
+    }
     // Calculo wIn
     wIn = vIn * iIn;
     // Wh
@@ -291,7 +298,7 @@ void loop() {
       lcd_printVin(vIn);
       wasVUpdated = false;
     }
-    if(isPowerOn){ // Solo imprimo la corriente cuando esta encendido. Caso contrario, el Setpoint
+    if(isPowerOn){ // Solo muestro la corriente cuando esta encendido. Caso contrario, el Setpoint
       if(wasIUpdated){
         // Print Iin
         lcd_printIin(iIn);
