@@ -40,7 +40,7 @@ void setup() {
   vBattRawOld = analogRead(VBATT_SENSE_PIN)-.01; // le resto un pequeño valor para que imprima la tension cuando
   iBattRawOld = analogRead(IBATT_SENSE_PIN);
 
-  //Entrando a modo Calibracion. ADC medido con una corriente de 1A
+  //Entrando a modo Calibracion. Obtengo ADC con una corriente de 1A
   if(isButtonDown())
   {
     lcd_printCalibration();
@@ -132,7 +132,8 @@ void loop() {
       tone(BUZZER_PIN, 436, 100);
       tone(BUZZER_PIN, 200, 150);
 
-      pwm_setDuty(0);
+      pwm_setDuty1(0);
+      pwm_setDuty2(0);
 
       myPID.SetMode(MANUAL);  // Apagamos el PID
 
@@ -208,7 +209,8 @@ void loop() {
   Input = iBattRaw;
   if(myPID.Compute()&&isPowerOn)
   {
-    pwm_setDuty(Output);
+    pwm_setDuty1(Output);
+    pwm_setDuty2(0);
     // Calculo wIn
     wIn = vIn * iIn;
     // Wh
@@ -269,8 +271,7 @@ void loop() {
     }
 
     // Imprimo los Watts-Hora y Ampere-Hora
-    if(wasXhUpdated){
-      
+    if(wasXhUpdated){      
       lcd_printWattHour(totalWh);
       lcd_printAmpHour(totalmAh);
 
@@ -278,16 +279,14 @@ void loop() {
     }
 
     // Imprimo Tension y Corriente
-    if(wasVUpdated)
-    {
+    if(wasVUpdated){
       // Print Vin
       lcd_printVin(vIn);
       wasVUpdated = false;
     }
-    if(wasIUpdated)
-    {
+    if(wasIUpdated){
       if(!isPowerOn)
-        iAdcOffset = iBattRaw;
+        iAdcOffset = iBattRaw; // Corriente medida, valores de ADC, a 0A
 
       // Print Iin
       lcd_printIin(iIn);
