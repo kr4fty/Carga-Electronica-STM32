@@ -1,7 +1,6 @@
-
-
 #ifndef _DISPLAY_LCD_H
 #define _DISPLAY_LCD_H
+
 #include <Adafruit_PCD8544.h>
 #include "config.h"
                                         
@@ -163,6 +162,7 @@ void lcd_printPowerOffMessage()
 
     updateDisplay = true;
 }
+
 void lcd_printOverTemperatureMessage()
 {
     lcd.setTextSize(1);
@@ -264,11 +264,20 @@ void lcd_printIin(float i_in)
 
     updateDisplay = true;
 }
+
+void lcd_printERROR(uint8_t x, uint8_t y, uint8_t sz=1)
+{
+    lcd.setCursor(x*sz*6, y*sz*8);
+    lcd.setTextSize(sz);
+    lcd.print("ERROR");
+    
+    lcd.display();
+}
+
 void lcd_display()
 {
     lcd.display();
     updateDisplay = false;
 }
-
 
 #endif

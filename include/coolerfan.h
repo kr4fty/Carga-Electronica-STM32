@@ -2,7 +2,7 @@
  * Por el uso de un transistor driver para activar al mosfet, que es quien
  * enciende el cooler, este utiliza logica inversa. Activo cooler con un LOW y 
  * apago con un HIGH.
-*/
+ */
 
 #ifndef _COOLER_H
 #define _COOLER_H

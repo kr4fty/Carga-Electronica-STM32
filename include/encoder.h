@@ -15,7 +15,6 @@ void readEncoderISR()
 {
 	encoder.readEncoder_ISR();
 }
-static unsigned long    lastTimePressed = 0;
 
 void encoder_init()
 {

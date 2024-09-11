@@ -82,6 +82,7 @@ bool isTheSetpointUpdated; // Para tener prioridad al mostrar nuevo setpoint
 bool printTinySetpoint=true;
 unsigned long timeToPrintNewSetpoint, windowNewSetpoint=1000;
 double Output2; // Contiene el duty del segundo MOSFET. Varia con el setpoint
+float ampereSetpoint; // Contiene el Setpoint expresado en amperes
 
 void loop() {
   /***************************************************************************/
@@ -90,9 +91,10 @@ void loop() {
   if (encoder.encoderChanged())
   {
     dutyCycle = encoder.readEncoder();
-    Output2 = VGS_THRESHOLE + (dutyCycle-VGS_THRESHOLE)/2;
+    ampereSetpoint = dutyCycleToAmpere(dutyCycle);
+    Output2 = ampereToDutycycle(ampereSetpoint*.5, MOSFET2);
     if(isPowerOn){
-      lcd_printNewSetpoint(dutyCycleToAmpere(dutyCycle));
+      lcd_printNewSetpoint(ampereSetpoint);
       isTheSetpointUpdated = true;
     }
     else{
