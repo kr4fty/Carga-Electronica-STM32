@@ -83,6 +83,13 @@ bool printTinySetpoint=true;
 unsigned long timeToPrintNewSetpoint, windowNewSetpoint=1000;
 double Output2; // Contiene el duty del segundo MOSFET. Varia con el setpoint
 float ampereSetpoint; // Contiene el Setpoint expresado en amperes
+unsigned long lastTimeButtonDown = 0;
+bool wasButtonDown = false;
+bool longClick; // True: pulsacion larga
+bool shortClick;// True: pulsacion corta
+//paramaters for button
+unsigned long shortPressAfterMiliseconds = 50;   //how long short press shoud be. Do not set too low to avoid bouncing (false press events).
+unsigned long longPressAfterMiliseconds = 1000;  //how long čong press shoud be.
 
 void loop() {
   /***************************************************************************/
@@ -116,7 +123,41 @@ void loop() {
       tone(BUZZER_PIN, 7000, 80);
   }
 
-  if (encoder.isEncoderButtonClicked()){
+  if (isButtonDown()&&!wasButtonDown) {
+    if (!wasButtonDown) {
+      //start measuring
+      lastTimeButtonDown = millis();
+    }
+    //else we wait since button is still down
+    wasButtonDown = true;
+  }
+  //button is up
+  if (!isButtonDown()&&wasButtonDown) {
+    if (millis() - lastTimeButtonDown >= longPressAfterMiliseconds) {
+      longClick = true;
+      shortClick = false;
+    } else if (millis() - lastTimeButtonDown >= shortPressAfterMiliseconds) {
+      longClick = false;
+      shortClick = true;
+    }
+    wasButtonDown = false;
+  }
+
+  if(longClick){ // Reiniciamos los contadores
+    longClick = false;
+    lcd_printReset();
+    clock_resetClock();
+    totalmAh = 0;
+    totalWh = 0;
+
+    tone(BUZZER_PIN, 1000,300);
+    printStatusMessage = true;
+    powerStateMessageTime = millis() + showMessageDuringThisTime;
+  }
+
+  if (shortClick){
+    shortClick = false;
+
     isPowerOn = not isPowerOn;
     if(vIn<0.05 && isPowerOn){ // Solo enciende si hay tension de bateria/fuente a testear
       isPowerOn = not isPowerOn;
@@ -233,6 +274,7 @@ void loop() {
     iBattRawOld = iBattRaw;
   }
   
+  // Bateria/Fuente funcionando?
   if(vIn>=0.05 && isPowerOn){
     // CALCULO PID
     Input = iBattRaw;
@@ -264,7 +306,7 @@ void loop() {
     currentMillis = millis();  // Obtiene el tiempo actual
 
     // Comprueba si ha pasado el intervalo de 1 segundo
-    if (currentMillis - previousMillis >= TIME_1SEG) {
+    if (vIn>=0.05 && (currentMillis - previousMillis)>=TIME_1SEG) {
       previousMillis = currentMillis;  // Guarda el tiempo actual
       // Actuzalizar el Tiempo solo si esta en funcionamiento
       clock_update();

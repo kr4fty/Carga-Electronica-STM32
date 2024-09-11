@@ -167,7 +167,18 @@ void lcd_printNoBattery()
 {
     lcd.setTextSize(1);
     lcd.setCursor(0, 1*5*8);
-    lcd.print(" CONNECT BATT ");
+    lcd.setTextColor(WHITE, BLACK);
+    lcd.print("  NO BATTERY  ");
+    lcd.setTextColor(BLACK, WHITE);
+
+    updateDisplay = true;
+}
+
+void lcd_printReset()
+{
+    lcd.setTextSize(1);
+    lcd.setCursor(0, 1*5*8);
+    lcd.print("RESET COUNTERS");
 
     updateDisplay = true;
 }

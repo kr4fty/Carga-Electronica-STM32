@@ -39,4 +39,11 @@ uint8_t clock_get_hours()
 {
     return hours;
 }
+
+void clock_resetClock()
+{
+    seconds = 0;
+    minutes = 0;
+    hours = 0;
+}
 #endif

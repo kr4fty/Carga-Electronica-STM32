@@ -107,15 +107,19 @@ Salida PWM multiple para el control de dos mosfet
     SOLUCION IMPLEMENTADA:
                             Se utliza dutycyle fijo en el segundo MOSFET, a la 
                             mitad del setpoint.
-                            Output2 = VGS_THRESHOLE+(dutyCycle-VGS_THRESHOLE)/2
+                            ampereSetpoint = dutyCycleToAmpere(dutyCycle);
+                        Output2 = ampereToDutycycle(ampereSetpoint/2, MOSFET2);
+
+Ver estado de la tension de entrada de la Tension de Entrada
+------------------------------------------------------------
+    Esto es para no arrancar el PID si todavia no se conecto la BATERIA/FUENTE
+
+Pulsacion larga para reiniciar parametros
+-----------------------------------------
+    Una pulsacion larga me reinicia los contadores de Tiempo, Wh y mAh
 
 Alarmas por caida en la fuente a testear
 ----------------------------------------
     Indicar si la fuente cae demasiado, por debajo de un 15% por ejemplo, en su
     tension de salida. Esto para indicar la calidad y si cumple con los 
     parametros de salida indicadas.
-
-Ver estado de la tension de entrada de la Tension de Entrada
-------------------------------------------------------------
-    Esto es para no arrancar el PID si todavia no se conecto la BATERIA/FUENTE
-    
