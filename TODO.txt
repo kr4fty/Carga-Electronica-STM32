@@ -114,3 +114,8 @@ Alarmas por caida en la fuente a testear
     Indicar si la fuente cae demasiado, por debajo de un 15% por ejemplo, en su
     tension de salida. Esto para indicar la calidad y si cumple con los 
     parametros de salida indicadas.
+
+Ver estado de la tension de entrada de la Tension de Entrada
+------------------------------------------------------------
+    Esto es para no arrancar el PID si todavia no se conecto la BATERIA/FUENTE
+    

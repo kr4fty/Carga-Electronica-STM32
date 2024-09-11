@@ -163,6 +163,15 @@ void lcd_printPowerOffMessage()
     updateDisplay = true;
 }
 
+void lcd_printNoBattery()
+{
+    lcd.setTextSize(1);
+    lcd.setCursor(0, 1*5*8);
+    lcd.print(" CONNECT BATT ");
+
+    updateDisplay = true;
+}
+
 void lcd_printOverTemperatureMessage()
 {
     lcd.setTextSize(1);

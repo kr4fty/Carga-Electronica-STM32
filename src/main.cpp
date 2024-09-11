@@ -67,7 +67,7 @@ void setup() {
   lcd_printBaseFrame();
 }
 
-bool isPowerOn = false; // TRUE: en funcionamiento, False: no ejecutandose
+bool isPowerOn = false, isPowerOnOld; // TRUE: en funcionamiento, False: no ejecutandose
 double vBattRaw, iBattRaw; // Valores Leidos en los ADC
 float iIn, vIn, wIn, totalmAh, totalWh; // Valores actuales de la V, I y Wh
 bool wasVUpdated, wasIUpdated, wasXhUpdated=true; //True: Si los valores cambiaron, para re imprimir
@@ -118,38 +118,56 @@ void loop() {
 
   if (encoder.isEncoderButtonClicked()){
     isPowerOn = not isPowerOn;
+    if(vIn<0.05 && isPowerOn){ // Solo enciende si hay tension de bateria/fuente a testear
+      isPowerOn = not isPowerOn;
 
-    // ENCENDIDO
-    if(isPowerOn){
-      lcd_printPowerOnMessage();
-      tone(BUZZER_PIN, 4000, 50);
-      delay(20);
-      tone(BUZZER_PIN, 4500, 50);
-      delay(20);
-      tone(BUZZER_PIN, 5000, 50);
-      
-      myPID.SetMode(AUTOMATIC); // Encendemos el PID
-
-      coolerFan_powerOn();      
+      // NO SE DETECTO TENSION DE ENTRADA!!!
+      lcd_printNoBattery();
+      // Emito un Sonido de alerta
+      tone(BUZZER_PIN, 2000, 50);
+      delay(50);
+      tone(BUZZER_PIN, 2000, 50);
+      delay(50);
+      tone(BUZZER_PIN, 2000, 50);
     }
-    // APAGADO
-    else{
-      lcd_printPowerOffMessage();
-      
-      tone(BUZZER_PIN, 436, 100);
-      tone(BUZZER_PIN, 200, 150);
 
-      pwm_setDuty1(0);
-      pwm_setDuty2(0);
+    if(isPowerOn != isPowerOnOld){
+      // ENCENDIDO
+      if(isPowerOn){
+        lcd_printPowerOnMessage();
+        tone(BUZZER_PIN, 4000, 50);
+        delay(20);
+        tone(BUZZER_PIN, 4500, 50);
+        delay(20);
+        tone(BUZZER_PIN, 5000, 50);
+        
+        Setpoint = dutycycleToADC(dutyCycle);
+        myPID.SetMode(AUTOMATIC); // Encendemos el PID
+        //myPID.SetTunings(Kp, Ki, Kd);
 
-      myPID.SetMode(MANUAL);  // Apagamos el PID
+        coolerFan_powerOn();      
+      }
+      // APAGADO
+      else{
+        lcd_printPowerOffMessage();
+        
+        tone(BUZZER_PIN, 436, 100);
+        tone(BUZZER_PIN, 200, 150);
 
-      coolerFan_powerOff();
+        pwm_setDuty1(0);
+        pwm_setDuty2(0);
+
+        Setpoint = 0;
+        myPID.SetMode(MANUAL);  // Apagamos el PID
+
+        coolerFan_powerOff();
+      }
+      isPowerOnOld = isPowerOn;
     }
     printStatusMessage = true;
     powerStateMessageTime = millis() + showMessageDuringThisTime;
 
-    digitalWrite(LED, digitalRead(LED)?LOW:HIGH);
+    digitalWrite(LED, isPowerOn?LOW:HIGH);
   }  
   // FIN CONFIGURACION DE CORRIENTE DE CARGA
 
@@ -215,43 +233,45 @@ void loop() {
     iBattRawOld = iBattRaw;
   }
   
-  // CALCULO PID
-  Input = iBattRaw;
-  if(myPID.Compute()&&isPowerOn)
-  {
-    if(iIn<1){ // si es menor a 1A solo trabaja un MOSFET
-      pwm_setDuty1(Output);
-      pwm_setDuty2(0);
-    }
-    else{
-      pwm_setDuty1(Output);
-      pwm_setDuty2(Output2); // Valor fijo a la mitad del setpoint
-    }
-    // Calculo wIn
-    wIn = vIn * iIn;
-    // Wh
-    totalWh += (wIn / 360000.0);  // PID_WINDOW_SIZE / 3600000.0 = 1/360000.0
-    // Ah
-    totalmAh += (iIn / 360.0);    // PID_WINDOW_SIZE / 3600000.0 * 1000 = 1/360.0
+  if(vIn>=0.05 && isPowerOn){
+    // CALCULO PID
+    Input = iBattRaw;
+    if(myPID.Compute())
+    {
+      if(iIn<1){ // si es menor a 1A solo trabaja un MOSFET
+        pwm_setDuty1(Output);
+        pwm_setDuty2(0);
+      }
+      else{
+        pwm_setDuty1(Output);
+        pwm_setDuty2(Output2); // Valor fijo a la mitad del setpoint
+      }
 
-    wasXhUpdated = true;
-  } 
-  // FIN PID
+      // Calculo wIn
+      wIn = vIn * iIn;
+      // Wh
+      totalWh += (wIn / 360000.0);  // PID_WINDOW_SIZE / 3600000.0 = 1/360000.0
+      // Ah
+      totalmAh += (iIn / 360.0);    // PID_WINDOW_SIZE / 3600000.0 * 1000 = 1/360.0
 
-  /***************************************************************************/
-  /*                     Actuzalizo Tiempo Transcurrido                      */
-  /***************************************************************************/
-  currentMillis = millis();  // Obtiene el tiempo actual
+      wasXhUpdated = true;
+    } 
+    // FIN PID
 
-  // Comprueba si ha pasado el intervalo de 1 segundo
-  if (currentMillis - previousMillis >= TIME_1SEG) {
-    previousMillis = currentMillis;  // Guarda el tiempo actual
-    if(isPowerOn){ // Actuzalizar el Tiempo solo si esta en funcionamiento
+    /***************************************************************************/
+    /*                     Actuzalizo Tiempo Transcurrido                      */
+    /***************************************************************************/
+    currentMillis = millis();  // Obtiene el tiempo actual
+
+    // Comprueba si ha pasado el intervalo de 1 segundo
+    if (currentMillis - previousMillis >= TIME_1SEG) {
+      previousMillis = currentMillis;  // Guarda el tiempo actual
+      // Actuzalizar el Tiempo solo si esta en funcionamiento
       clock_update();
       isPrintTime = true;
     }
+    // FIN RELOJ
   }
-  // FIN RELOJ
 
   /***************************************************************************/
   /*                            Refresco la Pantalla                         */
