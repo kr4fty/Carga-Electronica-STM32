@@ -10,6 +10,8 @@
 #define GAIN_V (R2/(R1+R2))
 #define ADCRAW_1V        50
 #define V3_3            3.3
+// Tension
+#define VBATT_MIN      0.05 // Vbatt min. para indicar si hay fuente conectada
 
 // Medicion de Corriente
 #define R3              2.2

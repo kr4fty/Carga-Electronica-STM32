@@ -174,6 +174,15 @@ void lcd_printNoBattery()
     updateDisplay = true;
 }
 
+void lcd_printBatteryConnected()
+{
+    lcd.setTextSize(1);
+    lcd.setCursor(0, 1*5*8);
+    lcd.print("BATT CONNECTED");
+
+    updateDisplay = true;
+}
+
 void lcd_printReset()
 {
     lcd.setTextSize(1);

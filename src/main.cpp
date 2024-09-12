@@ -69,13 +69,16 @@ void setup() {
 
 bool isPowerOn = false, isPowerOnOld; // TRUE: en funcionamiento, False: no ejecutandose
 double vBattRaw, iBattRaw; // Valores Leidos en los ADC
+bool batteryConnected=true;  // True si se detecto tension de sensado de bateria
 float iIn, vIn, wIn, totalmAh, totalWh; // Valores actuales de la V, I y Wh
 bool wasVUpdated, wasIUpdated, wasXhUpdated=true; //True: Si los valores cambiaron, para re imprimir
 uint16_t mosfetTempRaw, oldMofetTempRaw;
 float mosfetTemp; 
 long timeToUpdateDisplay=millis()+DISPLAY_UPDATE_WINDOW;
-unsigned long powerStateMessageTime, showMessageDuringThisTime = 2000; // 2 seg
-bool printStatusMessage= true;
+unsigned long notificationeMessageTime, showMessageDuringThisTime = 2000; // 2 seg
+uint8_t notificationPriority; // Contiene la prioridad de notificaciones
+bool printStatusMessage= true; // Para imprimir notificacion en la ultima fila
+bool forceRePrint; // Para volver a imprimir toda la pantalla
 bool isItOverheating=false;
 bool isPrintTime=true;
 bool isTheSetpointUpdated; // Para tener prioridad al mostrar nuevo setpoint
@@ -92,6 +95,83 @@ unsigned long shortPressAfterMiliseconds = 50;   //how long short press shoud be
 unsigned long longPressAfterMiliseconds = 1000;  //how long čong press shoud be.
 
 void loop() {
+  /***************************************************************************/
+  /*                    MEDION DE TENSION Y CORRIENTE                        */
+  /***************************************************************************/
+  vBattRaw = analogRead(VBATT_SENSE_PIN);
+  // Filtro de Wiener, Adaptativo
+  vBattRaw = vBattRawOld + MU * (vBattRaw - vBattRawOld);  
+  // Calulo de vIn
+  vIn = vBattRaw/ADCRAW_1V;
+
+  if(vBattRaw!=vBattRawOld){// si cambio V entonces actualizo valor en el LCD
+    wasVUpdated = true;
+    vBattRawOld = vBattRaw;
+  }
+  
+  iBattRaw = (double)analogRead(IBATT_SENSE_PIN);
+  // Filtro de Wiener, Adaptativo
+  iBattRaw = iBattRawOld + MU * (iBattRaw - iBattRawOld);
+  // Calculo iIn
+  iIn = (iBattRaw - iAdcOffset) / (ADCRAW_1A - iAdcOffset);
+
+  if(iBattRaw!=iBattRawOld){ // si cambio I entonces actualizo valor en el LCD
+    if(isPowerOn)
+      wasIUpdated = true;
+    else
+      iAdcOffset = iBattRaw; // Corriente medida, valores de ADC, a 0A
+    iBattRawOld = iBattRaw;
+  }
+  // FIN Mediones
+
+  /***************************************************************************/
+  /*                 ¿SE CONECTO LA FUENTE A LA ENTRADA?                     */
+  /***************************************************************************/
+  // Bateria/Fuente conectada y funcionando?
+  if(vIn > VBATT_MIN){
+    // Bateria conectada
+    if(!batteryConnected){
+      // Solo mostramos una vez el mensaje
+      printStatusMessage = true;
+      lcd_printBatteryConnected();
+      notificationPriority = 4;
+
+      batteryConnected = true;
+      notificationeMessageTime = millis() + showMessageDuringThisTime;
+      if(isPowerOn){
+        Setpoint = dutycycleToADC(dutyCycle);
+        //myPID.SetTunings(Kp, Ki, Kd);
+        //myPID.SetMode(AUTOMATIC);  // volvemos a encender el PID
+      }
+    }
+  }
+  else{ // NO SE DETECTO TENSION DE ENTRADA!!!
+    printStatusMessage = true;  // Mantego en mensaje hasta que se conecte la funete 
+    if(batteryConnected){
+      //shortClick = true;
+    
+      // Solo mostramos una vez el mensaje
+      lcd_printNoBattery();
+      notificationPriority = 5;
+
+      // Emito un Sonido de alerta
+      tone(BUZZER_PIN, 2000, 50);
+      delay(50);
+      tone(BUZZER_PIN, 2000, 50);
+      delay(50);
+      tone(BUZZER_PIN, 2000, 50);
+
+      batteryConnected = false;
+      if(isPowerOn){
+        pwm_setDuty1(0);
+        pwm_setDuty2(0);
+        Setpoint = 0;
+        //myPID.SetMode(MANUAL);  // Apagamos el PID
+      }
+    }
+  }
+  // FIN DETECCION DE TENSION DE ENTRADA
+
   /***************************************************************************/
   /*                            SETEO DE CORRIENTE                           */
   /***************************************************************************/
@@ -116,13 +196,19 @@ void loop() {
   }
   if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint)){
       isTheSetpointUpdated = false;
-      printStatusMessage= true;
+      forceRePrint = true;
 
       tone(BUZZER_PIN, 7000, 20);
       delay(75);
       tone(BUZZER_PIN, 7000, 80);
   }
+  // FIN CONFIGURACION DE CORRIENTE DE CARGA
 
+  /***************************************************************************/
+  /*                           ENCENDIDO Y APAGADO                           */
+  /***************************************************************************/
+
+  // Deteccion de pulsacion de boton
   if (isButtonDown()&&!wasButtonDown) {
     if (!wasButtonDown) {
       //start measuring
@@ -131,7 +217,7 @@ void loop() {
     //else we wait since button is still down
     wasButtonDown = true;
   }
-  //button is up
+  // Deteccion de pulsacion corta o larga
   if (!isButtonDown()&&wasButtonDown) {
     if (millis() - lastTimeButtonDown >= longPressAfterMiliseconds) {
       longClick = true;
@@ -143,74 +229,76 @@ void loop() {
     wasButtonDown = false;
   }
 
+  // Si hubo Pulsacion Larga
   if(longClick){ // Reiniciamos los contadores
     longClick = false;
-    lcd_printReset();
+
+    if(notificationPriority<1){
+      lcd_printReset();
+      notificationPriority = 1;
+    }
+    printStatusMessage = true;
+    notificationeMessageTime = millis() + showMessageDuringThisTime;
+
     clock_resetClock();
     totalmAh = 0;
     totalWh = 0;
 
     tone(BUZZER_PIN, 1000,300);
-    printStatusMessage = true;
-    powerStateMessageTime = millis() + showMessageDuringThisTime;
   }
 
+  // Si hubo pulsacion corta
   if (shortClick){
     shortClick = false;
 
     isPowerOn = not isPowerOn;
-    if(vIn<0.05 && isPowerOn){ // Solo enciende si hay tension de bateria/fuente a testear
-      isPowerOn = not isPowerOn;
-
-      // NO SE DETECTO TENSION DE ENTRADA!!!
-      lcd_printNoBattery();
-      // Emito un Sonido de alerta
-      tone(BUZZER_PIN, 2000, 50);
-      delay(50);
-      tone(BUZZER_PIN, 2000, 50);
-      delay(50);
-      tone(BUZZER_PIN, 2000, 50);
-    }
-
-    if(isPowerOn != isPowerOnOld){
-      // ENCENDIDO
-      if(isPowerOn){
+    // ENCENDIDO
+    if(isPowerOn){
+      if(notificationPriority<3){
         lcd_printPowerOnMessage();
-        tone(BUZZER_PIN, 4000, 50);
-        delay(20);
-        tone(BUZZER_PIN, 4500, 50);
-        delay(20);
-        tone(BUZZER_PIN, 5000, 50);
-        
-        Setpoint = dutycycleToADC(dutyCycle);
-        myPID.SetMode(AUTOMATIC); // Encendemos el PID
-        //myPID.SetTunings(Kp, Ki, Kd);
-
-        coolerFan_powerOn();      
+        printStatusMessage = true;
+        notificationeMessageTime = millis() + showMessageDuringThisTime;
+        notificationPriority = 3;
       }
-      // APAGADO
-      else{
-        lcd_printPowerOffMessage();
-        
-        tone(BUZZER_PIN, 436, 100);
-        tone(BUZZER_PIN, 200, 150);
+      
+      tone(BUZZER_PIN, 4000, 50);
+      delay(20);
+      tone(BUZZER_PIN, 4500, 50);
+      delay(20);
+      tone(BUZZER_PIN, 5000, 50);
+      
+      Setpoint = dutycycleToADC(dutyCycle);
+      myPID.SetTunings(Kp, Ki, Kd);
+      myPID.SetMode(AUTOMATIC); // Encendemos el PID
 
-        pwm_setDuty1(0);
-        pwm_setDuty2(0);
-
-        Setpoint = 0;
-        myPID.SetMode(MANUAL);  // Apagamos el PID
-
-        coolerFan_powerOff();
-      }
-      isPowerOnOld = isPowerOn;
+      coolerFan_powerOn();      
     }
-    printStatusMessage = true;
-    powerStateMessageTime = millis() + showMessageDuringThisTime;
+    // APAGADO
+    else{
+      if(notificationPriority<4){
+        lcd_printPowerOffMessage();
+        printStatusMessage = true;
+        notificationeMessageTime = millis() + showMessageDuringThisTime;
+        notificationPriority = 4;
+      }
+      
+      tone(BUZZER_PIN, 436, 100);
+      tone(BUZZER_PIN, 200, 150);
+
+      pwm_setDuty1(0);
+      pwm_setDuty2(0);
+
+      Setpoint = 0;
+      myPID.SetMode(MANUAL);  // Apagamos el PID
+
+      coolerFan_powerOff();
+    }
+
+    
 
     digitalWrite(LED, isPowerOn?LOW:HIGH);
-  }  
-  // FIN CONFIGURACION DE CORRIENTE DE CARGA
+  }
+  // FIN BOTON
 
   /***************************************************************************/
   /*           CHEQUEO Y CONTROL DE LA TEMPERATURA EN EL MOSFET              */
@@ -249,38 +337,12 @@ void loop() {
   /***************************************************************************/
   /*                                  PID                                    */
   /***************************************************************************/
-  vBattRaw = analogRead(VBATT_SENSE_PIN);
-  // Filtro de Wiener, Adaptativo
-  vBattRaw = vBattRawOld + MU * (vBattRaw - vBattRawOld);  
-  // Calulo de vIn
-  vIn = vBattRaw/ADCRAW_1V;
-
-  if(vBattRaw!=vBattRawOld){// si cambio V entonces actualizo valor en el LCD
-    wasVUpdated = true;
-    vBattRawOld = vBattRaw;
-  }
-  
-  iBattRaw = (double)analogRead(IBATT_SENSE_PIN);
-  // Filtro de Wiener, Adaptativo
-  iBattRaw = iBattRawOld + MU * (iBattRaw - iBattRawOld);
-  // Calculo iIn
-  iIn = (iBattRaw - iAdcOffset) / (ADCRAW_1A - iAdcOffset);
-
-  if(iBattRaw!=iBattRawOld){ // si cambio I entonces actualizo valor en el LCD
-    if(isPowerOn)
-      wasIUpdated = true;
-    else
-      iAdcOffset = iBattRaw; // Corriente medida, valores de ADC, a 0A
-    iBattRawOld = iBattRaw;
-  }
-  
-  // Bateria/Fuente funcionando?
-  if(vIn>=0.05 && isPowerOn){
+  if(batteryConnected){
     // CALCULO PID
     Input = iBattRaw;
-    if(myPID.Compute())
+    if(myPID.Compute() && isPowerOn)
     {
-      if(iIn<1){ // si es menor a 1A solo trabaja un MOSFET
+      if(ampereSetpoint<1){ // si es menor a 1A solo trabaja un MOSFET
         pwm_setDuty1(Output);
         pwm_setDuty2(0);
       }
@@ -297,39 +359,41 @@ void loop() {
       totalmAh += (iIn / 360.0);    // PID_WINDOW_SIZE / 3600000.0 * 1000 = 1/360.0
 
       wasXhUpdated = true;
-    } 
-    // FIN PID
-
-    /***************************************************************************/
-    /*                     Actuzalizo Tiempo Transcurrido                      */
-    /***************************************************************************/
-    currentMillis = millis();  // Obtiene el tiempo actual
-
-    // Comprueba si ha pasado el intervalo de 1 segundo
-    if (vIn>=0.05 && (currentMillis - previousMillis)>=TIME_1SEG) {
-      previousMillis = currentMillis;  // Guarda el tiempo actual
-      // Actuzalizar el Tiempo solo si esta en funcionamiento
-      clock_update();
-      isPrintTime = true;
     }
-    // FIN RELOJ
   }
+  // FIN PID
+
+  /***************************************************************************/
+  /*                     Actuzalizo Tiempo Transcurrido                      */
+  /***************************************************************************/
+  currentMillis = millis();  // Obtiene el tiempo actual
+
+  // Comprueba si ha pasado el intervalo de 1 segundo
+  if (isPowerOn && batteryConnected && (currentMillis - previousMillis)>=TIME_1SEG) {
+    previousMillis = currentMillis;  // Guarda el tiempo actual
+    // Actuzalizar el Tiempo solo si esta en funcionamiento
+    clock_update();
+    isPrintTime = true;
+  }
+  // FIN RELOJ
 
   /***************************************************************************/
   /*                            Refresco la Pantalla                         */
   /***************************************************************************/
   if(millis()>timeToUpdateDisplay && !isTheSetpointUpdated){
-    // Se muestra el nuevo estado del dispositivo, solo por 2seg
     if(printStatusMessage){
-      if(millis()>powerStateMessageTime){
-        printStatusMessage = false;
-        // Reimprimo toda la pantalla
-        lcd_printBaseFrame();
-        wasXhUpdated = true;
-        wasVUpdated = true;
-        wasIUpdated = true;
-        isPrintTime = true;
-      }
+      if(notificationPriority>0 && notificationPriority<5){
+        // Se muestra el nuevo estado del dispositivo, solo por 2seg
+        if(millis()>notificationeMessageTime){
+          printStatusMessage = false;
+          // Reimprimo toda la pantalla
+          forceRePrint = true;
+          //if(!batteryConnected){
+          //  batteryConnected = true;
+          //}
+          notificationPriority = 0;
+        }
+      }  
     }
     else if(isItOverheating){
       // Imprimir mensaje por Interrupcion de sobre-temperatura
@@ -346,6 +410,16 @@ void loop() {
         lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds());
         isPrintTime = false;
       }
+    }
+
+    if(forceRePrint){
+      // Reimprimir toda la pantalla
+      forceRePrint = false;
+      lcd_printBaseFrame();
+      wasXhUpdated = true;
+      wasVUpdated = true;
+      wasIUpdated = true;
+      isPrintTime = true;
     }
 
     // Imprimo los Watts-Hora y Ampere-Hora
