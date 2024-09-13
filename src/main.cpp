@@ -291,8 +291,8 @@ void loop() {
   /***************************************************************************/
   mosfetTempRaw = analogRead(FET_TEMP_SENSE_PIN);
   // Calculo la temperatura en el mosfet
-  mosfetTemp = mosfetTempRaw;
-  //mosfetTemp = 23;
+  //mosfetTemp = mosfetTempRaw;
+  mosfetTemp = 23;
   
   // Si supera cierta Temp maxima enciendo el Cooler
   if(mosfetTemp>FET_MIN_TEMP){
@@ -309,9 +309,17 @@ void loop() {
     //pwm_stop();
 
     if(!isItOverheating){ // Notificacion por exceso de temperatura, solo una vez
+      
+      if(isPowerOn){
+        pwm_setDuty1(0);
+        pwm_setDuty2(0);
+        Setpoint = iAdcOffset; // Lo seteo al valor de ADC para 0A
+        //myPID.SetMode(MANUAL);  // Apagamos el PID
+      }
+
       isItOverheating = true;
       notificationPriority = 4;
-      notification_add("TEMP MAX", notificationPriority, COLOR_WB);
+      notification_addMini("TEMP MAX", notificationPriority, NO_TIME_LIMIT, COLOR_WB);
 
       // Emito un Sonido de alerta
       tone(BUZZER_PIN, 2000, 50);
@@ -326,7 +334,7 @@ void loop() {
     if(isItOverheating){
       isItOverheating = false;
       notificationPriority = 4;
-      notification_remove(notificationPriority);
+      notification_removeMini(notificationPriority);
     }
   }
   if(mosfetTempRaw!=oldMofetTempRaw){
@@ -396,7 +404,8 @@ void loop() {
         wasTempUpdated = false;
       }
       // Imprimir tiempo transcurrido
-      if(isPrintTime){
+      // Usando las mini notificaciones puedo mostrar la temperatura
+      if(!newMiniNotificacion && isPrintTime){ 
         lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds());
         isPrintTime = false;
       }
