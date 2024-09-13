@@ -16,10 +16,10 @@ Notification notification;
 
 int notificationCount = 0;
 bool newNotification=false; // True: si hay una notificacion que se muestra
-unsigned long messageDisplayTime = 2000; // 2 seg
+unsigned long messageDisplayTime = 2000; // por default 2 seg
 
 
-void notification_add(const char *message, uint8_t priority, unsigned long duration=messageDisplayTime, uint8_t color=BW)// Inserta una nueva notificacion con prioridad mas alta
+void notification_add(const char *message, uint8_t priority, unsigned long duration=messageDisplayTime, uint8_t color=COLOR_BW)// Inserta una nueva notificacion con prioridad mas alta
 {
     if(priority >= notification.priority) // comprueba si la nueva es de mayor prioridad, si es que hay una anterior en pantalla
     {
@@ -39,6 +39,15 @@ void notification_add(const char *message, uint8_t priority, unsigned long durat
         lcd_printNotification(notification.message, color);
     }
 }
+
+void notification_remove(uint8_t priority) // Elimina una notificacion con prioridad Priority
+{
+    if(notification.priority == priority){
+        notification.priority = 0;
+        newNotification=false;
+    }
+}
+
 bool notification_hasExpired()
  {
     if(millis()>notification.timestamp && notification.timestamp>NO_TIME_LIMIT){

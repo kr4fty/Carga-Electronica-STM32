@@ -116,10 +116,12 @@ void loop() {
   iIn = (iBattRaw - iAdcOffset) / (ADCRAW_1A - iAdcOffset);
 
   if(iBattRaw!=iBattRawOld){ // si cambio I entonces actualizo valor en el LCD
-    if(isPowerOn)
+    if(isPowerOn){
       wasIUpdated = true;
-    else
+    }
+    else{
       iAdcOffset = iBattRaw; // Corriente medida, valores de ADC, a 0A
+    }
     iBattRawOld = iBattRaw;
   }
   // FIN Mediones
@@ -132,7 +134,7 @@ void loop() {
     // Bateria conectada
     if(!batteryConnected){
       // Solo mostramos una vez el mensaje
-      notificationPriority = 4;
+      notificationPriority = 3;
       notification_add("BATT CONNECTED", notificationPriority);
 
       batteryConnected = true;
@@ -146,8 +148,8 @@ void loop() {
   else{ // NO SE DETECTO TENSION DE ENTRADA!!!
     if(batteryConnected){
       // Se muestra solo una vez y queda fijo hasta que no se cambie el estado
-      notificationPriority = 4;
-      notification_add("  NO BATTERY  ", notificationPriority, NO_TIME_LIMIT, WB);
+      notificationPriority = 3;
+      notification_add("  NO BATTERY  ", notificationPriority, NO_TIME_LIMIT, COLOR_WB);
 
       // Emito un Sonido de alerta
       tone(BUZZER_PIN, 2000, 50);
@@ -160,7 +162,7 @@ void loop() {
       if(isPowerOn){
         pwm_setDuty1(0);
         pwm_setDuty2(0);
-        Setpoint = 0;
+        Setpoint = iAdcOffset; // Lo seteo al valor de ADC para 0A
         //myPID.SetMode(MANUAL);  // Apagamos el PID
       }
     }
@@ -246,7 +248,7 @@ void loop() {
 
     // ENCENDIDO
     if(isPowerOn){
-      notificationPriority = 3;
+      notificationPriority = 2;
       notification_add("   POWER ON   ", notificationPriority);
       
       tone(BUZZER_PIN, 4000, 50);
@@ -263,7 +265,7 @@ void loop() {
     }
     // APAGADO
     else{
-      notificationPriority = 3;
+      notificationPriority = 2;
       notification_add("   POWER OFF  ", notificationPriority);
       
       tone(BUZZER_PIN, 436, 100);
@@ -289,8 +291,8 @@ void loop() {
   /***************************************************************************/
   mosfetTempRaw = analogRead(FET_TEMP_SENSE_PIN);
   // Calculo la temperatura en el mosfet
-  //mosfetTemp = mosfetTempRaw;
-  mosfetTemp = 23;
+  mosfetTemp = mosfetTempRaw;
+  //mosfetTemp = 23;
   
   // Si supera cierta Temp maxima enciendo el Cooler
   if(mosfetTemp>FET_MIN_TEMP){
@@ -306,15 +308,26 @@ void loop() {
     // Detenemos la salida PWM
     //pwm_stop();
 
-    isItOverheating = true;
+    if(!isItOverheating){ // Notificacion por exceso de temperatura, solo una vez
+      isItOverheating = true;
+      notificationPriority = 4;
+      notification_add("TEMP MAX", notificationPriority, COLOR_WB);
 
-    // Emito un Sonido de alerta
-    tone(BUZZER_PIN, 2000, 50);
-    delay(100);
-    tone(BUZZER_PIN, 2000, 50);
-    delay(100);
-    tone(BUZZER_PIN, 2000, 50);
+      // Emito un Sonido de alerta
+      tone(BUZZER_PIN, 2000, 50);
+      delay(100);
+      tone(BUZZER_PIN, 2000, 50);
+      delay(100);
+      tone(BUZZER_PIN, 2000, 50);
+    }
 
+  }
+  else{
+    if(isItOverheating){
+      isItOverheating = false;
+      notificationPriority = 4;
+      notification_remove(notificationPriority);
+    }
   }
   if(mosfetTempRaw!=oldMofetTempRaw){
     wasTempUpdated = true;
@@ -376,10 +389,7 @@ void loop() {
         forceRePrint = true;
       }  
     }
-    else if(isItOverheating){
-      // Imprimir mensaje por Interrupcion de sobre-temperatura
-      lcd_printOverTemperatureMessage();
-    }else{
+    else {
       // actualizo el valor de la temperatura en el MOSFET
       if(wasTempUpdated){
         lcd_printTemperature(mosfetTemp);

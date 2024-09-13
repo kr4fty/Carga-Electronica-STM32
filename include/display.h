@@ -4,8 +4,8 @@
 #include <Adafruit_PCD8544.h>
 #include "config.h"
 
-#define WB  0   // Color WHITE sobre BLACK
-#define BW  1   // Color BLACK sobre WHITE
+#define COLOR_WB  0   // Color WHITE sobre BLACK
+#define COLOR_BW  1   // Color BLACK sobre WHITE
                                         
 
 Adafruit_PCD8544 lcd = Adafruit_PCD8544(LCD_SCLK_PIN, LCD_DIN_PIN, LCD_DC_PIN, LCD_CS_PIN, LCD_RST_PIN);
@@ -195,14 +195,14 @@ void lcd_printReset()
     updateDisplay = true;
 }
 
-void lcd_printNotification(char *text, uint8_t color=BW)
+void lcd_printNotification(char *text, uint8_t color=COLOR_BW)
 {
     lcd.setTextSize(1);
     lcd.setCursor(0, 1*5*8);
-    if(color == BW){
+    if(color == COLOR_BW){
         lcd.print(text);
     }
-    else if(color == WB){
+    else if(color == COLOR_WB){
         lcd.setTextColor(WHITE, BLACK);
         lcd.print(text);
         lcd.setTextColor(BLACK, WHITE);
