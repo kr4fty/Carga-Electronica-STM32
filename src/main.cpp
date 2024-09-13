@@ -9,6 +9,7 @@
 #include "constantes.h"
 #include "coolerfan.h"
 #include "conversion.h"
+#include "notifications.h"
 
 int dutyCycle = 0;
 
@@ -34,6 +35,7 @@ void setup() {
 
   myPID.SetOutputLimits(VGS_THRESHOLE, 4095);
   myPID.SetSampleTime(PID_WINDOW_SIZE);  //sets the period, in Millisecond
+  myPID.SetMode(AUTOMATIC); // Encendemos el PID
 
   // Lectura inicial de los sensores
   vBattRawOld = analogRead(VBATT_SENSE_PIN)-.01; // le resto un pequeño valor para que imprima la tension cuando
@@ -75,9 +77,7 @@ bool wasVUpdated, wasIUpdated, wasXhUpdated=true; //True: Si los valores cambiar
 uint16_t mosfetTempRaw, oldMofetTempRaw;
 float mosfetTemp; 
 long timeToUpdateDisplay=millis()+DISPLAY_UPDATE_WINDOW;
-unsigned long notificationeMessageTime, showMessageDuringThisTime = 2000; // 2 seg
 uint8_t notificationPriority; // Contiene la prioridad de notificaciones
-bool printStatusMessage= true; // Para imprimir notificacion en la ultima fila
 bool forceRePrint; // Para volver a imprimir toda la pantalla
 bool isItOverheating=false;
 bool isPrintTime=true;
@@ -132,12 +132,10 @@ void loop() {
     // Bateria conectada
     if(!batteryConnected){
       // Solo mostramos una vez el mensaje
-      printStatusMessage = true;
-      lcd_printBatteryConnected();
       notificationPriority = 4;
+      notification_add("BATT CONNECTED", notificationPriority);
 
       batteryConnected = true;
-      notificationeMessageTime = millis() + showMessageDuringThisTime;
       if(isPowerOn){
         Setpoint = dutycycleToADC(dutyCycle);
         //myPID.SetTunings(Kp, Ki, Kd);
@@ -146,13 +144,11 @@ void loop() {
     }
   }
   else{ // NO SE DETECTO TENSION DE ENTRADA!!!
-    printStatusMessage = true;  // Mantego en mensaje hasta que se conecte la funete 
+    newNotification = true;  // Mantego en mensaje hasta que se conecte la funete 
     if(batteryConnected){
-      //shortClick = true;
-    
-      // Solo mostramos una vez el mensaje
-      lcd_printNoBattery();
-      notificationPriority = 5;
+      // Se muestra solo una vez y queda fijo hasta que no se cambie el estado
+      notificationPriority = 4;
+      notification_add("  NO BATTERY  ", notificationPriority, NO_TIME_LIMIT, WB);
 
       // Emito un Sonido de alerta
       tone(BUZZER_PIN, 2000, 50);
@@ -180,11 +176,11 @@ void loop() {
     dutyCycle = encoder.readEncoder();
     ampereSetpoint = dutyCycleToAmpere(dutyCycle);
     Output2 = ampereToDutycycle(ampereSetpoint*.5, MOSFET2);
-    if(isPowerOn){
+    if(isPowerOn){ // Si esta encendido lo musetro en una ventana temporal
       lcd_printNewSetpoint(ampereSetpoint);
       isTheSetpointUpdated = true;
     }
-    else{
+    else{ // Si esta APAGADO lo muestro en lugar de la corriente medida
       printTinySetpoint = true;
     }
 
@@ -194,6 +190,7 @@ void loop() {
 
     timeToPrintNewSetpoint = millis() + windowNewSetpoint;
   }
+  // Tiempo de muestra de la Ventana temporal que imprime el nuevo SETPOINT
   if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint)){
       isTheSetpointUpdated = false;
       forceRePrint = true;
@@ -229,16 +226,12 @@ void loop() {
     wasButtonDown = false;
   }
 
-  // Si hubo Pulsacion Larga
+  //  HUBO UNA PULSACION LARGA
   if(longClick){ // Reiniciamos los contadores
     longClick = false;
 
-    if(notificationPriority<1){
-      lcd_printReset();
-      notificationPriority = 1;
-    }
-    printStatusMessage = true;
-    notificationeMessageTime = millis() + showMessageDuringThisTime;
+    notificationPriority = 1;
+    notification_add("RESET COUNTERS", notificationPriority);
 
     clock_resetClock();
     totalmAh = 0;
@@ -247,19 +240,15 @@ void loop() {
     tone(BUZZER_PIN, 1000,300);
   }
 
-  // Si hubo pulsacion corta
+  // HUBO UN CLICK EN EL BOTON
   if (shortClick){
     shortClick = false;
+    isPowerOn = not isPowerOn; // Cambia el estado anterior, de ENCENDIDO -> APAGADO y viceversa
 
-    isPowerOn = not isPowerOn;
     // ENCENDIDO
     if(isPowerOn){
-      if(notificationPriority<3){
-        lcd_printPowerOnMessage();
-        printStatusMessage = true;
-        notificationeMessageTime = millis() + showMessageDuringThisTime;
-        notificationPriority = 3;
-      }
+      notificationPriority = 3;
+      notification_add("   POWER ON   ", notificationPriority);
       
       tone(BUZZER_PIN, 4000, 50);
       delay(20);
@@ -268,19 +257,15 @@ void loop() {
       tone(BUZZER_PIN, 5000, 50);
       
       Setpoint = dutycycleToADC(dutyCycle);
-      myPID.SetTunings(Kp, Ki, Kd);
-      myPID.SetMode(AUTOMATIC); // Encendemos el PID
+      //myPID.SetTunings(Kp, Ki, Kd);
+      //myPID.SetMode(AUTOMATIC); // Encendemos el PID
 
       coolerFan_powerOn();      
     }
     // APAGADO
     else{
-      if(notificationPriority<4){
-        lcd_printPowerOffMessage();
-        printStatusMessage = true;
-        notificationeMessageTime = millis() + showMessageDuringThisTime;
-        notificationPriority = 4;
-      }
+      notificationPriority = 3;
+      notification_add("   POWER OFF  ", notificationPriority);
       
       tone(BUZZER_PIN, 436, 100);
       tone(BUZZER_PIN, 200, 150);
@@ -289,7 +274,7 @@ void loop() {
       pwm_setDuty2(0);
 
       Setpoint = 0;
-      myPID.SetMode(MANUAL);  // Apagamos el PID
+      //myPID.SetMode(MANUAL);  // Apagamos el PID
 
       coolerFan_powerOff();
     }
@@ -380,19 +365,12 @@ void loop() {
   /***************************************************************************/
   /*                            Refresco la Pantalla                         */
   /***************************************************************************/
+
   if(millis()>timeToUpdateDisplay && !isTheSetpointUpdated){
-    if(printStatusMessage){
-      if(notificationPriority>0 && notificationPriority<5){
-        // Se muestra el nuevo estado del dispositivo, solo por 2seg
-        if(millis()>notificationeMessageTime){
-          printStatusMessage = false;
-          // Reimprimo toda la pantalla
-          forceRePrint = true;
-          //if(!batteryConnected){
-          //  batteryConnected = true;
-          //}
-          notificationPriority = 0;
-        }
+    if(newNotification){
+      if(notification_hasExpired()){
+        // Fuerzo reimprimir toda la pantalla
+        forceRePrint = true;
       }  
     }
     else if(isItOverheating){

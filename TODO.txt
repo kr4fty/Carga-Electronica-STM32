@@ -110,9 +110,12 @@ Salida PWM multiple para el control de dos mosfet
                             ampereSetpoint = dutyCycleToAmpere(dutyCycle);
                         Output2 = ampereToDutycycle(ampereSetpoint/2, MOSFET2);
 
-Ver estado de la tension de entrada de la Tension de Entrada
-------------------------------------------------------------
+Ver estado de la Tension de Entrada
+-----------------------------------
     Esto es para no arrancar el PID si todavia no se conecto la BATERIA/FUENTE
+    Si el PID se sigue calculando en ausencia de Tension, cuando conectamos la
+    bateria, la carga consume el maximo ya que estuvo intentando subirla, 
+    maximo PID.
 
 Pulsacion larga para reiniciar parametros
 -----------------------------------------

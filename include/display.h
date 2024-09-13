@@ -3,6 +3,9 @@
 
 #include <Adafruit_PCD8544.h>
 #include "config.h"
+
+#define WB  0   // Color WHITE sobre BLACK
+#define BW  1   // Color BLACK sobre WHITE
                                         
 
 Adafruit_PCD8544 lcd = Adafruit_PCD8544(LCD_SCLK_PIN, LCD_DIN_PIN, LCD_DC_PIN, LCD_CS_PIN, LCD_RST_PIN);
@@ -190,6 +193,22 @@ void lcd_printReset()
     lcd.print("RESET COUNTERS");
 
     updateDisplay = true;
+}
+
+void lcd_printNotification(char *text, uint8_t color=BW)
+{
+    lcd.setTextSize(1);
+    lcd.setCursor(0, 1*5*8);
+    if(color == BW){
+        lcd.print(text);
+    }
+    else if(color == WB){
+        lcd.setTextColor(WHITE, BLACK);
+        lcd.print(text);
+        lcd.setTextColor(BLACK, WHITE);
+    }
+
+    lcd.display();
 }
 
 void lcd_printOverTemperatureMessage()
