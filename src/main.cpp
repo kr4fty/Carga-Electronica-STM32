@@ -38,7 +38,7 @@ void setup() {
   myPID.SetMode(AUTOMATIC); // Encendemos el PID
 
   // Lectura inicial de los sensores
-  vBattRawOld = analogRead(VBATT_SENSE_PIN)-.01; // le resto un pequeño valor para que imprima la tension cuando
+  vBattRawOld = analogRead(VBATT_SENSE_PIN);
   iBattRawOld = analogRead(IBATT_SENSE_PIN);
 
   // Entrando a modo Calibracion. Medimos una corriente de 1A para luego aplicar relacion
@@ -73,7 +73,7 @@ bool isPowerOn = false, isPowerOnOld; // TRUE: en funcionamiento, False: no ejec
 double vBattRaw, iBattRaw; // Valores Leidos en los ADC
 bool batteryConnected=true;  // True si se detecto tension de sensado de bateria
 float iIn, vIn, wIn, totalmAh, totalWh; // Valores actuales de la V, I y Wh
-bool wasVUpdated, wasIUpdated, wasXhUpdated=true; //True: Si los valores cambiaron, para re imprimir
+bool wasVUpdated=true, wasIUpdated=true, wasXhUpdated=true, wasTempUpdated=true; //True: Si los valores cambiaron, para re imprimir
 uint16_t mosfetTempRaw, oldMofetTempRaw;
 float mosfetTemp; 
 long timeToUpdateDisplay=millis()+DISPLAY_UPDATE_WINDOW;
@@ -144,7 +144,6 @@ void loop() {
     }
   }
   else{ // NO SE DETECTO TENSION DE ENTRADA!!!
-    newNotification = true;  // Mantego en mensaje hasta que se conecte la funete 
     if(batteryConnected){
       // Se muestra solo una vez y queda fijo hasta que no se cambie el estado
       notificationPriority = 4;
@@ -317,6 +316,10 @@ void loop() {
     tone(BUZZER_PIN, 2000, 50);
 
   }
+  if(mosfetTempRaw!=oldMofetTempRaw){
+    wasTempUpdated = true;
+    oldMofetTempRaw = mosfetTempRaw;
+  }
   // FIN TEMPERATURA EN EL MOSFET
 
   /***************************************************************************/
@@ -378,10 +381,9 @@ void loop() {
       lcd_printOverTemperatureMessage();
     }else{
       // actualizo el valor de la temperatura en el MOSFET
-      if(mosfetTempRaw!=oldMofetTempRaw){
+      if(wasTempUpdated){
         lcd_printTemperature(mosfetTemp);
-
-        oldMofetTempRaw = mosfetTempRaw;
+        wasTempUpdated = false;
       }
       // Imprimir tiempo transcurrido
       if(isPrintTime){
@@ -398,6 +400,7 @@ void loop() {
       wasVUpdated = true;
       wasIUpdated = true;
       isPrintTime = true;
+      wasTempUpdated = true;
     }
 
     // Imprimo los Watts-Hora y Ampere-Hora
