@@ -5,9 +5,9 @@ IMPLEMENTACION DE UN DAC (BluePill no cuenta con DAC)
     PWM en nuestra placa BluePill. A su vez la salida este MCU tiene una salida
     logica de 3.3V, por lo que el filtro debera tener una ganacia, dependiendo
     de la Vgs Threshold del mosfet
-    SOLUCION:
-            Se utliza un Filtro Activo tipo Bessel de 2do Orden con una 
-            ganancia de 1.51
+    SOLUCION IMPLEMENTADA:
+                    Se utliza un Filtro Activo tipo Bessel de 2do Orden con una 
+                    ganancia de 1.51
             http://sim.okawa-denshi.jp/en/OPseikiLowkeisan.htm
 
 Manejo de un LCD [ ECHO ]
@@ -18,20 +18,20 @@ Control de el mofet que activa el Cooler Fan, driving
 -----------------------------------------------------
     Como la salida logica del STM32 es 3.3V, tendria que cambiar este IRF540N 
     por un 2N7002, por ejemplo. Revisar cuanto consume el cooler!!!
-    SOLUCION:
+    SOLUCION IMPLEMENTADA:
             Se implementa un driver simple mediante un transistor NPN
             https://www.laboratoriogluon.com/controlar-mosfets-de-potencia-irfz44n-con-3-3v/
 
 
 Sensores de Tension de la Bateria
------------------------------------------
+---------------------------------
     Se utliza un divisor resistivo
 
     SOLUCION IMPLEMENTADA:
-                            Se toma el valor de la tension a 10V y luego para 
-                            calcular la V se utiliza la relacion:
-
-                            V = ADC_V_ACTUAL / ADC_10V
+                            Para calcularla see toma el valor de la tension a 
+                            1V y luego para calcular la V se utiliza la 
+                            relacion:
+                                        V = ADC_V_ACTUAL / ADC_1V
 
 Sensor de corriente ASC712
 --------------------------
