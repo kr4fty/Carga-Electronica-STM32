@@ -88,7 +88,7 @@ El diseño del hardware se realizó utilizando KiCad, y se ha optimizado para fa
 
 ### Imagen del Esquema
 
-<img align="center" src="https://i.ibb.co/pQYX3jh/Sin-nombre-resized.png" alt="Esquema del Hard
+<img align="center" src="https://i.ibb.co/pQYX3jh/Sin-nombre-resized.png" alt="Esquema del Hardware" width="720">
 ---
 
 Este documento proporciona una visión general del proyecto y su funcionamiento. Asegúrate de seguir las indicaciones de seguridad al trabajar con componentes electrónicos y realizar pruebas.
