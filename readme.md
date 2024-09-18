@@ -21,27 +21,29 @@ La carga electrónica fantasma es un dispositivo diseñado para simular una carg
 
 El MOSFET opera en la zona de saturación (o zona lineal), lo que permite mantener una corriente constante independientemente de la tensión Vds de entrada. Esta característica es ventajosa para nuestra aplicación, ya que al variar la tensión Vgs podemos ajustar la corriente de salida de manera precisa.
 
-### Consideraciones Importantes
+La tensión Vds será controlada mediante el STM32F103 utilizando modulación por ancho de pulso (PWM) y un filtro pasa-bajos para obtener una señal de conversión digital a analógica (DAC) de 12 bits.
+
+Debido a la inestabilidad de la potencia con respecto a la temperatura de los mosfset, el lazo de control dera realido mediante un PID, el cual debera tener en cuenta el rango de temperaturas no solo para mantener la corriente constante, si no tambien para mantener a salvo al dispositivo
+
+#### Consideraciones importantes de los transistores Mosfet
 
 - **Tensión de umbral (Vgs threshold):** Es el voltaje mínimo que debe aplicarse entre la puerta y la fuente para que el MOSFET comience a conducir corriente entre el drenador y la fuente.
 - **Disipación de potencia:** Operar en la zona de saturación genera una significativa disipación de potencia en el MOSFET. Por lo tanto, es necesario implementar un sistema de disipación forzada para evitar el sobrecalentamiento.
 
-La tensión Vds será controlada mediante el STM32F103 utilizando modulación por ancho de pulso (PWM) y un filtro pasa-bajos para obtener una señal de conversión digital a analógica (DAC) de 12 bits.
-
 ## Modo de Uso e Interfaz
 
 1. **Encendido:** Al encender el dispositivo, se mostrará la tensión de entrada y la corriente deseada para la prueba, con la carga inicialmente apagada.
-2. **Ajuste de Corriente:** Gire el encoder para seleccionar una corriente mayor o menor a la configurada por defecto.
-3. **Inicio del Proceso:** Presione el botón del encoder para comenzar el proceso de carga electrónica. Presione nuevamente para interrumpir o pausar el proceso.
+2. **Ajuste de Corriente:** Gire la perilla para seleccionar una corriente mayor o menor a la configurada por defecto.
+3. **Inicio del Proceso:** Presione el botón para que la carga electrónica se inicie. Presione nuevamente para interrumpir o pausar el proceso.
 4. **Visualización de Datos:** Durante el funcionamiento, se mostrarán:
-   - Tensión actual
-   - Corriente actual
-   - Amperes-hora
-   - Watts-hora
-   - Tiempo de carga encendida
-   - Temperatura
+   - Tensión actual de la bateria/fuente
+   - Corriente actual que se esta consumiendo
+   - Amperes-hora consumidos
+   - Watts-hora consumidos
+   - Tiempo que la carga esta en funcionamiento
+   - Temperatura de los mosfet
 
-## Indicaciones y Alarmas
+### Indicaciones y Alarmas
 
 - **Verificación de Conexión:** Al iniciar, se verifica la conexión de la batería/fuente. Si no hay conexión, el dispositivo permanecerá en reposo hasta que se detecte una fuente.
 - **Detención por Ausencia de Tensión:** Si luego de iniciado la carga electronica, se detectara la ausencia de tensión, el proceso se detiene inmediatamente. Se activa una alarma sonora y todos los procesos se pausarán, quedando en espera de reconexión.
@@ -86,7 +88,7 @@ El diseño del hardware se realizó utilizando KiCad, y se ha optimizado para fa
 - **Conexiones Seguras:** Verifica que todas las conexiones sean seguras y que no haya cortocircuitos, especialmente en la zona de alimentación.
 - **Alimentación:** Utiliza una fuente de alimentación adecuada que pueda proporcionar la corriente necesaria para la carga que se va a simular.
 
-### Imagen del Esquema
+### Imagen del PCB
 
 <img align="center" src="https://i.ibb.co/pQYX3jh/Sin-nombre-resized.png" alt="Esquema del Hardware" width="720">
 ---

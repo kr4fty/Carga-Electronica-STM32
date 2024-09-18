@@ -25,18 +25,18 @@
 #define MU             0.01 // Tasa de aprendizaje, Filtro Adaptativo con 0<x<1
 
 // MOSFET
-#define VGS_THRESHOLE  2650 // Tension minima de conduccion para este IRFZ44
+#define ADC_VGS_THRESHOLE  2650 // Tension minima de conduccion para este IRFZ44
 
 // PID
 //      https://pidtuner.com/
-//          Proportional Gain= 4
-//          Integral Time= 0.35
+//          Proportional Gain= 15
+//          Integral Time= 0,25
 //          Derivative Time= 0.05
-//          Integral Gain= 11.428571428571429
-//          Derivative Gain= 0.2
-#define KP                4
-#define KI         11.42857
-#define KD              0.2
+//          Integral Gain= 60
+//          Derivative Gain= 0.75
+#define KP               15
+#define KI               60
+#define KD             0.75
 #define PID_WINDOW_SIZE  10 // 10 mili segundos
 
 #endif

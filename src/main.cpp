@@ -33,7 +33,7 @@ void setup() {
   coolerFan_init();
   tone_init();
 
-  myPID.SetOutputLimits(VGS_THRESHOLE, 4095);
+  myPID.SetOutputLimits(ADC_VGS_THRESHOLE, 4095);
   myPID.SetSampleTime(PID_WINDOW_SIZE);  //sets the period, in Millisecond
   myPID.SetMode(AUTOMATIC); // Encendemos el PID
 
@@ -352,12 +352,12 @@ void loop() {
     if(myPID.Compute() && isPowerOn)
     {
       if(ampereSetpoint<1){ // si es menor a 1A solo trabaja un MOSFET
-        pwm_setDuty1(Output);
-        pwm_setDuty2(0);
+        pwm_setDuty1(0);
+        pwm_setDuty2(Output);
       }
       else{
-        pwm_setDuty1(Output);
-        pwm_setDuty2(Output2); // Valor fijo a la mitad del setpoint
+        pwm_setDuty1(Output2);
+        pwm_setDuty2(Output); // Valor fijo a la mitad del setpoint
       }
 
       // Calculo wIn

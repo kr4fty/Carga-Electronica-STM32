@@ -9,9 +9,9 @@
 /*********************** ADC en funcion del DutyCycle ************************/
 
 // Coeficientes de la regresión polinómica, para MOSFET1
-#define AM1  0.000318318466981727
-#define BM1  -1.69726098379941
-#define CM1  2804.90220497491
+#define AM1  0.000454764917333275
+#define BM1  -2.86027477489123
+#define CM1  5032.90528137101
 // MOSFET2
 #define AM2  0.000228750264512528
 #define BM2  -1.24017153035163
@@ -35,7 +35,7 @@ double dutycycleToADC(int dutyCycle, uint8_t unity=MOSFET1)
     return a * pow(dutyCycle, 2) + b * dutyCycle + c;
 }
 
-// Función para convertir ADC a Duty Cycle
+// Función para convertir valores de ADC a DutyCycle
 int adcToDutycycle(double adcValue, uint8_t unity=MOSFET1)
 {
     // Coeficientes de la ecuación cuadrática
@@ -70,16 +70,16 @@ int adcToDutycycle(double adcValue, uint8_t unity=MOSFET1)
 }
 
 /******************** Corriente en funcion del DutyCycle *********************/
-#define AA1  6.06822970192502E-6
-#define BB1  -0.0323636188175456
-#define CC1  43.2261758151534
+#define AA1  9.00739300215439E-06
+#define BB1  -0.0566835519684614
+#define CC1  88.970312496083
 // MOSFET2
 #define AA2  4.59759310013991E-06
 #define BB2  -0.0250369488847147
 #define CC2  34.1090211439599
 
 
-// Función para convertir Duty Cycle a Amperes
+// Función para convertir valores de DutyCycle a Amperes
 double dutyCycleToAmpere(int dutyCycle, uint8_t unity=MOSFET1)
 {
     double a, b, c;

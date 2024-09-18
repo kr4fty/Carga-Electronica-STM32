@@ -5,6 +5,7 @@
 #include "display.h"
 
 #define NO_TIME_LIMIT 0 // Expresa que seguira por tiempo indefinido
+#define MESSAGE_DIAPLAY_TIME 2000 // por default 2 seg
 
 typedef struct {
     char message[50];
@@ -14,12 +15,10 @@ typedef struct {
 
 Notification notification;
 
-int notificationCount = 0;
-bool newNotification=false, newMiniNotificacion=false; // True: si hay una notificacion que se muestra
-unsigned long messageDisplayTime = 2000; // por default 2 seg
+bool newNotification=false, newMiniNotificacion=false; // True: si hay una notificacion que muestrar
 
-
-void notification_add(const char *message, uint8_t priority, unsigned long duration=messageDisplayTime, uint8_t color=COLOR_BW)// Inserta una nueva notificacion con prioridad mas alta
+// Inserta una nueva notificacion con prioridad mas alta
+void notification_add(const char *message, uint8_t priority, unsigned long duration=MESSAGE_DIAPLAY_TIME, uint8_t color=COLOR_BW)
 {
     if(priority >= notification.priority) // comprueba si la nueva es de mayor prioridad, si es que hay una anterior en pantalla
     {
@@ -43,7 +42,8 @@ void notification_add(const char *message, uint8_t priority, unsigned long durat
     }
 }
 
-void notification_addMini(const char *message, uint8_t priority, unsigned long duration=messageDisplayTime, uint8_t color=COLOR_BW)// Usando las mini notificaciones puedo mostrar la temperatura
+// Usando las mini notificaciones puedo mostrar la temperatura
+void notification_addMini(const char *message, uint8_t priority, unsigned long duration=MESSAGE_DIAPLAY_TIME, uint8_t color=COLOR_BW)
 {
     if(priority >= notification.priority) // comprueba si la nueva es de mayor prioridad, si es que hay una anterior en pantalla
     {
@@ -67,7 +67,8 @@ void notification_addMini(const char *message, uint8_t priority, unsigned long d
     }
 }
 
-void notification_remove(uint8_t priority) // Elimina una notificacion con prioridad Priority
+ // Elimina una notificacion con prioridad Priority
+void notification_remove(uint8_t priority)
 {
     if(notification.priority == priority){
         notification.priority = 0;
@@ -75,7 +76,8 @@ void notification_remove(uint8_t priority) // Elimina una notificacion con prior
     }
 }
 
-void notification_removeMini(uint8_t priority) // Elimina una notificacion con prioridad Priority
+ // Elimina una mini notificacion con prioridad Priority
+void notification_removeMini(uint8_t priority)
 {
     if(notification.priority == priority){
         notification.priority = 0;
@@ -83,6 +85,7 @@ void notification_removeMini(uint8_t priority) // Elimina una notificacion con p
     }
 }
 
+// Devuelve true si la notificacion ya expiro
 bool notification_hasExpired()
  {
     if(millis()>notification.timestamp && notification.timestamp>NO_TIME_LIMIT){

@@ -9,7 +9,6 @@
                                         
 
 Adafruit_PCD8544 lcd = Adafruit_PCD8544(LCD_SCLK_PIN, LCD_DIN_PIN, LCD_DC_PIN, LCD_CS_PIN, LCD_RST_PIN);
-#define LED LED_BUILTIN
 #define DISPLAY_UPDATE_WINDOW 200 // Actualizo cada 200 mili segundos
 
 bool updateDisplay = false;

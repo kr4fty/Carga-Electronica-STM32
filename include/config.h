@@ -34,6 +34,9 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
+// LED BUILTIN
+#define LED         LED_BUILTIN // PC13
+
 // LCD
 #define LCD_SCLK_PIN        PB9
 #define LCD_DIN_PIN         PB8
