@@ -12,7 +12,7 @@ Este proyecto está basado en un microcontrolador STM32F103, el cual controla la
 
 Dado que cada transistor MOSFET presenta un voltaje umbral de puerta a fuente (Vgs Threshold) único, independientemente del fabricante o del código de identificación, es imperativo llevar a cabo mediciones específicas para determinar este voltaje umbral, así como la relación entre el ciclo de trabajo (Duty Cycle) y la corriente.
 
-Para ello, se empleará el proyecto Data Logger con el fin de registrar estos parámetros. Posteriormente, los valores obtenidos se integrarán en este proyecto para facilitar el control adecuado de nuestra carga electrónica.
+Para ello, se empleará el proyecto [Data Logger](https://github.com/kr4fty/DataLogger_STM32) con el fin de registrar estos parámetros. Posteriormente, los valores obtenidos se integrarán en este proyecto para facilitar el control adecuado de nuestra carga electrónica.
 
 ## Materiales
 
@@ -55,12 +55,12 @@ Presione el botón para que la carga electrónica se inicie. Presione nuevamente
 - **Visualización de Datos:**
 
 Durante el funcionamiento, se mostrarán:
-  - Tensión actual de la bateria/fuente
-  - Corriente actual que se esta consumiendo
-  - Amperes-hora consumidos
-  - Watts-hora consumidos
-  - Tiempo que la carga esta en funcionamiento
-  - Temperatura de los mosfet
+- Tensión actual de la bateria/fuente
+- Corriente actual que se esta consumiendo
+- Amperes-hora consumidos
+- Watts-hora consumidos
+- Tiempo que la carga esta en funcionamiento
+- Temperatura de los mosfet
 
 ### Indicaciones y Alarmas
 
