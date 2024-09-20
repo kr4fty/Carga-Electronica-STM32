@@ -1,20 +1,27 @@
 # CARGA ELECTRÓNICA FANTASMA
 
-La carga electrónica fantasma es un dispositivo diseñado para simular una carga eléctrica, utilizado principalmente para pruebas y mediciones. Este proyecto está basado en un microcontrolador STM32F103 y controla un MOSFET para regular la corriente.
+La carga electrónica fantasma es un dispositivo diseñado para simular una carga eléctrica, utilizado principalmente para pruebas y mediciones. 
+
+Este proyecto está basado en un microcontrolador STM32F103, el cual controla la Vgs del MOSFET para regular la corriente.
 
 **Estado del proyecto:** Funcional, pero aún en proceso de creación.
 
 ----------------- **BAJO SU RESPONSABILIDAD** ----------------------
 
+## Preparación Previa
+Dado que cada trasistor mosfet tiene un Vgs Threshold unico sin importar el fabricante o igualdad de codigo, se deberá siempre realizar estas mediciones y obtener la tension de Threshold, como asi tambien la relación del Duty con la Corriente.
+
+Para tal, se utilizara el proyecto Data Logger para obtener estos valores. Luego poder volcarlos en este proyecto y asi poder realizar el correcto control.
+
 ## Materiales
 
-- **Microcontrolador:** BLUE PILL (STM32F103)
+- **Placa:** BLUE PILL (STM32F103)
 - **Encoder con botón**
 - **Pantalla LCD:** Nokia 5110
 - **Buzzer**
 - **Sensor de temperatura:** LM35
-- **Ventilador:** Cooler Fan
-- **Transistor MOSFET:** IRFZ44
+- **Cooler Fan**
+- **Transistor/s MOSFET:** IRFZ44
 - **Sensor de corriente:** ACS712-05B
 
 ## Principio de Funcionamiento
