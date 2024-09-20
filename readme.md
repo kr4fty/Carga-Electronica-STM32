@@ -9,9 +9,10 @@ Este proyecto está basado en un microcontrolador STM32F103, el cual controla la
 ----------------- **BAJO SU RESPONSABILIDAD** ----------------------
 
 ## Preparación Previa
-Dado que cada trasistor mosfet tiene un Vgs Threshold unico sin importar el fabricante o igualdad de codigo, se deberá siempre realizar estas mediciones y obtener la tension de Threshold, como asi tambien la relación del Duty con la Corriente.
 
-Para tal, se utilizara el proyecto Data Logger para obtener estos valores. Luego poder volcarlos en este proyecto y asi poder realizar el correcto control.
+Dado que cada transistor MOSFET presenta un voltaje umbral de puerta a fuente (Vgs Threshold) único, independientemente del fabricante o del código de identificación, es imperativo llevar a cabo mediciones específicas para determinar este voltaje umbral, así como la relación entre el ciclo de trabajo (Duty Cycle) y la corriente.
+
+Para ello, se empleará el proyecto Data Logger con el fin de registrar estos parámetros. Posteriormente, los valores obtenidos se integrarán en este proyecto para facilitar el control adecuado de nuestra carga electrónica.
 
 ## Materiales
 
@@ -37,24 +38,41 @@ Debido a la inestabilidad de la potencia con respecto a la temperatura de los mo
 - **Tensión de umbral (Vgs threshold):** Es el voltaje mínimo que debe aplicarse entre la puerta y la fuente para que el MOSFET comience a conducir corriente entre el drenador y la fuente.
 - **Disipación de potencia:** Operar en la zona de saturación genera una significativa disipación de potencia en el MOSFET. Por lo tanto, es necesario implementar un sistema de disipación forzada para evitar el sobrecalentamiento.
 
-## Modo de Uso e Interfaz
+## Interfaz
 
-1. **Encendido:** Al encender el dispositivo, se mostrará la tensión de entrada y la corriente deseada para la prueba, con la carga inicialmente apagada.
-2. **Ajuste de Corriente:** Gire la perilla para seleccionar una corriente mayor o menor a la configurada por defecto.
-3. **Inicio del Proceso:** Presione el botón para que la carga electrónica se inicie. Presione nuevamente para interrumpir o pausar el proceso.
-4. **Visualización de Datos:** Durante el funcionamiento, se mostrarán:
-   - Tensión actual de la bateria/fuente
-   - Corriente actual que se esta consumiendo
-   - Amperes-hora consumidos
-   - Watts-hora consumidos
-   - Tiempo que la carga esta en funcionamiento
-   - Temperatura de los mosfet
+- **Encendido:** 
+
+Al encender el dispositivo, se mostrará la tensión de entrada y la corriente deseada para la prueba, con la carga inicialmente apagada.
+
+- **Ajuste de Corriente:** 
+
+Gire la perilla para seleccionar una corriente mayor o menor a la configurada por defecto.
+
+- **Inicio del Proceso:** 
+
+Presione el botón para que la carga electrónica se inicie. Presione nuevamente para interrumpir o pausar el proceso.
+
+- **Visualización de Datos:**
+
+Durante el funcionamiento, se mostrarán:
+  - Tensión actual de la bateria/fuente
+  - Corriente actual que se esta consumiendo
+  - Amperes-hora consumidos
+  - Watts-hora consumidos
+  - Tiempo que la carga esta en funcionamiento
+  - Temperatura de los mosfet
 
 ### Indicaciones y Alarmas
 
-- **Verificación de Conexión:** Al iniciar, se verifica la conexión de la batería/fuente. Si no hay conexión, el dispositivo permanecerá en reposo hasta que se detecte una fuente.
-- **Detención por Ausencia de Tensión:** Si luego de iniciado la carga electronica, se detectara la ausencia de tensión, el proceso se detiene inmediatamente. Se activa una alarma sonora y todos los procesos se pausarán, quedando en espera de reconexión.
-- **Alarma de Temperatura:** Se monitorea la temperatura de los MOSFET. Si se supera la temperatura crítica, todos los procesos se detendrán de inmediato.
+- **Comprobación de la conexión de voltaje en la entrada:** 
+
+Al iniciar, se verifica la conexión de la batería/fuente. Si no hay conexión, el dispositivo permanecerá en reposo hasta que se detecte una fuente.
+- **Detención por Ausencia de Tensión:**
+
+Si luego de iniciado la carga electronica, se detectara la ausencia de tensión, el proceso se detiene inmediatamente. Se activa una alarma sonora y todos los procesos se pausarán, quedando en espera de reconexión.
+- **Alarma de Temperatura:**
+
+Se monitorea la temperatura de los MOSFET. Si se supera la temperatura crítica, todos los procesos se detendrán de inmediato.
 
 ## Hardware
 
