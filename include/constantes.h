@@ -19,8 +19,8 @@
 #define VD              0.7
 #define GAIN_I (R4/(R3+R4))
 #define SENSIBILITY   0.185 // Modelo ACS712 5A
-#define IADCOFFSET    541.8 //541.61 // ADC medido en vacio
-#define ADCRAW_1A     598.7 // ADC medido con una corriente de 1A
+#define IADCOFFSET    514.2 // ADC medido en vacio
+#define ADCRAW_1A     555.3 // ADC medido con una corriente de 1A
 #define C_1A            1.0 // 1A
                          
 #define MU            0.001 // Tasa de aprendizaje, Filtro Adaptativo con 0<x<1

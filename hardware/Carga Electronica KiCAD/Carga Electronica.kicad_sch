@@ -4675,7 +4675,7 @@
 		(uuid "007ddf07-1126-4417-8bca-e0ef6ebbab8f")
 	)
 	(junction
-		(at 55.88 116.84)
+		(at 53.34 116.84)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "042e2f52-0499-42a6-a6cf-e47c5904858c")
@@ -4741,7 +4741,7 @@
 		(uuid "99871dd6-3851-4be6-9cbe-a6633827269c")
 	)
 	(junction
-		(at 40.64 100.33)
+		(at 38.1 100.33)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "b5139cab-1f8e-475f-9e86-e8a8ef43b008")
@@ -4777,7 +4777,7 @@
 		(uuid "d0512579-c206-44df-b0c6-dd22131ca8ae")
 	)
 	(junction
-		(at 76.2 102.87)
+		(at 73.66 102.87)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "fa48bd02-0d6f-497e-9218-205186e1efcc")
@@ -4894,7 +4894,7 @@
 	)
 	(wire
 		(pts
-			(xy 40.64 100.33) (xy 44.45 100.33)
+			(xy 38.1 100.33) (xy 41.91 100.33)
 		)
 		(stroke
 			(width 0)
@@ -4934,7 +4934,7 @@
 	)
 	(wire
 		(pts
-			(xy 60.96 88.9) (xy 76.2 88.9)
+			(xy 58.42 88.9) (xy 73.66 88.9)
 		)
 		(stroke
 			(width 0)
@@ -4984,7 +4984,7 @@
 	)
 	(wire
 		(pts
-			(xy 40.64 88.9) (xy 40.64 100.33)
+			(xy 38.1 88.9) (xy 38.1 100.33)
 		)
 		(stroke
 			(width 0)
@@ -5034,7 +5034,7 @@
 	)
 	(wire
 		(pts
-			(xy 68.58 116.84) (xy 76.2 116.84)
+			(xy 66.04 116.84) (xy 73.66 116.84)
 		)
 		(stroke
 			(width 0)
@@ -5134,7 +5134,7 @@
 	)
 	(wire
 		(pts
-			(xy 55.88 116.84) (xy 55.88 118.11)
+			(xy 53.34 116.84) (xy 53.34 118.11)
 		)
 		(stroke
 			(width 0)
@@ -5304,7 +5304,7 @@
 	)
 	(wire
 		(pts
-			(xy 58.42 105.41) (xy 55.88 105.41)
+			(xy 55.88 105.41) (xy 53.34 105.41)
 		)
 		(stroke
 			(width 0)
@@ -5314,7 +5314,7 @@
 	)
 	(wire
 		(pts
-			(xy 55.88 88.9) (xy 40.64 88.9)
+			(xy 53.34 88.9) (xy 38.1 88.9)
 		)
 		(stroke
 			(width 0)
@@ -5424,7 +5424,7 @@
 	)
 	(wire
 		(pts
-			(xy 76.2 102.87) (xy 73.66 102.87)
+			(xy 73.66 102.87) (xy 71.12 102.87)
 		)
 		(stroke
 			(width 0)
@@ -5504,7 +5504,7 @@
 	)
 	(wire
 		(pts
-			(xy 49.53 100.33) (xy 58.42 100.33)
+			(xy 46.99 100.33) (xy 55.88 100.33)
 		)
 		(stroke
 			(width 0)
@@ -5584,7 +5584,7 @@
 	)
 	(wire
 		(pts
-			(xy 40.64 107.95) (xy 40.64 110.49)
+			(xy 38.1 107.95) (xy 38.1 110.49)
 		)
 		(stroke
 			(width 0)
@@ -5724,7 +5724,7 @@
 	)
 	(wire
 		(pts
-			(xy 40.64 100.33) (xy 40.64 102.87)
+			(xy 38.1 100.33) (xy 38.1 102.87)
 		)
 		(stroke
 			(width 0)
@@ -5744,7 +5744,7 @@
 	)
 	(wire
 		(pts
-			(xy 76.2 116.84) (xy 76.2 102.87)
+			(xy 73.66 116.84) (xy 73.66 102.87)
 		)
 		(stroke
 			(width 0)
@@ -6104,7 +6104,7 @@
 	)
 	(wire
 		(pts
-			(xy 55.88 116.84) (xy 63.5 116.84)
+			(xy 53.34 116.84) (xy 60.96 116.84)
 		)
 		(stroke
 			(width 0)
@@ -6114,7 +6114,7 @@
 	)
 	(wire
 		(pts
-			(xy 55.88 123.19) (xy 55.88 124.46)
+			(xy 53.34 123.19) (xy 53.34 124.46)
 		)
 		(stroke
 			(width 0)
@@ -6134,7 +6134,7 @@
 	)
 	(wire
 		(pts
-			(xy 26.67 100.33) (xy 31.75 100.33)
+			(xy 24.13 100.33) (xy 29.21 100.33)
 		)
 		(stroke
 			(width 0)
@@ -6154,7 +6154,7 @@
 	)
 	(wire
 		(pts
-			(xy 36.83 100.33) (xy 40.64 100.33)
+			(xy 34.29 100.33) (xy 38.1 100.33)
 		)
 		(stroke
 			(width 0)
@@ -6394,7 +6394,7 @@
 	)
 	(wire
 		(pts
-			(xy 76.2 88.9) (xy 76.2 102.87)
+			(xy 73.66 88.9) (xy 73.66 102.87)
 		)
 		(stroke
 			(width 0)
@@ -6444,7 +6444,7 @@
 	)
 	(wire
 		(pts
-			(xy 55.88 105.41) (xy 55.88 116.84)
+			(xy 53.34 105.41) (xy 53.34 116.84)
 		)
 		(stroke
 			(width 0)
@@ -6464,7 +6464,7 @@
 	)
 	(wire
 		(pts
-			(xy 76.2 102.87) (xy 82.55 102.87)
+			(xy 73.66 102.87) (xy 80.01 102.87)
 		)
 		(stroke
 			(width 0)
@@ -6602,9 +6602,28 @@
 		)
 		(uuid "ffeef0f1-4353-4b5d-996b-76341a2613dd")
 	)
+	(text_box "Use R12=20K y R11=10K con D1 reemplazado por R=0"
+		(exclude_from_sim no)
+		(at 114.3 20.32 0)
+		(size 24.13 8.89)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill
+			(type none)
+		)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "04725b1a-0093-4c3b-8cd5-b33fbd4615ff")
+	)
 	(text_box "NOTA: dependiendo del  Vgs-threshold del MOSFET utilizado, se requerira o no amplificacion de la ganacia del filtro.\nNo fue Necesario para el IRFZ44 => R9 y R17 = 0 , R8 y R16 = inf"
 		(exclude_from_sim no)
-		(at 77.47 106.68 0)
+		(at 74.93 106.68 0)
 		(size 33.02 20.32)
 		(stroke
 			(width 0)
@@ -6732,7 +6751,7 @@
 	)
 	(text "G=1.51"
 		(exclude_from_sim no)
-		(at 50.8 117.602 0)
+		(at 48.26 117.602 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -6755,7 +6774,7 @@
 	)
 	(text "5V"
 		(exclude_from_sim no)
-		(at 80.01 101.854 0)
+		(at 77.47 101.854 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -6777,7 +6796,7 @@
 	)
 	(text "3.3V"
 		(exclude_from_sim no)
-		(at 29.21 99.06 0)
+		(at 26.67 99.06 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -6869,7 +6888,7 @@
 	)
 	(global_label "PWM2"
 		(shape input)
-		(at 26.67 100.33 180)
+		(at 24.13 100.33 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6879,7 +6898,7 @@
 		)
 		(uuid "018da131-afd1-4c36-8fad-b3860dc0ff81")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 18.3025 100.33 0)
+			(at 15.7625 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7089,7 +7108,7 @@
 	)
 	(global_label "Mosfet_control2"
 		(shape output)
-		(at 82.55 102.87 0)
+		(at 80.01 102.87 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -7099,7 +7118,7 @@
 		)
 		(uuid "6b342568-dbfb-4e9f-9c42-4a9c8ed2ed58")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 100.5935 102.87 0)
+			(at 98.0535 102.87 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8061,7 +8080,7 @@
 	)
 	(symbol
 		(lib_id "Device:R_Small_US")
-		(at 66.04 116.84 90)
+		(at 63.5 116.84 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8069,7 +8088,7 @@
 		(dnp no)
 		(uuid "0a52aae8-c917-4377-aad4-5a613dea60e1")
 		(property "Reference" "R17"
-			(at 69.088 115.824 90)
+			(at 66.548 115.824 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8077,7 +8096,7 @@
 			)
 		)
 		(property "Value" "51K"
-			(at 66.04 119.126 90)
+			(at 63.5 119.126 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8085,7 +8104,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
-			(at 66.04 116.84 0)
+			(at 63.5 116.84 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8094,7 +8113,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 66.04 116.84 0)
+			(at 63.5 116.84 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8103,7 +8122,7 @@
 			)
 		)
 		(property "Description" "Resistor, small US symbol"
-			(at 66.04 116.84 0)
+			(at 63.5 116.84 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8128,7 +8147,7 @@
 	)
 	(symbol
 		(lib_id "power:GNDD")
-		(at 40.64 110.49 0)
+		(at 38.1 110.49 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8137,7 +8156,7 @@
 		(fields_autoplaced yes)
 		(uuid "0e17e244-8754-4876-bd06-844767c5febb")
 		(property "Reference" "#PWR037"
-			(at 40.64 116.84 0)
+			(at 38.1 116.84 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8146,7 +8165,7 @@
 			)
 		)
 		(property "Value" "GNDD"
-			(at 40.64 114.3 0)
+			(at 38.1 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8155,7 +8174,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 40.64 110.49 0)
+			(at 38.1 110.49 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8164,7 +8183,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 40.64 110.49 0)
+			(at 38.1 110.49 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8173,7 +8192,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GNDD\" , digital ground"
-			(at 40.64 110.49 0)
+			(at 38.1 110.49 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8398,7 +8417,7 @@
 	)
 	(symbol
 		(lib_id "Device:C_Small")
-		(at 40.64 105.41 0)
+		(at 38.1 105.41 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8407,7 +8426,7 @@
 		(fields_autoplaced yes)
 		(uuid "15be7279-7b15-4e28-a794-b2d59c8eb2be")
 		(property "Reference" "C9"
-			(at 43.18 104.1462 0)
+			(at 40.64 104.1462 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8416,7 +8435,7 @@
 			)
 		)
 		(property "Value" "820n"
-			(at 43.18 106.6862 0)
+			(at 40.64 106.6862 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8425,7 +8444,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder"
-			(at 40.64 105.41 0)
+			(at 38.1 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8434,7 +8453,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 40.64 105.41 0)
+			(at 38.1 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8443,7 +8462,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor, small symbol"
-			(at 40.64 105.41 0)
+			(at 38.1 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8535,7 +8554,7 @@
 	)
 	(symbol
 		(lib_id "power:GNDD")
-		(at 55.88 124.46 0)
+		(at 53.34 124.46 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8544,7 +8563,7 @@
 		(fields_autoplaced yes)
 		(uuid "19f17f05-d845-4853-81a4-1b81d254d29e")
 		(property "Reference" "#PWR038"
-			(at 55.88 130.81 0)
+			(at 53.34 130.81 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8553,7 +8572,7 @@
 			)
 		)
 		(property "Value" "GNDD"
-			(at 55.88 128.27 0)
+			(at 53.34 128.27 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8562,7 +8581,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 55.88 124.46 0)
+			(at 53.34 124.46 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8571,7 +8590,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 55.88 124.46 0)
+			(at 53.34 124.46 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8580,7 +8599,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GNDD\" , digital ground"
-			(at 55.88 124.46 0)
+			(at 53.34 124.46 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9070,7 +9089,7 @@
 	)
 	(symbol
 		(lib_id "Amplifier_Operational:LM324")
-		(at 66.04 102.87 0)
+		(at 63.5 102.87 0)
 		(unit 2)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -9079,7 +9098,7 @@
 		(fields_autoplaced yes)
 		(uuid "2d30b54e-7574-476f-bda2-4fe36634e35e")
 		(property "Reference" "U2"
-			(at 66.04 92.71 0)
+			(at 63.5 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9087,7 +9106,7 @@
 			)
 		)
 		(property "Value" "LM324"
-			(at 66.04 95.25 0)
+			(at 63.5 95.25 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9095,7 +9114,7 @@
 			)
 		)
 		(property "Footprint" "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm"
-			(at 64.77 100.33 0)
+			(at 62.23 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9104,7 +9123,7 @@
 			)
 		)
 		(property "Datasheet" "http://www.ti.com/lit/ds/symlink/lm2902-n.pdf"
-			(at 67.31 97.79 0)
+			(at 64.77 97.79 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9113,7 +9132,7 @@
 			)
 		)
 		(property "Description" "Low-Power, Quad-Operational Amplifiers, DIP-14/SOIC-14/SSOP-14"
-			(at 66.04 102.87 0)
+			(at 63.5 102.87 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9852,7 +9871,7 @@
 	)
 	(symbol
 		(lib_id "Device:R_Small_US")
-		(at 55.88 120.65 0)
+		(at 53.34 120.65 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -9861,7 +9880,7 @@
 		(fields_autoplaced yes)
 		(uuid "4fa50a88-8227-4a51-a6b4-bc72c05a6838")
 		(property "Reference" "R16"
-			(at 58.42 119.3799 0)
+			(at 55.88 119.3799 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9870,7 +9889,7 @@
 			)
 		)
 		(property "Value" "100K"
-			(at 58.42 121.9199 0)
+			(at 55.88 121.9199 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9879,7 +9898,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder"
-			(at 55.88 120.65 0)
+			(at 53.34 120.65 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9888,7 +9907,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 55.88 120.65 0)
+			(at 53.34 120.65 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9897,7 +9916,7 @@
 			)
 		)
 		(property "Description" "Resistor, small US symbol"
-			(at 55.88 120.65 0)
+			(at 53.34 120.65 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10144,7 +10163,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "20K"
+		(property "Value" "1K"
 			(at 196.85 41.9099 0)
 			(effects
 				(font
@@ -10732,7 +10751,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100K"
+		(property "Value" "5.1K"
 			(at 196.85 29.2099 0)
 			(effects
 				(font
@@ -13017,7 +13036,7 @@
 	)
 	(symbol
 		(lib_id "Device:R_Small_US")
-		(at 46.99 100.33 90)
+		(at 44.45 100.33 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13026,7 +13045,7 @@
 		(fields_autoplaced yes)
 		(uuid "cd0889d2-fdc0-4672-84b8-5dde9ce624a5")
 		(property "Reference" "R15"
-			(at 46.99 93.98 90)
+			(at 44.45 93.98 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13034,7 +13053,7 @@
 			)
 		)
 		(property "Value" "100K"
-			(at 46.99 96.52 90)
+			(at 44.45 96.52 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13042,7 +13061,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
-			(at 46.99 100.33 0)
+			(at 44.45 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13051,7 +13070,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 46.99 100.33 0)
+			(at 44.45 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13060,7 +13079,7 @@
 			)
 		)
 		(property "Description" "Resistor, small US symbol"
-			(at 46.99 100.33 0)
+			(at 44.45 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13702,7 +13721,7 @@
 	)
 	(symbol
 		(lib_id "Device:C_Small")
-		(at 58.42 88.9 90)
+		(at 55.88 88.9 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13710,7 +13729,7 @@
 		(dnp no)
 		(uuid "eb7ba463-7cdc-4713-806b-0b1677141b28")
 		(property "Reference" "C10"
-			(at 58.4263 82.55 90)
+			(at 56.388 85.598 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13718,7 +13737,7 @@
 			)
 		)
 		(property "Value" "1000n"
-			(at 58.4263 85.09 90)
+			(at 60.452 87.63 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13726,7 +13745,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder"
-			(at 58.42 88.9 0)
+			(at 55.88 88.9 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13735,7 +13754,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 58.42 88.9 0)
+			(at 55.88 88.9 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13744,7 +13763,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor, small symbol"
-			(at 58.42 88.9 0)
+			(at 55.88 88.9 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14045,7 +14064,7 @@
 	)
 	(symbol
 		(lib_id "Device:R_Small_US")
-		(at 34.29 100.33 90)
+		(at 31.75 100.33 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -14054,7 +14073,7 @@
 		(fields_autoplaced yes)
 		(uuid "f9c6ded0-4480-44df-b17c-7a78f691dabf")
 		(property "Reference" "R14"
-			(at 34.29 93.98 90)
+			(at 31.75 93.98 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14062,7 +14081,7 @@
 			)
 		)
 		(property "Value" "100K"
-			(at 34.29 96.52 90)
+			(at 31.75 96.52 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14070,7 +14089,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
-			(at 34.29 100.33 0)
+			(at 31.75 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14079,7 +14098,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 34.29 100.33 0)
+			(at 31.75 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14088,7 +14107,7 @@
 			)
 		)
 		(property "Description" "Resistor, small US symbol"
-			(at 34.29 100.33 0)
+			(at 31.75 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
