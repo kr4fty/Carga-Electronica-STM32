@@ -84,9 +84,26 @@ void lcd_printCalibration()
 {
     lcd.clearDisplay();
     lcd.setTextSize(1);
+    lcd.setTextColor(WHITE, BLACK);
     lcd.print("CALIBRACION");
+    lcd.setTextColor(BLACK, WHITE);
     lcd.setCursor(0*6, 2*8);
-    lcd.print("Coloque una carga de 1A y presione para finalizar");
+    lcd.print("Gire hasta obtener una I=1A Presione para terminar");
+    lcd.display();
+}
+
+void lcd_printIraw(float iRaw, uint8_t color=COLOR_BW)
+{
+    floatTostr(iRaw, 5, 2);
+
+    lcd.setTextSize(1);
+    lcd.setCursor(9*6,5*8);
+    if(color == COLOR_WB){
+        lcd.setTextColor(WHITE, BLACK);
+    }
+    lcd.print(buff);
+    lcd.setTextColor(BLACK, WHITE);
+
     lcd.display();
 }
 

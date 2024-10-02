@@ -52,14 +52,40 @@ void setup() {
   if(isButtonDown())
   {
     lcd_printCalibration();
-    delay(2000);
+
+    iBattRawOld = analogRead(IBATT_SENSE_PIN);
+    for(int i=0; i<4000; i++){
+      iAdcOffset = analogRead(IBATT_SENSE_PIN);
+      iAdcOffset = iBattRawOld + MU * (iAdcOffset - iBattRawOld);
+      iBattRawOld = iAdcOffset;
+      if(!(i%50)){
+        lcd_printIraw(iAdcOffset);
+      }
+      delay(1);
+    }
+    encoder.setBoundaries(0, 4095, false);
+    encoder.setEncoderValue(ampereToDutycycle(C_1A));
+    dutyCycle = encoder.readEncoder();
+    pwm_setDuty1(dutyCycle);
+    pwm_setDuty2(0);
+
     while(!isButtonClicked()){
+      if (encoder.encoderChanged()){
+        dutyCycle = encoder.readEncoder();
+                
+        pwm_setDuty1(dutyCycle);
+      }
+
       AdcRaw_1A = analogRead(IBATT_SENSE_PIN);
       AdcRaw_1A = iBattRawOld + MU * (AdcRaw_1A - iBattRawOld);
       iBattRawOld = AdcRaw_1A;
-      delay(5);
+      lcd_printIraw(AdcRaw_1A, COLOR_WB);
+      delay(1);
     }
-    AdcRaw_1A -= 512;
+    pwm_setDuty1(0);
+    encoder.setBoundaries(0, 1000, false);
+    shortClick = false;
+    longClick = false;
   }
   else{
     iAdcOffset = IADCOFFSET;
@@ -113,7 +139,7 @@ void loop() {
   // Filtro de Wiener, Adaptativo
   iBattRaw = iBattRawOld + MU * (iBattRaw - iBattRawOld);
   // Calculo iIn
-  iIn = (iBattRaw - iAdcOffset) / (ADCRAW_1A - iAdcOffset);
+  iIn = (iBattRaw - iAdcOffset) / (AdcRaw_1A - iAdcOffset);
 
   if(iBattRaw!=iBattRawOld){ // si cambio I entonces actualizo valor en el LCD
     if(isPowerOn){

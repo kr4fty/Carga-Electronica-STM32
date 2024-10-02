@@ -62,6 +62,7 @@ bool isButtonClicked()
             shortClick = true;
         }
         wasButtonDown = false;
+        clicked = true;
     }
 
     return clicked;
