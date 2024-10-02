@@ -21,9 +21,9 @@ void encoder_init()
     encoder.begin();
     encoder.setup(readEncoderISR);
     bool circleValues = false;
-    encoder.setBoundaries(ADC_VGS_THRESHOLE, 4095, circleValues); //minValue, maxValue, circleValues true|false (when max go to min and vice versa)
+    encoder.setBoundaries(0, 1000, circleValues); //minValue, maxValue, circleValues true|false (when max go to min and vice versa)
     //encoder.disableAcceleration(); //acceleration is now enabled by default - disable if you dont need it
-    encoder.setAcceleration(250); //or set the value - larger number = more accelearation; 0 or 1 means disabled acceleration
+    encoder.setAcceleration(150); //or set the value - larger number = more accelearation; 0 or 1 means disabled acceleration
     encoder.setEncoderValue(0);
 }
 

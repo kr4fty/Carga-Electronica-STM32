@@ -133,7 +133,7 @@ void lcd_printNewSetpoint(float value)
 
 void lcd_printTinyNewSetpoint(float value)
 {
-    floatTostr(value, 6, 3);
+    floatTostr(value, 6, 2);
     //dtostrf(value, 6, 3, buff);
 
     lcd.setTextSize(2);

@@ -66,6 +66,8 @@
 
 // PWM
 #define PWM_PIN             PB1 // Canal 4 de TIM3
+#define PWM2_PIN            PB0 // Canal 3 de TIM3
+
 //#define FREQUENCY         10000 // 10KHz
 #define PWM_INITIAL_DUTY      0 // 0%
 #define PWM_RESOLUTION     4095 // Resolución de 12 bits

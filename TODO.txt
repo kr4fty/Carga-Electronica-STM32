@@ -126,3 +126,10 @@ Alarmas por caida en la fuente a testear
     Indicar si la fuente cae demasiado, por debajo de un 15% por ejemplo, en su
     tension de salida. Esto para indicar la calidad y si cumple con los 
     parametros de salida indicadas.
+
+dutyCycle a Amperes
+-------------------
+    Cuando se setea el nuevo setpoint por medio del encoder, la conversion 
+    deveria ser en funcion del ACS712?????
+
+    selecciono corriente -> convierto a ADC -> convierto a dutyCycle

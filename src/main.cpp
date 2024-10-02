@@ -15,15 +15,13 @@ int dutyCycle = 0;
 
 double Setpoint, Input, Output; // Parametro PID
 //Specify the links and initial tuning parameters
-double Kp=KP, Ki=KI, Kd=KD;
-PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+PID myPID(&Input, &Output, &Setpoint, KP_CNSTIVE, KI_CNSTIVE, KD_CNSTIVE, DIRECT);
 unsigned long windowStartTime;
 
 double vBattRawOld, iBattRawOld;
-uint16_t iAdcOffset;  // Lectura del ADC medida en vacio (0 A)
-float AdcRaw_1A;      // Lectura del ADC midiendo 1A
 
 void setup() {
+  
   pinMode(LED, OUTPUT);
   digitalWrite(LED, HIGH);
   
@@ -61,9 +59,8 @@ void setup() {
 
   windowStartTime = millis();
 
-  encoder.setEncoderValue(adcToDutycycle(ADCRAW_1A)); // Seteo por defecto a 1A
-  dutyCycle = encoder.readEncoder();
-  Setpoint = dutycycleToADC(dutyCycle);
+  encoder.setEncoderValue(C_1A*100); // Seteo por defecto a 1A
+  Setpoint = 0;
 
   tone(BUZZER_PIN, 434, 100);
   lcd_printBaseFrame();
@@ -85,7 +82,7 @@ bool isTheSetpointUpdated; // Para tener prioridad al mostrar nuevo setpoint
 bool printTinySetpoint=true;
 unsigned long timeToPrintNewSetpoint, windowNewSetpoint=1000;
 double Output2; // Contiene el duty del segundo MOSFET. Varia con el setpoint
-float ampereSetpoint; // Contiene el Setpoint expresado en amperes
+float ampereSetpoint=C_1A; // Contiene el valor del Setpoint expresado en amperes
 unsigned long lastTimeButtonDown = 0;
 bool wasButtonDown = false;
 bool longClick; // True: pulsacion larga
@@ -102,7 +99,8 @@ void loop() {
   // Filtro de Wiener, Adaptativo
   vBattRaw = vBattRawOld + MU * (vBattRaw - vBattRawOld);  
   // Calulo de vIn
-  vIn = vBattRaw/ADCRAW_1V;
+  //vIn = vBattRaw/ADCRAW_1V; // falta de linealidad
+  vIn = 0.01935*vBattRaw + 0.25; // Funcion obtenida por regresion lineal
 
   if(vBattRaw!=vBattRawOld){// si cambio V entonces actualizo valor en el LCD
     wasVUpdated = true;
@@ -139,7 +137,7 @@ void loop() {
 
       batteryConnected = true;
       if(isPowerOn){
-        Setpoint = dutycycleToADC(dutyCycle);
+        Setpoint = ampereToAdc(ampereSetpoint);
         //myPID.SetTunings(Kp, Ki, Kd);
         //myPID.SetMode(AUTOMATIC);  // volvemos a encender el PID
       }
@@ -175,7 +173,7 @@ void loop() {
   if (encoder.encoderChanged())
   {
     dutyCycle = encoder.readEncoder();
-    ampereSetpoint = dutyCycleToAmpere(dutyCycle);
+    ampereSetpoint = dutyCycle/100.0;
     Output2 = ampereToDutycycle(ampereSetpoint*.5, MOSFET2);
     if(isPowerOn){ // Si esta encendido lo musetro en una ventana temporal
       lcd_printNewSetpoint(ampereSetpoint);
@@ -185,7 +183,9 @@ void loop() {
       printTinySetpoint = true;
     }
 
-    Setpoint = dutycycleToADC(dutyCycle);
+    if(isPowerOn){
+      Setpoint = ampereToAdc(ampereSetpoint);
+    }
     
     tone(BUZZER_PIN, 600, 10);
 
@@ -257,11 +257,16 @@ void loop() {
       delay(20);
       tone(BUZZER_PIN, 5000, 50);
       
-      Setpoint = dutycycleToADC(dutyCycle);
-      //myPID.SetTunings(Kp, Ki, Kd);
+      Setpoint =ampereToAdc(ampereSetpoint);
+      if(ampereSetpoint<1){
+        myPID.SetTunings(KP_AGG, KI_AGG, KD_AGG);
+      }
+      else{
+        myPID.SetTunings(KP_CNSTIVE, KI_CNSTIVE, KD_CNSTIVE);
+      }
       //myPID.SetMode(AUTOMATIC); // Encendemos el PID
 
-      coolerFan_powerOn();      
+      coolerFan_powerOn();
     }
     // APAGADO
     else{
@@ -352,12 +357,12 @@ void loop() {
     if(myPID.Compute() && isPowerOn)
     {
       if(ampereSetpoint<1){ // si es menor a 1A solo trabaja un MOSFET
-        pwm_setDuty1(0);
-        pwm_setDuty2(Output);
+        pwm_setDuty1(Output);
+        pwm_setDuty2(0);
       }
       else{
-        pwm_setDuty1(Output2);
-        pwm_setDuty2(Output); // Valor fijo a la mitad del setpoint
+        pwm_setDuty1(Output);
+        pwm_setDuty2(Output2); // Valor fijo a la mitad del setpoint
       }
 
       // Calculo wIn
@@ -417,7 +422,12 @@ void loop() {
       lcd_printBaseFrame();
       wasXhUpdated = true;
       wasVUpdated = true;
-      wasIUpdated = true;
+      if(isPowerOn){
+        wasIUpdated = true;
+      }
+      else{
+        printTinySetpoint = true;
+      }
       isPrintTime = true;
       wasTempUpdated = true;
     }
@@ -443,8 +453,9 @@ void loop() {
         wasIUpdated = false;
       }
     }
-    else{
-      lcd_printTinyNewSetpoint(dutyCycleToAmpere(dutyCycle));
+    else {
+      if(printTinySetpoint)
+        lcd_printTinyNewSetpoint(ampereSetpoint);
       printTinySetpoint = false;
     }
 

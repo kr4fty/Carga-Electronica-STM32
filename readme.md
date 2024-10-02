@@ -31,7 +31,7 @@ El MOSFET opera en la zona de saturación (o zona lineal), lo que permite manten
 
 La tensión Vds será controlada mediante el STM32F103 utilizando modulación por ancho de pulso (PWM) y un filtro pasa-bajos para obtener una señal de conversión digital a analógica (DAC) de 12 bits.
 
-Debido a la inestabilidad de la potencia con respecto a la temperatura de los mosfset, el lazo de control dera realido mediante un PID, el cual debera tener en cuenta el rango de temperaturas no solo para mantener la corriente constante, si no tambien para mantener a salvo al dispositivo
+Debido a la inestabilidad de la potencia con respecto a la temperatura de los mosfset, el lazo de control sera realizado mediante un PID, el cual debera tener en cuenta el rango de temperaturas no solo para mantener la corriente constante, si no tambien para mantener a salvo al dispositivo.
 
 #### Consideraciones importantes de los transistores Mosfet
 
