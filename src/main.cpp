@@ -20,8 +20,17 @@ unsigned long windowStartTime;
 
 double vBattRawOld, iBattRawOld;
 
+#ifdef DEBUG
+unsigned long nextTime, startTime;
+double    Time;
+#define WINDOW_CAPTURE  20
+#define WINDOW_10SEG 10000
+#endif
+
 void setup() {
-  
+  #ifdef DEBUG
+  Serial.begin(115200);
+  #endif
   pinMode(LED, OUTPUT);
   digitalWrite(LED, HIGH);
   
@@ -266,7 +275,12 @@ void loop() {
       }
       //myPID.SetMode(AUTOMATIC); // Encendemos el PID
 
-      coolerFan_powerOn();
+      coolerFan_powerOn();   
+      
+      #ifdef DEBUG
+      startTime = millis();
+      nextTime = startTime + WINDOW_CAPTURE;
+      #endif
     }
     // APAGADO
     else{
@@ -464,4 +478,19 @@ void loop() {
     timeToUpdateDisplay = millis()+DISPLAY_UPDATE_WINDOW;
   }  
   // FIN UPDATE DISPLAY
+
+  #ifdef DEBUG
+  /***************************************************************************/
+  /*                   Envio Datos por el puerto Serie                       */
+  /***************************************************************************/
+  if(millis()>nextTime && isPowerOn && millis()<(startTime+WINDOW_10SEG)){
+   
+    Time = (millis()-startTime);
+    // Para graficar y obtener datos utilizando serial_port_plotter
+    //sprintf(buff, "$%d %ld %d;", (int)dutyCycle, Time, (int)iBattRaw);
+    Serial.printf("$%d %ld %d;", dutyCycle, (unsigned long)Time, (int)iBattRaw);
+    nextTime = millis() + WINDOW_CAPTURE;
+  }  
+  // END Serial port
+  #endif
 }
