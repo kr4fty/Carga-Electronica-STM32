@@ -27,9 +27,44 @@ void encoder_init()
     encoder.setEncoderValue(0);
 }
 
+bool shortClick;    // True: pulsacion larga
+bool longClick;     // True: pulsacion larga
+bool wasButtonDown = false;
+//paramaters for button
+unsigned long shortPressAfterMiliseconds = 50;  //how long short press shoud be. Do not set too low to avoid bouncing (false press events).
+unsigned long longPressAfterMiliseconds = 1000; //how long čong press shoud be.
+unsigned long lastTimeButtonDown = 0;           // tiempo en el que duro la pulsacion
+
 bool isButtonDown()
 {
     return digitalRead(BUTTON_PIN) ? false : true;
+}
+
+bool isButtonClicked()
+{
+    bool clicked=false;
+    // Deteccion de pulsacion de boton
+    if (isButtonDown()&&!wasButtonDown) {
+        if (!wasButtonDown) {
+            //start measuring
+            lastTimeButtonDown = millis();
+        }
+        //else we wait since button is still down
+        wasButtonDown = true;
+    }
+    // Deteccion de pulsacion corta o larga
+    if (!isButtonDown()&&wasButtonDown) {
+        if (millis() - lastTimeButtonDown >= longPressAfterMiliseconds) {
+            longClick = true;
+            shortClick = false;
+        } else if (millis() - lastTimeButtonDown >= shortPressAfterMiliseconds) {
+            longClick = false;
+            shortClick = true;
+        }
+        wasButtonDown = false;
+    }
+
+    return clicked;
 }
 
 #endif
