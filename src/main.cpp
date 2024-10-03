@@ -102,6 +102,7 @@ void setup() {
 }
 
 bool isPowerOn = false, isPowerOnOld; // TRUE: en funcionamiento, False: no ejecutandose
+double vRaw; // Valor crudo de la tencion de entrada, sin aplicar filtro, para detectar mas rapidamente la desconexion de la bateria
 double vBattRaw, iBattRaw; // Valores Leidos en los ADC
 bool batteryConnected=true;  // True si se detecto tension de sensado de bateria
 float iIn, vIn, wIn, totalmAh, totalWh; // Valores actuales de la V, I y Wh
@@ -123,9 +124,9 @@ void loop() {
   /***************************************************************************/
   /*                    MEDION DE TENSION Y CORRIENTE                        */
   /***************************************************************************/
-  vBattRaw = analogRead(VBATT_SENSE_PIN);
+  vRaw = analogRead(VBATT_SENSE_PIN);
   // Filtro de Wiener, Adaptativo
-  vBattRaw = vBattRawOld + MU * (vBattRaw - vBattRawOld);  
+  vBattRaw = vBattRawOld + MU * (vRaw - vBattRawOld);  
   // Calulo de vIn
   //vIn = vBattRaw/ADCRAW_1V; // falta de linealidad
   vIn = 0.01935*vBattRaw + 0.25; // Funcion obtenida por regresion lineal
@@ -146,7 +147,7 @@ void loop() {
       wasIUpdated = true;
     }
     else{
-      iAdcOffset = iBattRaw; // Corriente medida, valores de ADC, a 0A
+      //iAdcOffset = iBattRaw; // Corriente medida, valores de ADC, a 0A
     }
     iBattRawOld = iBattRaw;
   }
@@ -156,19 +157,14 @@ void loop() {
   /*                 ¿SE CONECTO LA FUENTE A LA ENTRADA?                     */
   /***************************************************************************/
   // Bateria/Fuente conectada y funcionando?
-  if(vIn > VBATT_MIN){
+  if(vRaw > VBATT_MIN){
     // Bateria conectada
     if(!batteryConnected){
       // Solo mostramos una vez el mensaje
       notificationPriority = 3;
-      notification_add("BATT CONNECTED", notificationPriority);
+      notification_add("BATT CONNECTED", notificationPriority, 500, COLOR_BW);
 
       batteryConnected = true;
-      if(isPowerOn){
-        Setpoint = ampereToAdc(ampereSetpoint);
-        //myPID.SetTunings(Kp, Ki, Kd);
-        //myPID.SetMode(AUTOMATIC);  // volvemos a encender el PID
-      }
     }
   }
   else{ // NO SE DETECTO TENSION DE ENTRADA!!!
@@ -188,7 +184,7 @@ void loop() {
       if(isPowerOn){
         pwm_setDuty1(0);
         pwm_setDuty2(0);
-        Setpoint = iAdcOffset; // Lo seteo al valor de ADC para 0A
+        Setpoint = 0; // Lo seteo al valor de ADC para 0A
         //myPID.SetMode(MANUAL);  // Apagamos el PID
       }
     }
@@ -415,7 +411,10 @@ void loop() {
       if(notification_hasExpired()){
         // Fuerzo reimprimir toda la pantalla
         forceRePrint = true;
-      }  
+        if(isPowerOn&&batteryConnected){
+          Setpoint = ampereToAdc(ampereSetpoint);
+        }
+      }
     }
     else {
       // actualizo el valor de la temperatura en el MOSFET

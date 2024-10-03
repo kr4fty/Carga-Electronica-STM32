@@ -65,7 +65,7 @@
 #define FET_MIN_TEMP         30 //ºC minimo para encender el cooler
 
 // PWM
-#define PWM_PIN             PB1 // Canal 4 de TIM3
+#define PWM1_PIN            PB1 // Canal 4 de TIM3
 #define PWM2_PIN            PB0 // Canal 3 de TIM3
 
 //#define FREQUENCY         10000 // 10KHz
