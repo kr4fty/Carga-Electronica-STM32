@@ -15,7 +15,7 @@ int dutyCycle = 0;
 
 double Setpoint, Input, Output; // Parametro PID
 //Specify the links and initial tuning parameters
-PID myPID(&Input, &Output, &Setpoint, KP_CNSTIVE, KI_CNSTIVE, KD_CNSTIVE, DIRECT);
+PID myPID(&Input, &Output, &Setpoint, KP_AGG, KI_AGG, KD_AGG, DIRECT);
 unsigned long windowStartTime;
 
 double vBattRawOld, iBattRawOld;
@@ -23,7 +23,7 @@ double vBattRawOld, iBattRawOld;
 #ifdef DEBUG
 unsigned long nextTime, startTime;
 double    Time;
-#define WINDOW_CAPTURE  20
+#define WINDOW_CAPTURE  40
 #define WINDOW_10SEG 10000
 #endif
 
@@ -111,6 +111,7 @@ uint16_t mosfetTempRaw, oldMofetTempRaw;
 float mosfetTemp; 
 long timeToUpdateDisplay=millis()+DISPLAY_UPDATE_WINDOW;
 uint8_t notificationPriority; // Contiene la prioridad de notificaciones
+uint16_t time_mseg; // Tiempo en mili segundos
 bool forceRePrint; // Para volver a imprimir toda la pantalla
 bool isItOverheating=false;
 bool isPrintTime=true;
@@ -162,7 +163,8 @@ void loop() {
     if(!batteryConnected){
       // Solo mostramos una vez el mensaje
       notificationPriority = 3;
-      notification_add("BATT CONNECTED", notificationPriority, 500, COLOR_BW);
+      time_mseg = 500;
+      notification_add("BATT CONNECTED", notificationPriority, time_mseg, COLOR_BW);
 
       batteryConnected = true;
     }
@@ -264,12 +266,12 @@ void loop() {
       tone(BUZZER_PIN, 5000, 50);
       
       Setpoint =ampereToAdc(ampereSetpoint);
-      if(ampereSetpoint<1){
+      /*if(ampereSetpoint<1){
         myPID.SetTunings(KP_AGG, KI_AGG, KD_AGG);
       }
       else{
         myPID.SetTunings(KP_CNSTIVE, KI_CNSTIVE, KD_CNSTIVE);
-      }
+      }*/
       //myPID.SetMode(AUTOMATIC); // Encendemos el PID
 
       coolerFan_powerOn();   
@@ -282,6 +284,7 @@ void loop() {
     // APAGADO
     else{
       notificationPriority = 2;
+      notification_remove(3);
       notification_add("   POWER OFF  ", notificationPriority);
       
       tone(BUZZER_PIN, 436, 100);
@@ -411,9 +414,16 @@ void loop() {
       if(notification_hasExpired()){
         // Fuerzo reimprimir toda la pantalla
         forceRePrint = true;
+
+        /* Se coloca aquí porque, al reconectar la batería tras una desconexión,
+         * se genera un sobreimpulso que puede dañar la fuente/batería. Por 
+         * ello, espero a que desaparezca la notificación de 'conexión de 
+         * batería' antes de reactivar la carga."
+         */
         if(isPowerOn&&batteryConnected){
           Setpoint = ampereToAdc(ampereSetpoint);
         }
+        batteryConnected = true;  // si estando encendido se desconecta y luego apago la carga, no se reimprime la pantalla
       }
     }
     else {
@@ -490,7 +500,21 @@ void loop() {
     //sprintf(buff, "$%d %ld %d;", (int)dutyCycle, Time, (int)iBattRaw);
     Serial.printf("$%d %ld %d;", dutyCycle, (unsigned long)Time, (int)iBattRaw);
     nextTime = millis() + WINDOW_CAPTURE;
-  }  
+  }
+  if(isPowerOn && millis()>(startTime+WINDOW_10SEG)){
+    isPowerOn = false;
+    notificationPriority = 2;
+    notification_remove(3);
+    notification_add("   POWER OFF  ", notificationPriority);
+
+    tone(BUZZER_PIN, 436, 100);
+    tone(BUZZER_PIN, 200, 150);
+
+    pwm_setDuty1(0);
+    pwm_setDuty2(0);
+
+    Setpoint = 0;
+  }
   // END Serial port
   #endif
 }
