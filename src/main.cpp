@@ -223,6 +223,7 @@ void loop() {
   if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint)){
       isTheSetpointUpdated = false;
       forceRePrint = true;
+      batteryConnected = true;  // si estando encendido se desconecta y luego apago la carga, no se reimprime la pantalla
 
       tone(BUZZER_PIN, 7000, 20);
       delay(75);
