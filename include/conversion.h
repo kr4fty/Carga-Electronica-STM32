@@ -134,10 +134,11 @@ int ampereToDutycycle(double ampereValue, uint8_t unity=MOSFET1)
 // Función para convertir Amperes a valores de ADC
 double iAdcOffset; // Lectura del ADC medida en vacio (0 A)
 double AdcRaw_1A;  // Lectura del ADC midiendo 1A
+double Adc1aDiff;
 //I = (Iadc - iAdcOffset) / (AdcRaw_1A - iAdcOffset);
 double ampereToAdc(double ampValue)
 {
-    double iAdc = ampValue*(AdcRaw_1A-iAdcOffset) + iAdcOffset;
+    double iAdc = ampValue*Adc1aDiff + iAdcOffset;
 
     return iAdc;
 }

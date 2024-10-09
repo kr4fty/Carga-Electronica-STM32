@@ -79,9 +79,10 @@
 //PID
 #define RESOLUTION PWM_RESOLUTION
 
-/* MODO DEPURACION
- *  Para graficar la respuesta con los parametros PID seleccionados
+// MODO DEPURACION
+/*  Para graficar la respuesta con los parametros PID seleccionados
  *  Utilizar la aplicacion, en la PC, serial_port_plotter
  */
 //#define DEBUG // Descomente esta linea para habilitar
+
 #endif

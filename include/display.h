@@ -14,7 +14,7 @@ Adafruit_PCD8544 lcd = Adafruit_PCD8544(LCD_SCLK_PIN, LCD_DIN_PIN, LCD_DC_PIN, L
 bool updateDisplay = false;
 char buff[20];
 
-void floatTostr(float numero, uint8_t size_buff, uint8_t decimales)
+/*void floatTostr(float numero, uint8_t size_buff, uint8_t decimales)
 {
     if((decimales+1)<=size_buff){
         int parte_entera, parte_decimal;
@@ -62,11 +62,12 @@ void floatTostr(float numero, uint8_t size_buff, uint8_t decimales)
     }
     else
         sprintf(buff,"NULL");
-}
+}*/
 
 void lcd_init()
 {
     pinMode(LCD_BKLIGHT_PIN, OUTPUT);
+    digitalWrite(LCD_BKLIGHT_PIN, HIGH);
     lcd.begin();
     lcd.cp437(true);
     lcd.setContrast(75);
@@ -94,7 +95,8 @@ void lcd_printCalibration()
 
 void lcd_printIraw(float iRaw, uint8_t color=COLOR_BW)
 {
-    floatTostr(iRaw, 5, 2);
+    //floatTostr(iRaw, 5, 2);
+    dtostrf(iRaw, 5, 2, buff);
 
     lcd.setTextSize(1);
     lcd.setCursor(9*6,5*8);
@@ -130,8 +132,9 @@ void lcd_printBaseFrame()
 
 void lcd_printNewSetpoint(float value)
 {
-    floatTostr(value, 4, 2);
-    //dtostrf(value, 4, 2, buff);
+    //floatTostr(value, 4, 2);
+    dtostrf(value, 4, 2, buff);
+    
     lcd.setTextSize(3);
     lcd.fillRect(0, ((LCDHEIGHT-3*8)/2)-1, 84, (3*8)+1, WHITE);
     lcd.setCursor(0,(LCDHEIGHT-(3*8))/2);
@@ -150,8 +153,8 @@ void lcd_printNewSetpoint(float value)
 
 void lcd_printTinyNewSetpoint(float value)
 {
-    floatTostr(value, 6, 2);
-    //dtostrf(value, 6, 3, buff);
+    //floatTostr(value, 6, 2);
+    dtostrf(value, 6, 2, buff);
 
     lcd.setTextSize(2);
     lcd.setCursor(2*0*6,2*1*8);
@@ -261,20 +264,20 @@ void lcd_printWattHour(float w_h)
     }
     else if(w_h<10){
         lcd.setCursor(8*6,4*8);
-        //dtostrf(w_h, 4, 2, buff);
-        floatTostr(w_h, 4, 2);
+        //floatTostr(w_h, 4, 2);
+        dtostrf(w_h, 4, 2, buff);
         lcd.print(buff);
     }
     else if(w_h<100){
         lcd.setCursor(8*6,4*8);
-        floatTostr(w_h, 4, 1);
-        //dtostrf(w_h, 4, 1, buff);
+        //floatTostr(w_h, 4, 1);
+        dtostrf(w_h, 4, 1, buff);
         lcd.print(buff);
     }
     else{
         lcd.setCursor(7*6,4*8);
-        //dtostrf(w_h, 4, 1, buff);
-        floatTostr(w_h, 4, 1);
+        //floatTostr(w_h, 4, 1);
+        dtostrf(w_h, 4, 1, buff);
         lcd.print(buff);
     }
 
@@ -307,8 +310,8 @@ void lcd_printTemperature(float mosfet_temp)
 
 void lcd_printVin(float v_in)
 {
-    //dtostrf(v_in, 6, 2, buff);
-    floatTostr(v_in, 6, 2);
+    //floatTostr(v_in, 6, 2);
+    dtostrf(v_in, 6, 2, buff);
 
     lcd.setTextSize(2);
     lcd.setCursor(2*0*6,2*0*8);
@@ -319,8 +322,8 @@ void lcd_printVin(float v_in)
 
 void lcd_printIin(float i_in)
 {
-    //dtostrf(i_in, 6, 2, buff);
-    floatTostr(i_in, 6, 2);
+    //floatTostr(i_in, 6, 2);
+    dtostrf(i_in, 6, 2, buff);
 
     lcd.setTextSize(2);
     lcd.setCursor(2*0*6,2*1*8);

@@ -39,6 +39,7 @@ inline void tone(uint8_t _pin, unsigned int frequency, unsigned long duration)
     while (millis() < endT);
 
     // Detener el tono
+    TIM2->CCR2 = 0;
     // Deshabilitar la salida del canal 2
     TIM2->CCER &= ~TIM_CCER_CC2E; // Deshabilitar la salida del canal 2
     // Detener el temporizador

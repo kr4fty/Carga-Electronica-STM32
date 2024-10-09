@@ -133,3 +133,11 @@ dutyCycle a Amperes
     deveria ser en funcion del ACS712?????
 
     selecciono corriente -> convierto a ADC -> convierto a dutyCycle
+
+Agregar Modos de funcionamiento
+-------------------------------
+    Por ejemplo:
+                Corriente constante por un determinado Tiempo
+                Whatts constantes
+                Medicion de mAh de una bateria
+                Reaccion frente a pulsos de corriente, para ver si cae la Vin

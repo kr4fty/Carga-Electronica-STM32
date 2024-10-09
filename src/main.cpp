@@ -11,7 +11,7 @@
 #include "conversion.h"
 #include "notifications.h"
 
-int dutyCycle = 0;
+long encoderValue = 0;
 
 double Setpoint, Input, Output; // Parametro PID
 //Specify the links and initial tuning parameters
@@ -54,7 +54,7 @@ void setup() {
     lcd_printCalibration();
 
     iBattRawOld = analogRead(IBATT_SENSE_PIN);
-    for(int i=0; i<4000; i++){
+    for(int i=0; i<5000; i++){
       iAdcOffset = analogRead(IBATT_SENSE_PIN);
       iAdcOffset = iBattRawOld + MU * (iAdcOffset - iBattRawOld);
       iBattRawOld = iAdcOffset;
@@ -65,15 +65,15 @@ void setup() {
     }
     encoder.setBoundaries(0, 4095, false);
     encoder.setEncoderValue(ampereToDutycycle(C_1A));
-    dutyCycle = encoder.readEncoder();
-    pwm_setDuty1(dutyCycle);
+    encoderValue = encoder.readEncoder();
+    pwm_setDuty1(encoderValue);
     pwm_setDuty2(0);
 
     while(!isButtonClicked()){
       if (encoder.encoderChanged()){
-        dutyCycle = encoder.readEncoder();
+        encoderValue = encoder.readEncoder();
                 
-        pwm_setDuty1(dutyCycle);
+        pwm_setDuty1(encoderValue);
       }
 
       AdcRaw_1A = analogRead(IBATT_SENSE_PIN);
@@ -83,6 +83,7 @@ void setup() {
       delay(1);
     }
     pwm_setDuty1(0);
+    Adc1aDiff = AdcRaw_1A - iAdcOffset;
     encoder.setBoundaries(0, 1000, false);
     shortClick = false;
     longClick = false;
@@ -90,6 +91,7 @@ void setup() {
   else{
     iAdcOffset = IADCOFFSET;
     AdcRaw_1A = ADCRAW_1A;
+    Adc1aDiff = ADC_1A_DIFF;
   }
 
   windowStartTime = millis();
@@ -141,14 +143,14 @@ void loop() {
   // Filtro de Wiener, Adaptativo
   iBattRaw = iBattRawOld + MU * (iBattRaw - iBattRawOld);
   // Calculo iIn
-  iIn = (iBattRaw - iAdcOffset) / (AdcRaw_1A - iAdcOffset);
+  iIn = (iBattRaw - iAdcOffset) / Adc1aDiff;
 
   if(iBattRaw!=iBattRawOld){ // si cambio I entonces actualizo valor en el LCD
     if(isPowerOn){
       wasIUpdated = true;
     }
     else{
-      //iAdcOffset = iBattRaw; // Corriente medida, valores de ADC, a 0A
+      iAdcOffset = iBattRaw; // Corriente medida, valores de ADC, a 0A
     }
     iBattRawOld = iBattRaw;
   }
@@ -198,8 +200,8 @@ void loop() {
   /***************************************************************************/
   if (encoder.encoderChanged())
   {
-    dutyCycle = encoder.readEncoder();
-    ampereSetpoint = dutyCycle/100.0;
+    encoderValue = encoder.readEncoder();
+    ampereSetpoint = encoderValue/100.0;
     Output2 = ampereToDutycycle(ampereSetpoint*.5, MOSFET2);
     if(isPowerOn){ // Si esta encendido lo musetro en una ventana temporal
       lcd_printNewSetpoint(ampereSetpoint);
@@ -497,8 +499,8 @@ void loop() {
    
     Time = (millis()-startTime);
     // Para graficar y obtener datos utilizando serial_port_plotter
-    //sprintf(buff, "$%d %ld %d;", (int)dutyCycle, Time, (int)iBattRaw);
-    Serial.printf("$%d %ld %d;", dutyCycle, (unsigned long)Time, (int)iBattRaw);
+    //sprintf(buff, "$%d %ld %d;", (int)encoderValue, Time, (int)iBattRaw);
+    Serial.printf("$%d %ld %d;", encoderValue, (unsigned long)Time, (int)iBattRaw);
     nextTime = millis() + WINDOW_CAPTURE;
   }
   if(isPowerOn && millis()>(startTime+WINDOW_10SEG)){
