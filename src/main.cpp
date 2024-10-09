@@ -223,7 +223,7 @@ void loop() {
   if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint)){
       isTheSetpointUpdated = false;
       forceRePrint = true;
-      batteryConnected = true;  // si estando encendido se desconecta y luego apago la carga, no se reimprime la pantalla
+      batteryConnected = true;  // si estando encendido se desconecta y luego modifico el setpoint, no se reimprime la notificacion
 
       tone(BUZZER_PIN, 7000, 20);
       delay(75);
@@ -236,75 +236,73 @@ void loop() {
   /***************************************************************************/
 
   // Deteccion de pulsacion de boton
-  isButtonClicked();
+  if(isButtonClicked()){
+    //  HUBO UNA PULSACION LARGA
+    if(longClick){ // Reiniciamos los contadores
+      longClick = false;
 
-  //  HUBO UNA PULSACION LARGA
-  if(longClick){ // Reiniciamos los contadores
-    longClick = false;
+      notificationPriority = 1;
+      notification_add("RESET COUNTERS", notificationPriority);
 
-    notificationPriority = 1;
-    notification_add("RESET COUNTERS", notificationPriority);
+      clock_resetClock();
+      totalmAh = 0;
+      totalWh = 0;
 
-    clock_resetClock();
-    totalmAh = 0;
-    totalWh = 0;
+      tone(BUZZER_PIN, 1000,300);
+    }
 
-    tone(BUZZER_PIN, 1000,300);
-  }
+    // HUBO UN CLICK EN EL BOTON
+    if (shortClick){
+      shortClick = false;
+      isPowerOn = not isPowerOn; // Cambia el estado anterior, de ENCENDIDO -> APAGADO y viceversa
 
-  // HUBO UN CLICK EN EL BOTON
-  if (shortClick){
-    shortClick = false;
-    isPowerOn = not isPowerOn; // Cambia el estado anterior, de ENCENDIDO -> APAGADO y viceversa
+      // ENCENDIDO
+      if(isPowerOn){
+        notificationPriority = 2;
+        notification_add("   POWER ON   ", notificationPriority);
+        
+        tone(BUZZER_PIN, 4000, 50);
+        delay(20);
+        tone(BUZZER_PIN, 4500, 50);
+        delay(20);
+        tone(BUZZER_PIN, 5000, 50);
+        
+        Setpoint =ampereToAdc(ampereSetpoint);
+        /*if(ampereSetpoint<1){
+          myPID.SetTunings(KP_AGG, KI_AGG, KD_AGG);
+        }
+        else{
+          myPID.SetTunings(KP_CNSTIVE, KI_CNSTIVE, KD_CNSTIVE);
+        }*/
+        //myPID.SetMode(AUTOMATIC); // Encendemos el PID
 
-    // ENCENDIDO
-    if(isPowerOn){
-      notificationPriority = 2;
-      notification_add("   POWER ON   ", notificationPriority);
-      
-      tone(BUZZER_PIN, 4000, 50);
-      delay(20);
-      tone(BUZZER_PIN, 4500, 50);
-      delay(20);
-      tone(BUZZER_PIN, 5000, 50);
-      
-      Setpoint =ampereToAdc(ampereSetpoint);
-      /*if(ampereSetpoint<1){
-        myPID.SetTunings(KP_AGG, KI_AGG, KD_AGG);
+        coolerFan_powerOn();   
+        
+        #ifdef DEBUG
+        startTime = millis();
+        nextTime = startTime + WINDOW_CAPTURE;
+        #endif
       }
+      // APAGADO
       else{
-        myPID.SetTunings(KP_CNSTIVE, KI_CNSTIVE, KD_CNSTIVE);
-      }*/
-      //myPID.SetMode(AUTOMATIC); // Encendemos el PID
+        notificationPriority = 2;
+        notification_remove(3);
+        notification_add("   POWER OFF  ", notificationPriority);
+        
+        tone(BUZZER_PIN, 436, 100);
+        tone(BUZZER_PIN, 200, 150);
 
-      coolerFan_powerOn();   
-      
-      #ifdef DEBUG
-      startTime = millis();
-      nextTime = startTime + WINDOW_CAPTURE;
-      #endif
+        pwm_setDuty1(0);
+        pwm_setDuty2(0);
+
+        Setpoint = 0;
+        //myPID.SetMode(MANUAL);  // Apagamos el PID
+
+        coolerFan_powerOff();
+      }
+
+      digitalWrite(LED, isPowerOn?LOW:HIGH);
     }
-    // APAGADO
-    else{
-      notificationPriority = 2;
-      notification_remove(3);
-      notification_add("   POWER OFF  ", notificationPriority);
-      
-      tone(BUZZER_PIN, 436, 100);
-      tone(BUZZER_PIN, 200, 150);
-
-      pwm_setDuty1(0);
-      pwm_setDuty2(0);
-
-      Setpoint = 0;
-      //myPID.SetMode(MANUAL);  // Apagamos el PID
-
-      coolerFan_powerOff();
-    }
-
-    
-
-    digitalWrite(LED, isPowerOn?LOW:HIGH);
   }
   // FIN BOTON
 
