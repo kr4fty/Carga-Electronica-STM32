@@ -21,8 +21,7 @@ unsigned long windowStartTime;
 double vBattRawOld, iBattRawOld;
 
 #ifdef DEBUG
-unsigned long nextTime, startTime;
-double    Time;
+unsigned long nextTime, startTime, actualTime;
 #define WINDOW_CAPTURE  40
 #define WINDOW_10SEG 10000
 #endif
@@ -501,10 +500,10 @@ void loop() {
   /***************************************************************************/
   if(millis()>nextTime && isPowerOn && millis()<(startTime+WINDOW_10SEG)){
    
-    Time = (millis()-startTime);
+    actualTime = (millis()-startTime);
     // Para graficar y obtener datos utilizando serial_port_plotter
-    //sprintf(buff, "$%d %ld %d;", (int)encoderValue, Time, (int)iBattRaw);
-    Serial.printf("$%d %ld %d;", encoderValue, (unsigned long)Time, (int)iBattRaw);
+    //sprintf(buff, "$%d %ld %d;", (int)encoderValue, actualTime, (int)iBattRaw);
+    Serial.printf("$%d %ld %d;", encoderValue, (unsigned long)actualTime, (int)iBattRaw);
     nextTime = millis() + WINDOW_CAPTURE;
   }
   if(isPowerOn && millis()>(startTime+WINDOW_10SEG)){
