@@ -78,6 +78,7 @@ void lcd_init()
     lcd.setCursor(8, LCDHEIGHT/2-4);
     lcd.print("INICIANDO...");
     lcd.display();
+    delay(1000);
     lcd.clearDisplay();
 }
 
@@ -284,13 +285,15 @@ void lcd_printWattHour(float w_h)
     updateDisplay = true;
 }
 
-void lcd_printTime(uint8_t hs, uint8_t min, uint8_t seg)
+void lcd_printTime(uint8_t hs, uint8_t min, uint8_t seg, uint8_t color=COLOR_BW)
 {
     sprintf(buff, "%02d:%02d:%02d",hs,min,seg);
 
     lcd.setTextSize(1);
     lcd.setCursor(0*6,5*8);
-    lcd.setTextColor(WHITE, BLACK);
+    if(color == COLOR_WB){
+        lcd.setTextColor(WHITE, BLACK);
+    }
     lcd.print(buff);
     lcd.setTextColor(BLACK, WHITE);
 
