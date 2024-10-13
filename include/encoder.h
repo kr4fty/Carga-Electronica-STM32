@@ -27,45 +27,111 @@ void encoder_init()
     encoder.setEncoderValue(0);
 }
 
-bool shortClick;    // True: pulsacion larga
-bool longClick;     // True: pulsacion larga
-bool wasButtonDown = false;
+enum ClickType {
+    NO_CLICK,       // No hay pulsacion
+    SHORT_CLICK,    // Pulsacion corta
+    LONG_CLICK,     // Pulsacion larga
+    DOUBLE_CLICK    // Doble pulsacion
+};
+
+bool wasButtonDown    = false; // se presiono el boton
+bool checkDoubleClick = false; // si detecta una pulsacion rapida es posible que venga una doble pulsacion
+bool longClickDetected;        // True: se forzo pulzacion larga, ignorar click al soltar el boton
+uint8_t key;                   // 1: corta, 2: larga, 3: doble pulsacion
+uint8_t clickCounter=0; // 
 //paramaters for button
-unsigned long shortPressAfterMiliseconds = 50;  //how long short press shoud be. Do not set too low to avoid bouncing (false press events).
-unsigned long longPressAfterMiliseconds = 1000; //how long čong press shoud be.
-unsigned long lastTimeButtonDown = 0;           // tiempo en el que duro la pulsacion
+unsigned long shortPressAfterMiliseconds = 250; // Tiempo de espera para una pulsación corta
+unsigned long longPressAfterMiliseconds = 1000; // ¿Cuánto tiempo se considera una pulsación larga?
+unsigned long lastTimeButtonDown = millis();           // tiempo en el que duro la pulsacion
+unsigned long lastTimeButtonClick;
+unsigned long maxTimeBetween2Events = 300;
+unsigned long shakyClick = 500;
 
 bool isButtonDown()
 {
-    return digitalRead(BUTTON_PIN) ? false : true;
+    return digitalReadFast(digitalPinToPinName(BUTTON_PIN)) ? false : true;
+}
+bool isButtonUp()
+{
+    return digitalReadFast(digitalPinToPinName(BUTTON_PIN));
 }
 
+// Devuelve si True si se hizo click, uno o varios
 bool isButtonClicked()
 {
-    bool clicked=false;
-    // Deteccion de pulsacion de boton
-    if (isButtonDown()&&!wasButtonDown) {
-        if (!wasButtonDown) {
-            //start measuring
-            lastTimeButtonDown = millis();
+    unsigned long timeDiff = millis() - lastTimeButtonDown;;
+    bool clicked = false;
+    bool currentButtonState = digitalReadFast(digitalPinToPinName(BUTTON_PIN));
+    
+    // Boton presionado, button down.
+    if (!currentButtonState){
+        // Lo hacemos por unica vez en cada ciclo click, button down a button up
+        if(!wasButtonDown) {
+            wasButtonDown = true;   //  No se ingresara aqui hasta el proximo inicio de click
+            lastTimeButtonDown = millis();  // Iniciar el temporizador
+            longClickDetected = false;
+            //Serial.printf("button down\n");
         }
-        //else we wait since button is still down
-        wasButtonDown = true;
+        // Si el boton permanece presionado, chequeo por pulzacion larga
+        else{
+            // Considerar como pulsación larga si se mantuvo presionado más de 'longPressAfterMiliseconds'
+            if(timeDiff > longPressAfterMiliseconds){
+                if(!longClickDetected){
+                    key = LONG_CLICK;
+                    clicked = true;
+                    longClickDetected = true;
+                    //Serial.printf("Pulsacion Larga Duracion: %d - %d\n", timeDiff, (millis() - lastTimeButtonDown));
+                    // se ha detectado una pulsacion larga, por lo que no tiene sentido ahora preguntar por pulsacion corta
+                    return clicked;
+                }
+            }
+        }
     }
-    // Deteccion de pulsacion corta o larga
-    if (!isButtonDown()&&wasButtonDown) {
-        if (millis() - lastTimeButtonDown >= longPressAfterMiliseconds) {
-            longClick = true;
-            shortClick = false;
-        } else if (millis() - lastTimeButtonDown >= shortPressAfterMiliseconds) {
-            longClick = false;
-            shortClick = true;
+    // Boton liberado, se hizo click
+    else if (wasButtonDown){
+        //Serial.printf("button up\n");
+        if(!longClickDetected){
+            // solo sumo el click si antes no hubo una pulsacion larga
+            clickCounter++;
+            //Serial.printf("Clicks = %d Time: %d ", clickCounter, timeDiff);
         }
         wasButtonDown = false;
-        clicked = true;
+
+        if (timeDiff > shortPressAfterMiliseconds){
+            //Serial.printf("\n");
+        } else {
+            checkDoubleClick = true;
+            //Serial.printf("Fast click\n");
+        }
+    }
+    // Pasado un tiempo maxTimeBetween2Events, veo si fue un click corto o un doble click rapido
+    if(timeDiff>maxTimeBetween2Events && !longClickDetected && clickCounter){
+        if(clickCounter==1){
+            key = SHORT_CLICK;
+            clicked = true;
+            //Serial.printf("Pulsacion Corta\n");
+
+        }
+        else if(clickCounter>1){
+            if(checkDoubleClick){
+                key = DOUBLE_CLICK;
+                clicked = true;
+                //Serial.printf("Doble Pulsacion\n");
+            }
+        }
+        
+        clickCounter = 0;
+        checkDoubleClick = false;
+    }
+    
+    if(currentButtonState && longClickDetected){
+        longClickDetected = false;
+        wasButtonDown = false;
+        //Serial.printf("Limpiando...\n");
     }
 
     return clicked;
 }
+
 
 #endif

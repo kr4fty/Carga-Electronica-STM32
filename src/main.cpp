@@ -84,8 +84,6 @@ void setup() {
     pwm_setDuty1(0);
     Adc1aDiff = AdcRaw_1A - iAdcOffset;
     encoder.setBoundaries(0, 1000, false);
-    shortClick = false;
-    longClick = false;
   }
   else{
     iAdcOffset = IADCOFFSET;
@@ -237,8 +235,7 @@ void loop() {
   // Deteccion de pulsacion de boton
   if(isButtonClicked()){
     //  HUBO UNA PULSACION LARGA
-    if(longClick){ // Reiniciamos los contadores
-      longClick = false;
+    if(key == LONG_CLICK){ // Reiniciamos los contadores
 
       notificationPriority = 1;
       notification_add("RESET COUNTERS", notificationPriority);
@@ -251,8 +248,7 @@ void loop() {
     }
 
     // HUBO UN CLICK EN EL BOTON
-    if (shortClick){
-      shortClick = false;
+    else if (key == SHORT_CLICK){
       isPowerOn = not isPowerOn; // Cambia el estado anterior, de ENCENDIDO -> APAGADO y viceversa
 
       // ENCENDIDO
@@ -302,6 +298,10 @@ void loop() {
 
       digitalWrite(LED, isPowerOn?LOW:HIGH);
     }
+    else if(key == DOUBLE_CLICK){
+      digitalWrite(LCD_BKLIGHT_PIN, !digitalRead(LCD_BKLIGHT_PIN));
+    }
+    //key = 0;
   }
   // FIN BOTON
 
