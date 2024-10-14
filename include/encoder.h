@@ -37,7 +37,6 @@ enum ClickType {
 bool wasButtonDown    = false; // se presiono el boton
 bool checkDoubleClick = false; // si detecta una pulsacion rapida es posible que venga una doble pulsacion
 bool longClickDetected;        // True: se forzo pulzacion larga, ignorar click al soltar el boton
-uint8_t key;                   // 1: corta, 2: larga, 3: doble pulsacion
 uint8_t clickCounter=0; // 
 //paramaters for button
 unsigned long shortPressAfterMiliseconds = 250; // Tiempo de espera para una pulsación corta
@@ -56,11 +55,11 @@ bool isButtonUp()
     return digitalReadFast(digitalPinToPinName(BUTTON_PIN))? true : false;
 }
 
-// Devuelve si True si se hizo click, uno o varios
-bool isButtonClicked()
+// Devuelve el tipo de pulsacion detectatado. Caso contrario, un NO_CLICK
+uint8_t isButtonClicked()
 {
-    unsigned long timeDiff = millis() - lastTimeButtonDown;;
-    bool clicked = false;
+    unsigned long timeDiff = millis() - lastTimeButtonDown;
+    uint8_t key = NO_CLICK;
     bool currentButtonState = digitalReadFast(digitalPinToPinName(BUTTON_PIN));
     
     // Boton presionado, button down.
@@ -78,12 +77,11 @@ bool isButtonClicked()
             if(timeDiff > longPressAfterMiliseconds){
                 if(!longClickDetected){ // el boton sigue presionado?
                     key = LONG_CLICK;
-                    clicked = true;
                     longClickDetected = true;
-                    //Serial.printf("Pulsacion Larga, Duracion: %d, clicked: %s, Key:%d\n", timeDiff, clicked?"true":"false", key);
+                    //Serial.printf("Pulsacion Larga, Duracion: %d, Key:%d\n", timeDiff, key);
                 } 
                 // se ha detectado una pulsacion larga, por lo que no tiene sentido ahora preguntar por pulsacion corta
-                return clicked;
+                return key;
             }
         }
     }
@@ -111,14 +109,12 @@ bool isButtonClicked()
     if(timeDiff>maxTimeBetween2Events && clickCounter){
         if(clickCounter==1){ // Solo se detecto una pulsacion, entonces es una pulsacion corta
             key = SHORT_CLICK;
-            clicked = true;
             //Serial.printf("Pulsacion Corta\n");
 
         }
         else if(clickCounter>1){ // Se detecto varias pulsaciones, entonces es un doble click (podria haber 3 o mas :P)
             if(checkDoubleClick){
                 key = DOUBLE_CLICK;
-                clicked = true;
                 //Serial.printf("Doble Pulsacion\n");
             }
         }
@@ -127,7 +123,7 @@ bool isButtonClicked()
         checkDoubleClick = false;
     }
 
-    return clicked;
+    return key;
 }
 
 

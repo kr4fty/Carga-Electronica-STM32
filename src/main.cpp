@@ -27,9 +27,9 @@ unsigned long nextTime, startTime, actualTime;
 #endif
 
 void setup() {
-  #ifdef DEBUG
+  //#ifdef DEBUG
   Serial.begin(115200);
-  #endif
+  //#endif
   pinMode(LED, OUTPUT);
   digitalWrite(LED, HIGH);
   
@@ -119,6 +119,7 @@ bool printTinySetpoint=true;
 unsigned long timeToPrintNewSetpoint, windowNewSetpoint=1000;
 double Output2; // Contiene el duty del segundo MOSFET. Varia con el setpoint
 float ampereSetpoint=C_1A; // Contiene el valor del Setpoint expresado en ampere
+uint8_t key; // 0: no click, 1: corta, 2: larga, 3: doble pulsacion
 
 void loop() {
   /***************************************************************************/
@@ -233,7 +234,9 @@ void loop() {
   /***************************************************************************/
 
   // Deteccion de pulsacion de boton
-  if(isButtonClicked()){
+  key = isButtonClicked(); // 0: no click, 1: short click, 2: long click, 3: double click
+  if(key){
+    Serial.printf("Key: %d\n", key);
     //  HUBO UNA PULSACION LARGA
     if(key == LONG_CLICK){ // Reiniciamos los contadores
 
@@ -301,7 +304,6 @@ void loop() {
     else if(key == DOUBLE_CLICK){
       digitalWrite(LCD_BKLIGHT_PIN, !digitalRead(LCD_BKLIGHT_PIN));
     }
-    //key = 0;
   }
   // FIN BOTON
 
