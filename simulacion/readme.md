@@ -9,8 +9,8 @@
 2. Abre el archivo `Carga.pzw` con PICSIMLAB (`File->Load Workspace`); este se ejecutará automáticamente.
 3. Si deseas cargar un archivo BIN, asegúrate de seleccionar el entorno **generic_qemu** dentro de `platformio.ini` y luego compilarlo:
 
-
-```
+**platformio.ini**
+``` platformio.ini
 [platformio]
 ;default_envs = nanoatmega328
 ;default_envs = wroom
