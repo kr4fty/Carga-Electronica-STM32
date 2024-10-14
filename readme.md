@@ -14,6 +14,13 @@ Dado que cada transistor MOSFET presenta un voltaje umbral de puerta a fuente (V
 
 Para ello, se empleará el proyecto [Data Logger](https://github.com/kr4fty/DataLogger_STM32) con el fin de registrar estos parámetros. Posteriormente, los valores obtenidos se integrarán en este proyecto para facilitar el control adecuado de nuestra carga electrónica.
 
+## Que incluye este repositorio?
+
+Actualmente este repositorio cuenta con:
+ - Diseño del hardware necesario para el proyecto
+ - Codigo fuentes, tanto el de Control como la de adquicision de Datos
+ - Archivo necesario para simular la placa BluePill, mediante PICSIMLAB
+
 ## Materiales
 
 - **Placa:** BLUE PILL (STM32F103)
