@@ -10,6 +10,7 @@
 #include "coolerfan.h"
 #include "conversion.h"
 #include "notifications.h"
+#include "myMenu.h"
 
 long encoderValue = 0;
 
@@ -27,9 +28,9 @@ unsigned long nextTime, startTime, actualTime;
 #endif
 
 void setup() {
-  //#ifdef DEBUG
+  #ifdef DEBUG
   Serial.begin(115200);
-  //#endif
+  #endif
   pinMode(LED, OUTPUT);
   digitalWrite(LED, HIGH);
   
@@ -121,6 +122,8 @@ double Output2; // Contiene el duty del segundo MOSFET. Varia con el setpoint
 float ampereSetpoint=C_1A; // Contiene el valor del Setpoint expresado en ampere
 uint8_t key; // 0: no click, 1: corta, 2: larga, 3: doble pulsacion
 
+long oldEncoderValue;
+
 void loop() {
   /***************************************************************************/
   /*                    MEDION DE TENSION Y CORRIENTE                        */
@@ -196,116 +199,131 @@ void loop() {
   /***************************************************************************/
   /*                            SETEO DE CORRIENTE                           */
   /***************************************************************************/
-  if (encoder.encoderChanged())
-  {
-    encoderValue = encoder.readEncoder();
-    ampereSetpoint = encoderValue/100.0;
-    Output2 = ampereToDutycycle(ampereSetpoint*.5, MOSFET2);
-    if(isPowerOn){ // Si esta encendido lo musetro en una ventana temporal
-      lcd_printNewSetpoint(ampereSetpoint);
-      isTheSetpointUpdated = true;
-    }
-    else{ // Si esta APAGADO lo muestro en lugar de la corriente medida
-      printTinySetpoint = true;
-    }
+  if (!showMenu){
+    if(encoder.encoderChanged()){
+      encoderValue = encoder.readEncoder();
+      ampereSetpoint = encoderValue/100.0;
+      Output2 = ampereToDutycycle(ampereSetpoint*.5, MOSFET2);
+      if(isPowerOn){ // Si esta encendido lo musetro en una ventana temporal
+        lcd_printNewSetpoint(ampereSetpoint);
+        isTheSetpointUpdated = true;
+      }
+      else{ // Si esta APAGADO lo muestro en lugar de la corriente medida
+        printTinySetpoint = true;
+      }
 
-    if(isPowerOn){
-      Setpoint = ampereToAdc(ampereSetpoint);
+      if(isPowerOn){
+        Setpoint = ampereToAdc(ampereSetpoint);
+      }
+      
+      tone(BUZZER_PIN, 600, 10);
+
+      timeToPrintNewSetpoint = millis() + windowNewSetpoint;
     }
-    
-    tone(BUZZER_PIN, 600, 10);
+    // Tiempo de muestra de la Ventana temporal que imprime el nuevo SETPOINT
+    if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint)){
+        isTheSetpointUpdated = false;
+        forceRePrint = true;
+        batteryConnected = true;  // si estando encendido se desconecta y luego modifico el setpoint, no se reimprime la notificacion
 
-    timeToPrintNewSetpoint = millis() + windowNewSetpoint;
-  }
-  // Tiempo de muestra de la Ventana temporal que imprime el nuevo SETPOINT
-  if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint)){
-      isTheSetpointUpdated = false;
-      forceRePrint = true;
-      batteryConnected = true;  // si estando encendido se desconecta y luego modifico el setpoint, no se reimprime la notificacion
-
-      tone(BUZZER_PIN, 7000, 20);
-      delay(75);
-      tone(BUZZER_PIN, 7000, 80);
-  }
-  // FIN CONFIGURACION DE CORRIENTE DE CARGA
+        tone(BUZZER_PIN, 7000, 20);
+        delay(75);
+        tone(BUZZER_PIN, 7000, 80);
+    }
+    // FIN CONFIGURACION DE CORRIENTE DE CARGA
 
   /***************************************************************************/
   /*                           ENCENDIDO Y APAGADO                           */
   /***************************************************************************/
 
-  // Deteccion de pulsacion de boton
-  key = isButtonClicked(); // 0: no click, 1: short click, 2: long click, 3: double click
-  if(key){
-    Serial.printf("Key: %d\n", key);
-    //  HUBO UNA PULSACION LARGA
-    if(key == LONG_CLICK){ // Reiniciamos los contadores
+    // Deteccion de pulsacion de boton  
+    key = isButtonClicked(); // 0: no click, 1: short click, 2: long click, 3: double click
+    if(key){
+      //  HUBO UNA PULSACION LARGA
+      if(key == LONG_CLICK){ // Reiniciamos los contadores
 
-      notificationPriority = 1;
-      notification_add("RESET COUNTERS", notificationPriority);
+        notificationPriority = 1;
+        notification_add("RESET COUNTERS", notificationPriority);
 
-      clock_resetClock();
-      totalmAh = 0;
-      totalWh = 0;
+        clock_resetClock();
+        totalmAh = 0;
+        totalWh = 0;
 
-      tone(BUZZER_PIN, 1000,300);
-    }
+        tone(BUZZER_PIN, 1000,300);
+      }
 
-    // HUBO UN CLICK EN EL BOTON
-    else if (key == SHORT_CLICK){
-      isPowerOn = not isPowerOn; // Cambia el estado anterior, de ENCENDIDO -> APAGADO y viceversa
+      // HUBO UN CLICK EN EL BOTON
+      else if (key == SHORT_CLICK){
+        isPowerOn = not isPowerOn; // Cambia el estado anterior, de ENCENDIDO -> APAGADO y viceversa
 
-      // ENCENDIDO
-      if(isPowerOn){
-        notificationPriority = 2;
-        notification_add("   POWER ON   ", notificationPriority);
-        
-        tone(BUZZER_PIN, 4000, 50);
-        delay(20);
-        tone(BUZZER_PIN, 4500, 50);
-        delay(20);
-        tone(BUZZER_PIN, 5000, 50);
-        
-        Setpoint =ampereToAdc(ampereSetpoint);
-        /*if(ampereSetpoint<1){
-          myPID.SetTunings(KP_AGG, KI_AGG, KD_AGG);
+        // ENCENDIDO
+        if(isPowerOn){
+          notificationPriority = 2;
+          notification_add("   POWER ON   ", notificationPriority);
+          
+          tone(BUZZER_PIN, 4000, 50);
+          delay(20);
+          tone(BUZZER_PIN, 4500, 50);
+          delay(20);
+          tone(BUZZER_PIN, 5000, 50);
+          
+          Setpoint =ampereToAdc(ampereSetpoint);
+          /*if(ampereSetpoint<1){
+            myPID.SetTunings(KP_AGG, KI_AGG, KD_AGG);
+          }
+          else{
+            myPID.SetTunings(KP_CNSTIVE, KI_CNSTIVE, KD_CNSTIVE);
+          }*/
+          //myPID.SetMode(AUTOMATIC); // Encendemos el PID
+
+          coolerFan_powerOn();   
+          
+          #ifdef DEBUG
+          startTime = millis();
+          nextTime = startTime + WINDOW_CAPTURE;
+          #endif
         }
+        // APAGADO
         else{
-          myPID.SetTunings(KP_CNSTIVE, KI_CNSTIVE, KD_CNSTIVE);
-        }*/
-        //myPID.SetMode(AUTOMATIC); // Encendemos el PID
+          notificationPriority = 2;
+          notification_remove(3);
+          notification_add("   POWER OFF  ", notificationPriority);
+          
+          tone(BUZZER_PIN, 436, 100);
+          tone(BUZZER_PIN, 200, 150);
 
-        coolerFan_powerOn();   
-        
-        #ifdef DEBUG
-        startTime = millis();
-        nextTime = startTime + WINDOW_CAPTURE;
-        #endif
+          pwm_setDuty1(0);
+          pwm_setDuty2(0);
+
+          Setpoint = 0;
+          //myPID.SetMode(MANUAL);  // Apagamos el PID
+
+          coolerFan_powerOff();
+        }
+
+        digitalWrite(LED, isPowerOn?LOW:HIGH);
       }
-      // APAGADO
-      else{
-        notificationPriority = 2;
-        notification_remove(3);
-        notification_add("   POWER OFF  ", notificationPriority);
-        
-        tone(BUZZER_PIN, 436, 100);
-        tone(BUZZER_PIN, 200, 150);
-
-        pwm_setDuty1(0);
-        pwm_setDuty2(0);
-
-        Setpoint = 0;
-        //myPID.SetMode(MANUAL);  // Apagamos el PID
-
-        coolerFan_powerOff();
+      else if(key == DOUBLE_CLICK){
+        menu_init();
+        showMenu = true;
+        oldEncoderValue = encoderValue;
       }
-
-      digitalWrite(LED, isPowerOn?LOW:HIGH);
     }
-    else if(key == DOUBLE_CLICK){
-      digitalWrite(LCD_BKLIGHT_PIN, !digitalRead(LCD_BKLIGHT_PIN));
+  // FIN BOTON
+  }
+  else {
+    menu.update();      // Actualiza el estado del encoder
+    menu.checkButton(); // Verifica si se ha presionado el botón
+    if(!showMenu){      // Restauro los valores
+      batteryConnected = true;          
+      forceRePrint = true;
+
+      encoder.setBoundaries(0, 1000, false);
+      encoder.setEncoderValue(oldEncoderValue);
+
+      showMenu = false;
     }
   }
-  // FIN BOTON
 
   /***************************************************************************/
   /*           CHEQUEO Y CONTROL DE LA TEMPERATURA EN EL MOSFET              */
@@ -410,90 +428,91 @@ void loop() {
   /***************************************************************************/
   /*                            Refresco la Pantalla                         */
   /***************************************************************************/
+  if(!showMenu){
+    if(millis()>timeToUpdateDisplay && !isTheSetpointUpdated){
+      if(newNotification){
+        if(notification_hasExpired()){
+          // Fuerzo reimprimir toda la pantalla
+          forceRePrint = true;
 
-  if(millis()>timeToUpdateDisplay && !isTheSetpointUpdated){
-    if(newNotification){
-      if(notification_hasExpired()){
-        // Fuerzo reimprimir toda la pantalla
-        forceRePrint = true;
-
-        /* Se coloca aquí porque, al reconectar la batería tras una desconexión,
-         * se genera un sobreimpulso que puede dañar la fuente/batería. Por 
-         * ello, espero a que desaparezca la notificación de 'conexión de 
-         * batería' antes de reactivar la carga."
-         */
-        if(isPowerOn&&batteryConnected){
-          Setpoint = ampereToAdc(ampereSetpoint);
+          /* Se coloca aquí porque, al reconectar la batería tras una desconexión,
+          * se genera un sobreimpulso que puede dañar la fuente/batería. Por 
+          * ello, espero a que desaparezca la notificación de 'conexión de 
+          * batería' antes de reactivar la carga."
+          */
+          if(isPowerOn&&batteryConnected){
+            Setpoint = ampereToAdc(ampereSetpoint);
+          }
+          batteryConnected = true;  // si estando encendido se desconecta y luego apago la carga, no se reimprime la pantalla
         }
-        batteryConnected = true;  // si estando encendido se desconecta y luego apago la carga, no se reimprime la pantalla
       }
-    }
-    else {
-      // actualizo el valor de la temperatura en el MOSFET
-      if(wasTempUpdated){
-        lcd_printTemperature(mosfetTemp);
-        wasTempUpdated = false;
+      else {
+        // actualizo el valor de la temperatura en el MOSFET
+        if(wasTempUpdated){
+          lcd_printTemperature(mosfetTemp);
+          wasTempUpdated = false;
+        }
+        // Imprimir tiempo transcurrido
+        // Usando las mini notificaciones puedo mostrar la temperatura
+        if(!newMiniNotificacion && isPrintTime){
+          if(isPowerOn){
+            lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds(), COLOR_WB);
+          }
+          else{
+            lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds());
+          }
+          isPrintTime = false;
+        }
       }
-      // Imprimir tiempo transcurrido
-      // Usando las mini notificaciones puedo mostrar la temperatura
-      if(!newMiniNotificacion && isPrintTime){
+
+      if(forceRePrint){
+        // Reimprimir toda la pantalla
+        forceRePrint = false;
+        lcd_printBaseFrame();
+        wasXhUpdated = true;
+        wasVUpdated = true;
         if(isPowerOn){
-          lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds(), COLOR_WB);
+          wasIUpdated = true;
         }
         else{
-          lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds());
+          printTinySetpoint = true;
         }
-        isPrintTime = false;
+        isPrintTime = true;
+        wasTempUpdated = true;
       }
-    }
 
-    if(forceRePrint){
-      // Reimprimir toda la pantalla
-      forceRePrint = false;
-      lcd_printBaseFrame();
-      wasXhUpdated = true;
-      wasVUpdated = true;
-      if(isPowerOn){
-        wasIUpdated = true;
+      // Imprimo los Watts-Hora y Ampere-Hora
+      if(wasXhUpdated){      
+        lcd_printWattHour(totalWh);
+        lcd_printAmpHour(totalmAh);
+
+        wasXhUpdated = false;
       }
-      else{
-        printTinySetpoint = true;
+
+      // Imprimo Tension y Corriente
+      if(wasVUpdated){
+        // Print Vin
+        lcd_printVin(vIn);
+        wasVUpdated = false;
       }
-      isPrintTime = true;
-      wasTempUpdated = true;
-    }
-
-    // Imprimo los Watts-Hora y Ampere-Hora
-    if(wasXhUpdated){      
-      lcd_printWattHour(totalWh);
-      lcd_printAmpHour(totalmAh);
-
-      wasXhUpdated = false;
-    }
-
-    // Imprimo Tension y Corriente
-    if(wasVUpdated){
-      // Print Vin
-      lcd_printVin(vIn);
-      wasVUpdated = false;
-    }
-    if(isPowerOn){ // Solo muestro la corriente cuando esta encendido. Caso contrario, el Setpoint
-      if(wasIUpdated){
-        // Print Iin
-        lcd_printIin(iIn);
-        wasIUpdated = false;
+      if(isPowerOn){ // Solo muestro la corriente cuando esta encendido. Caso contrario, el Setpoint
+        if(wasIUpdated){
+          // Print Iin
+          lcd_printIin(iIn);
+          wasIUpdated = false;
+        }
       }
-    }
-    else {
-      if(printTinySetpoint)
-        lcd_printTinyNewSetpoint(ampereSetpoint);
-      printTinySetpoint = false;
-    }
+      else {
+        if(printTinySetpoint)
+          lcd_printTinyNewSetpoint(ampereSetpoint);
+        printTinySetpoint = false;
+      }
 
-    lcd_display();
-    
-    timeToUpdateDisplay = millis()+DISPLAY_UPDATE_WINDOW;
-  }  
+      lcd_display();
+      
+      timeToUpdateDisplay = millis()+DISPLAY_UPDATE_WINDOW;
+    }
+  }
   // FIN UPDATE DISPLAY
 
   #ifdef DEBUG

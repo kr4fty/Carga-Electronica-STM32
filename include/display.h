@@ -87,6 +87,16 @@ void lcd_init()
     lcd.clearDisplay();
 }
 
+void lcd_backlightOn()
+{
+    digitalWrite(LCD_BKLIGHT_PIN, HIGH);
+}
+
+void lcd_backlightOff()
+{
+    digitalWrite(LCD_BKLIGHT_PIN, LOW);
+}
+
 void lcd_printCalibration()
 {
     lcd.clearDisplay();
