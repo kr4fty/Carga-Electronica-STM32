@@ -358,14 +358,27 @@ void lcd_printERROR(uint8_t x, uint8_t y, uint8_t sz=1)
 
 void lcd_printMenuItem(const char *str, uint8_t posy, uint8_t color=COLOR_BW)
 {
+    uint8_t str_len=strlen(str);
+    char aux[15];
+    // Relleno de caracteres ' ' hasta completar 14, max caracteres por linea
+    for(uint8_t i=0; i<14; i++){
+        if(i<str_len){
+            aux[i] = str[i];
+        }
+        else{
+            aux[i] = ' ';
+        }
+    }
+    aux[14] = '\0';
+
     lcd.setTextSize(SIZE_S);
     lcd.setCursor(0, posy*8);
     if(color==COLOR_WB){
         lcd.setTextColor(WHITE, BLACK);
-        lcd.print(str);
+        lcd.print(aux);        
         lcd.setTextColor(BLACK, WHITE);
     }else{
-        lcd.print(str);
+        lcd.print(aux);
     }
 
     lcd.display();
