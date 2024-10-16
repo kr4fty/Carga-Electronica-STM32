@@ -199,9 +199,10 @@ void loop() {
   /***************************************************************************/
   /*                            SETEO DE CORRIENTE                           */
   /***************************************************************************/
-  if (!showMenu){
-    if(encoder.encoderChanged()){
-      encoderValue = encoder.readEncoder();
+  if(encoder.encoderChanged()){
+    encoderValue = encoder.readEncoder();
+   if (!showMenu) {
+      //encoderValue = encoder.readEncoder();
       ampereSetpoint = encoderValue/100.0;
       Output2 = ampereToDutycycle(ampereSetpoint*.5, MOSFET2);
       if(isPowerOn){ // Si esta encendido lo musetro en una ventana temporal
@@ -220,25 +221,31 @@ void loop() {
 
       timeToPrintNewSetpoint = millis() + windowNewSetpoint;
     }
-    // Tiempo de muestra de la Ventana temporal que imprime el nuevo SETPOINT
-    if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint)){
-        isTheSetpointUpdated = false;
-        forceRePrint = true;
-        batteryConnected = true;  // si estando encendido se desconecta y luego modifico el setpoint, no se reimprime la notificacion
-
-        tone(BUZZER_PIN, 7000, 20);
-        delay(75);
-        tone(BUZZER_PIN, 7000, 80);
+    else{
+      menu.highlightMenuItem(encoderValue); // Resalto el nuevo Iten seleccionado mediante el encoder
     }
+  }
+  // Tiempo de muestra de la Ventana temporal que imprime el nuevo SETPOINT
+  if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint)){
+      isTheSetpointUpdated = false;
+      forceRePrint = true;
+      batteryConnected = true;  // si estando encendido se desconecta y luego modifico el setpoint, no se reimprime la notificacion
+
+      tone(BUZZER_PIN, 7000, 20);
+      delay(75);
+      tone(BUZZER_PIN, 7000, 80);
+  }
     // FIN CONFIGURACION DE CORRIENTE DE CARGA
+
 
   /***************************************************************************/
   /*                           ENCENDIDO Y APAGADO                           */
   /***************************************************************************/
 
-    // Deteccion de pulsacion de boton  
-    key = isButtonClicked(); // 0: no click, 1: short click, 2: long click, 3: double click
-    if(key){
+  // Deteccion de pulsacion de boton  
+  key = isButtonClicked(); // 0: no click, 1: short click, 2: long click, 3: double click
+  if(key){
+    if(!showMenu){ // Modo normal
       //  HUBO UNA PULSACION LARGA
       if(key == LONG_CLICK){ // Reiniciamos los contadores
 
@@ -308,22 +315,21 @@ void loop() {
         showMenu = true;
         oldEncoderValue = encoderValue;
       }
+    } // FIN Modo normal
+    else{ // Modo Configuracion/Seleccion
+      menu.executeMenuAction(); // Ejecuta la acción asociada al ítem del menú seleccionado.
+      if(!showMenu){      // Restauro los valores
+        batteryConnected = true;          
+        forceRePrint = true;
+
+        encoder.setBoundaries(0, 1000, false);
+        encoder.setEncoderValue(oldEncoderValue);
+
+        showMenu = false;
+      }
     }
+  }
   // FIN BOTON
-  }
-  else {
-    menu.update();      // Actualiza el estado del encoder
-    menu.checkButton(); // Verifica si se ha presionado el botón
-    if(!showMenu){      // Restauro los valores
-      batteryConnected = true;          
-      forceRePrint = true;
-
-      encoder.setBoundaries(0, 1000, false);
-      encoder.setEncoderValue(oldEncoderValue);
-
-      showMenu = false;
-    }
-  }
 
   /***************************************************************************/
   /*           CHEQUEO Y CONTROL DE LA TEMPERATURA EN EL MOSFET              */

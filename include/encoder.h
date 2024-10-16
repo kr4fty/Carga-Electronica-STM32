@@ -26,6 +26,11 @@ void encoder_init()
     encoder.setAcceleration(150); //or set the value - larger number = more accelearation; 0 or 1 means disabled acceleration
     encoder.setEncoderValue(0);
 }
+void encoder_setBasicParameters(long minValue, long maxValue, bool circleValues=false , long newValue=0)
+{
+    encoder.setBoundaries(minValue, maxValue, circleValues);
+    encoder.setEncoderValue(newValue);
+}
 
 enum ClickType {
     NO_CLICK,       // No hay pulsacion

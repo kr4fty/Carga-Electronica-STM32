@@ -4,7 +4,7 @@
 #include "menu.h"
 
 // Inicializa la librería de menús
-MenuLibraryWithSubmenus menu(lcd, encoder);
+MenuLibraryWithSubmenus menu;
 
 bool showMenu; //True: si se muestra el menu y no los mediciones
 
@@ -37,7 +37,7 @@ void menu_init(){
 
     // Asocia los submenús a las opciones del menú principal
     menu.addSubMenu("Backlight", subMenu1);
-    menu.addSubMenu("Modo", subMenu2);
+    menu.addSubMenu("Modo     ", subMenu2);
 
     // Muestra el menú principal
     menu.displayMenu();

@@ -20,19 +20,18 @@ public:
 
 class MenuLibraryWithSubmenus {
 public:
-    MenuLibraryWithSubmenus(Adafruit_PCD8544 &disp, AiEsp32RotaryEncoder &enc){
-        display = &disp;
-        encoder = &enc;
+    char menuList[10][14];
+
+    MenuLibraryWithSubmenus(){
         menuIndex = 0;
         menuItemsCount = 0;
         currentSubMenu = nullptr;
     }
     void addMenuItem(const char* item, void (*action)()=nullptr) {
-    if (menuItemsCount < maxMenuItems) {
-        menuItems[menuItemsCount++] = new MenuItem(item, action);
+        if (menuItemsCount < maxMenuItems) {
+            menuItems[menuItemsCount++] = new MenuItem(item, action);
+        }
     }
-}
-
     void addSubMenu(const char* item, MenuItem* subMenu) {
         for (int i = 0; i < menuItemsCount; i++) {
             if (strcmp(menuItems[i]->name, item) == 0) {
@@ -42,60 +41,43 @@ public:
         }
     }
     void displayMenu(){
-        encoder->setEncoderValue(0);
-        encoder->setBoundaries(0, menuItemsCount-1, true);
+        encoder_setBasicParameters(0, menuItemsCount-1, true);
 
-        display->clearDisplay();
-        display->setTextSize(1);
-        display->setTextColor(BLACK, WHITE);
-        display->setCursor(0, 0);
-        display->println("Menu:");
+        sprintf(menuList[0],"Menu:");
 
         for (int i = 0; i < menuItemsCount; i++) {
-            if (i == menuIndex) {
-                display->setTextColor(WHITE, BLACK); // Resalta la opción seleccionada
-            } else {
-                display->setTextColor(BLACK, WHITE);
-            }
-            display->println(menuItems[i]->name);
+            sprintf(menuList[i+1] ,"%s", menuItems[i]->name);
         }
 
-        display->display();
+        lcd_printMenu(menuList, menuItemsCount+1, menuIndex);
     }
-    void update(){
-        if (encoder->encoderChanged()) {
-            oldMenuIndex = menuIndex;
-            menuIndex = encoder->readEncoder();
-            if (currentSubMenu) {
-                //displaySubMenu(currentSubMenu);
-                updateSelectedSubenuItem(currentSubMenu);
-            } else {
-                //displayMenu();
-                updateSelectedMenuItem();
-            }
+    void highlightMenuItem(long encoderValue){ // Resaltar el nuevo Item seleccionado mediante el encoder
+        oldMenuIndex = menuIndex;
+        menuIndex = encoderValue;
+        if (currentSubMenu) {
+            updateSelectedSubenuItem(currentSubMenu);
+        } else {
+            updateSelectedMenuItem();
         }
     }
-    void checkButton(){
-        if (isButtonClicked()) {
-            if (currentSubMenu) {
+    void executeMenuAction(){ // Ejecuta la acción asociada al ítem del menú seleccionado.
+        if (currentSubMenu) {
+            selectMenuItem(menuIndex);
+            menuIndex = 0;
+            oldMenuIndex = 0;
+            displayMenu();
+            currentSubMenu = nullptr; // Regresa al menú principal
+        } else {
+            if (menuItems[menuIndex]->subMenu) {
+                currentSubMenu = menuItems[menuIndex]->subMenu; // Entra al submenú
+                menuIndex = 0; // Reinicia el índice del submenú
+                displaySubMenu(currentSubMenu);
+            } else {
                 selectMenuItem(menuIndex);
                 menuIndex = 0;
                 oldMenuIndex = 0;
                 displayMenu();
-                currentSubMenu = nullptr; // Regresa al menú principal
-            } else {
-                if (menuItems[menuIndex]->subMenu) {
-                    currentSubMenu = menuItems[menuIndex]->subMenu; // Entra al submenú
-                    menuIndex = 0; // Reinicia el índice del submenú
-                    displaySubMenu(currentSubMenu);
-                } else {
-                    selectMenuItem(menuIndex);
-                    menuIndex = 0;
-                    oldMenuIndex = 0;
-                    displayMenu();
-                }
             }
-            delay(200); // Debounce
         }
     }
     void freeMemory() {
@@ -115,8 +97,6 @@ public:
     }
 
 private:
-    Adafruit_PCD8544 *display;
-    AiEsp32RotaryEncoder *encoder;
     int menuIndex;
     int oldMenuIndex;
     int menuItemsCount;
@@ -138,56 +118,30 @@ private:
         if (selectedItem->action) {
             selectedItem->action(); // Llama a la función asociada
         }  else{ 
-            display->clearDisplay();
-            display->setTextSize(1);
-            display->setTextColor(BLACK, WHITE);
-            display->setCursor(0, 0);
-            display->print("Seleccionado: ");
-            display->println(menuItems[index]->name);
-            display->display();
+            lcd_pintSelectedMenu(selectedItem->name);
             delay(1000); // Muestra la selección durante 1 segundo
         }
     }
     void displaySubMenu(MenuItem* subMenu){
-        encoder->setEncoderValue(0);
-        encoder->setBoundaries(0, subMenu->subMenuItemCount-1, true);
+        encoder_setBasicParameters(0, subMenu->subMenuItemCount-1, true);
 
-        display->clearDisplay();
-        display->setTextSize(1);
-        display->setTextColor(BLACK, WHITE);
-        display->setCursor(0, 0);
-        display->println(subMenu->name);
+        sprintf(menuList[0], "%s", subMenu->name);
 
         for (int i = 0; i < subMenu->subMenuItemCount; i++) {
-            if (i == menuIndex) {
-                display->setTextColor(WHITE, BLACK); // Resalta la opción seleccionada
-            } else {
-                display->setTextColor(BLACK, WHITE);
-            }
-            display->println(subMenu->subMenu[i].name);
+            sprintf(menuList[i+1], "%s",subMenu->subMenu[i].name);
         }
 
-        display->display();
+        lcd_printMenu(menuList, subMenu->subMenuItemCount+1, menuIndex);
     }
     void updateSelectedSubenuItem(MenuItem* subMenu){
-        display->setCursor(0, (oldMenuIndex+1)*8);
-        display->setTextColor(BLACK, WHITE);
-        display->print(subMenu->subMenu[oldMenuIndex].name);
+        lcd_printMenuItem(subMenu->subMenu[oldMenuIndex].name, oldMenuIndex+1);
 
-        display->setCursor(0, (menuIndex+1)*8);
-        display->setTextColor(WHITE, BLACK);
-        display->print(subMenu->subMenu[menuIndex].name);
-        display->display();
+        lcd_printMenuItem(subMenu->subMenu[menuIndex].name, menuIndex+1, COLOR_WB); 
     }
     void updateSelectedMenuItem(){
-        display->setCursor(0, (oldMenuIndex+1)*8);
-        display->setTextColor(BLACK, WHITE);
-        display->print(menuItems[oldMenuIndex]->name);
+        lcd_printMenuItem(menuItems[oldMenuIndex]->name, oldMenuIndex+1);
 
-        display->setCursor(0, (menuIndex+1)*8);
-        display->setTextColor(WHITE, BLACK);
-        display->print(menuItems[menuIndex]->name);
-        display->display();
+        lcd_printMenuItem(menuItems[menuIndex]->name, menuIndex+1, COLOR_WB);  
     }
 };
 
