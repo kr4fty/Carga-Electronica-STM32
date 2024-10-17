@@ -11,6 +11,7 @@
 #include "conversion.h"
 #include "notifications.h"
 #include "myMenu.h"
+#include "calibrate.h"
 
 long encoderValue = 0;
 
@@ -18,8 +19,6 @@ double Setpoint, Input, Output; // Parametro PID
 //Specify the links and initial tuning parameters
 PID myPID(&Input, &Output, &Setpoint, KP_AGG, KI_AGG, KD_AGG, DIRECT);
 unsigned long windowStartTime;
-
-double vBattRawOld, iBattRawOld;
 
 #ifdef DEBUG
 unsigned long nextTime, startTime, actualTime;
@@ -51,50 +50,19 @@ void setup() {
   // Entrando a modo Calibracion. Medimos una corriente de 1A para luego aplicar relacion
   if(isButtonDown())
   {
-    lcd_printCalibration();
-
-    iBattRawOld = analogRead(IBATT_SENSE_PIN);
-    for(int i=0; i<5000; i++){
-      iAdcOffset = analogRead(IBATT_SENSE_PIN);
-      iAdcOffset = iBattRawOld + MU * (iAdcOffset - iBattRawOld);
-      iBattRawOld = iAdcOffset;
-      if(!(i%50)){
-        lcd_printIraw(iAdcOffset);
-      }
-      delay(1);
+    calibration_calibrate();
+    if(!iAdcOffset || !AdcRaw_1A){
+      calibration_clean();
     }
-    encoder.setBoundaries(0, 4095, false);
-    encoder.setEncoderValue(ampereToDutycycle(C_1A));
-    encoderValue = encoder.readEncoder();
-    pwm_setDuty1(encoderValue);
-    pwm_setDuty2(0);
-
-    while(!isButtonClicked()){
-      if (encoder.encoderChanged()){
-        encoderValue = encoder.readEncoder();
-                
-        pwm_setDuty1(encoderValue);
-      }
-
-      AdcRaw_1A = analogRead(IBATT_SENSE_PIN);
-      AdcRaw_1A = iBattRawOld + MU * (AdcRaw_1A - iBattRawOld);
-      iBattRawOld = AdcRaw_1A;
-      lcd_printIraw(AdcRaw_1A, COLOR_WB);
-      delay(1);
-    }
-    pwm_setDuty1(0);
-    Adc1aDiff = AdcRaw_1A - iAdcOffset;
-    encoder.setBoundaries(0, 1000, false);
   }
   else{
-    iAdcOffset = IADCOFFSET;
-    AdcRaw_1A = ADCRAW_1A;
-    Adc1aDiff = ADC_1A_DIFF;
+    calibration_clean();
   }
 
   windowStartTime = millis();
 
-  encoder.setEncoderValue(C_1A*100); // Seteo por defecto a 1A
+  encoder_setBasicParameters(0, 1000, false, C_1A*100); // Seteo por defecto a 1A
+  encoderValue = encoder.readEncoder();
   Setpoint = 0;
 
   tone(BUZZER_PIN, 434, 100);
@@ -322,10 +290,7 @@ void loop() {
         batteryConnected = true;          
         forceRePrint = true;
 
-        encoder.setBoundaries(0, 1000, false);
-        encoder.setEncoderValue(oldEncoderValue);
-
-        showMenu = false;
+        encoder_setBasicParameters(0, 1000, false, oldEncoderValue);
       }
     }
   }

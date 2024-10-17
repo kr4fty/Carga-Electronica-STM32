@@ -6,9 +6,9 @@
 
 #define COLOR_WB    0 // Color WHITE sobre BLACK
 #define COLOR_BW    1 // Color BLACK sobre WHITE
-#define SIZE_S      1 // Tamaño normal
-#define SIZE_M      2 // Tamaño mediano
-#define SIZE_L      3 // Tamaño grande
+#define SIZE_S      1 // Tamaño normal de la fuente
+#define SIZE_M      2 // Tamaño mediano de la fuente
+#define SIZE_L      3 // Tamaño grande de la fuente
 #define FONT_H      8 // Altura de la fuente
 #define FONT_W      6 // Ancho de la fuente
                                         
@@ -122,6 +122,22 @@ void lcd_printIraw(float iRaw, uint8_t color=COLOR_BW)
     lcd.print(buff);
     lcd.setTextColor(BLACK, WHITE);
 
+    lcd.display();
+}
+
+void lcd_printCalibrationParameters(double i0Araw, double i1Araw)
+{
+    lcd.clearDisplay();
+    lcd.drawLine(0*SIZE_S*FONT_W, 0*SIZE_S*FONT_H, 14*SIZE_S*FONT_W, 0*SIZE_S*FONT_H, BLACK);
+    lcd.setCursor(0*SIZE_S*FONT_W, 0*SIZE_S*FONT_H+2);
+    lcd.print("Parametros:");
+    lcd.drawLine(0*SIZE_S*FONT_W, 1*SIZE_S*FONT_H+2, 14*SIZE_S*FONT_W, 1*SIZE_S*FONT_H+2, BLACK);
+
+    lcd.setCursor(0*SIZE_S*FONT_W, 2*SIZE_S*FONT_H);
+    dtostrf(i0Araw, 6, 2, buff);
+    lcd.printf("adc 0A: %s\n", buff);
+    dtostrf(i1Araw, 6, 2, buff);
+    lcd.printf("adc 1A: %s", buff);
     lcd.display();
 }
 

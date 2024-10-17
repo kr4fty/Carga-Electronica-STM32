@@ -2,22 +2,25 @@
 #define _MY_MENU_H
 
 #include "menu.h"
+#include "calibrate.h"
 
 // Inicializa la librería de menús
 MenuLibraryWithSubmenus menu;
 
 bool showMenu; //True: si se muestra el menu y no los mediciones
 
-void menu_exit()
+void menu_exit() // libera memoria y sale del menu inmediatamente
 {
     menu.freeMemory();
     showMenu = false;
 }
 
+
 void menu_init(){
     // Agrega elementos al menú principal
     menu.addMenuItem("Backlight");
     menu.addMenuItem("Modo");
+    menu.addMenuItem("Calibracion");
     menu.addMenuItem("Salir", menu_exit);
 
     // Submenu Backlight
@@ -35,9 +38,18 @@ void menu_init(){
     subMenu2->subMenu[1] = MenuItem("Potencia  CTE");
     subMenu2->subMenu[2] = MenuItem("Tiempo");
 
+    // Submenu Calibracion
+    MenuItem* subMenu3 = new MenuItem("Calibracion");
+    subMenu3->subMenuItemCount = 3;
+    subMenu3->subMenu = new MenuItem[subMenu3->subMenuItemCount];
+    subMenu3->subMenu[0] = MenuItem("Calibrar", calibration_calibrate);
+    subMenu3->subMenu[1] = MenuItem("Parametros", calibration_show);
+    subMenu3->subMenu[2] = MenuItem("Borrar cfg", calibration_clean);
+
     // Asocia los submenús a las opciones del menú principal
     menu.addSubMenu("Backlight", subMenu1);
     menu.addSubMenu("Modo", subMenu2);
+    menu.addSubMenu("Calibracion", subMenu3);
 
     // Muestra el menú principal
     menu.displayMenu();
