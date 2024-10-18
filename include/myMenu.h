@@ -7,7 +7,8 @@
 // Inicializa la librería de menús
 MenuLibraryWithSubmenus menu;
 
-bool showMenu; //True: si se muestra el menu y no los mediciones
+bool showMenu; //True: si se muestra el menu y no las mediciones
+uint8_t controlMode=1; // Modo de control, corriente cte. por defecto (C_CONST_MODE es 1)
 
 void menu_exit() // libera memoria y sale del menu inmediatamente
 {
@@ -15,9 +16,18 @@ void menu_exit() // libera memoria y sale del menu inmediatamente
     showMenu = false;
 }
 
-void menu_goback()
+void menu_goback() // Por ahora no deberia hacer nada en especial
 {
+}
 
+void menu_modeCurrentContant()
+{
+    controlMode = 1;
+}
+
+void menu_modePowerContant()
+{
+    controlMode = 2;
 }
 
 void menu_init(){
@@ -39,8 +49,8 @@ void menu_init(){
     MenuItem* subMenu2 = new MenuItem("Modo");
     subMenu2->subMenuItemCount = 4;
     subMenu2->subMenu = new MenuItem[subMenu2->subMenuItemCount];
-    subMenu2->subMenu[0] = MenuItem("Corriente CTE");
-    subMenu2->subMenu[1] = MenuItem("Potencia  CTE");
+    subMenu2->subMenu[0] = MenuItem("Corriente CTE", menu_modeCurrentContant);
+    subMenu2->subMenu[1] = MenuItem("Potencia  CTE", menu_modePowerContant);
     subMenu2->subMenu[2] = MenuItem("Tiempo");
     subMenu2->subMenu[3] = MenuItem("Atras", menu_goback);
 

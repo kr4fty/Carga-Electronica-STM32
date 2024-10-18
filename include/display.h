@@ -141,14 +141,32 @@ void lcd_printCalibrationParameters(double i0Araw, double i1Araw)
     lcd.display();
 }
 
-void lcd_printBaseFrame()
+void lcd_printBaseFrame(uint8_t mode)
 {
     lcd.clearDisplay();
     lcd.setTextSize(SIZE_M);
     lcd.setCursor(6*SIZE_M*FONT_W, 0*SIZE_M*FONT_H);
     lcd.print("V");
     lcd.setCursor(6*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
-    lcd.print("A");
+    
+    // Dependiendo del modo varia la unidad del Setpoint
+    switch (mode){
+        case 0: // Sin modo de operacion
+            break;
+        case 1: // Modo Corriente Constante
+            lcd.print("A");
+            break;
+        case 2: // Modo Potencia Constante
+            lcd.print("W");
+            break;
+        case 3: // Modo Periodo
+        // Aca, dependiendo de tamaño del periodo, se debera usar Seg, Min u H
+            lcd.print("S");
+            break;
+        default:
+            break;
+    }
+
     lcd.setTextSize(SIZE_S);
     lcd.setCursor(4*SIZE_S*FONT_W, 4*SIZE_S*FONT_H);
     lcd.print("mAh");
@@ -162,7 +180,7 @@ void lcd_printBaseFrame()
     updateDisplay = true;
 }
 
-void lcd_printNewSetpoint(float value)
+void lcd_printNewSetpoint(float value, uint8_t mode=1)
 {
     //floatTostr(value, 4, 2);
     dtostrf(value, 4, 2, buff);
@@ -177,16 +195,37 @@ void lcd_printNewSetpoint(float value)
     lcd.print(buff);
     lcd.setTextSize(SIZE_M);
     lcd.setCursor(6*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
-    lcd.print("A");
+    // Dependiendo del modo varia la unidad del Setpoint
+    switch (mode){
+        case 0: // Sin modo de operacion
+            break;
+        case 1: // Modo Corriente Constante
+            lcd.print("A");
+            break;
+        case 2: // Modo Potencia Constante
+            lcd.print("W");
+            break;
+        case 3: // Modo Periodo
+        // Aca, dependiendo de tamaño del periodo, se debera usar Seg, Min u H
+            lcd.print("S");
+            break;
+        default:
+            break;
+    }
+    
     lcd.drawRect(0, ((LCDHEIGHT-SIZE_L*FONT_H)/2)-2, 84, (SIZE_L*FONT_H)+2, BLACK);
     lcd.setTextColor(BLACK,WHITE);
     lcd.display();
 }
 
-void lcd_printTinyNewSetpoint(float value)
+void lcd_printTinyNewSetpoint(float value, uint8_t mode=1)
 {
     //floatTostr(value, 6, 2);
-    dtostrf(value, 6, 2, buff);
+    if(mode == 2){
+        dtostrf(value, 6, 1, buff);
+    }else {
+        dtostrf(value, 6, 2, buff);
+    }
 
     lcd.setTextSize(SIZE_M);
     lcd.setCursor(0*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
@@ -355,6 +394,18 @@ void lcd_printIin(float i_in)
 {
     //floatTostr(i_in, 6, 2);
     dtostrf(i_in, 6, 2, buff);
+
+    lcd.setTextSize(SIZE_M);
+    lcd.setCursor(0*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
+    lcd.print(buff);
+
+    updateDisplay = true;
+}
+
+void lcd_printPin(float p_in)
+{
+    //floatTostr(p_in, 6, 1);
+    dtostrf(p_in, 6, 1, buff);
 
     lcd.setTextSize(SIZE_M);
     lcd.setCursor(0*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);

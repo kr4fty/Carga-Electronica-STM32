@@ -141,3 +141,18 @@ Agregar Modos de funcionamiento
                 Whatts constantes
                 Medicion de mAh de una bateria
                 Reaccion frente a pulsos de corriente, para ver si cae la Vin
+
+    En Modo Potencia constate, que deberia hacer?:
+        * Configurar el *encoder* para tener nuevo rango de limites
+          Si considero que voy a medir un maximo de 100W y con una resolucion
+          de 0.1W, por ejemplo, entonces mis limites serian de 0 a 1000.
+        * Modificar la variables de control dependiendo del tipo de MODO
+          seleccionado.
+          Ahora el Input seria la tension y corriente (potencia) leidas en cada
+          ciclo. A su vez el Setpoint sera la Potencia deseada. En tanto el 
+          Output seguira siendo dutyCycle ya que es el unico parametro que se 
+          puede controlar para controlar la corriente.
+          Tener en cuenta que en este caso variaran tanto la tension como la
+          la corriente al mismo tiempo(en el mejor de los casos solo variara 
+          uno, dependiendo del tipo de fuente). Por lo que el Setpoint debera 
+          ajustarse continuamente ya que solo podemos controla la corriente.

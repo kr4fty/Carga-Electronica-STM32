@@ -12,6 +12,7 @@
 #include "notifications.h"
 #include "myMenu.h"
 #include "calibrate.h"
+#include "modes.h"
 
 long encoderValue = 0;
 
@@ -66,14 +67,14 @@ void setup() {
   Setpoint = 0;
 
   tone(BUZZER_PIN, 434, 100);
-  lcd_printBaseFrame();
+  lcd_printBaseFrame(controlMode);
 }
 
 bool isPowerOn = false, isPowerOnOld; // TRUE: en funcionamiento, False: no ejecutandose
 double vRaw; // Valor crudo de la tencion de entrada, sin aplicar filtro, para detectar mas rapidamente la desconexion de la bateria
 double vBattRaw, iBattRaw; // Valores Leidos en los ADC
 bool batteryConnected=true;  // True si se detecto tension de sensado de bateria
-float iIn, vIn, wIn, totalmAh, totalWh; // Valores actuales de la V, I y Wh
+float iIn, vIn, vInOld, wIn, totalmAh, totalWh; // Valores actuales de la V, I y Wh
 bool wasVUpdated=true, wasIUpdated=true, wasXhUpdated=true, wasTempUpdated=true; //True: Si los valores cambiaron, para re imprimir
 uint16_t mosfetTempRaw, oldMofetTempRaw;
 float mosfetTemp; 
@@ -123,6 +124,19 @@ void loop() {
     }
     iBattRawOld = iBattRaw;
   }
+
+  // Calculo wIn
+  wIn = vIn * iIn;
+
+  // Si vario la Vin entonces recalculo el setpoint para el modo P_CONST_MODE
+  if(controlMode == P_CONST_MODE){
+    if(vIn =! vInOld && isPowerOn){
+      // Actualizo valores
+      ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
+      Setpoint = ampereToAdc(ampereSetpoint);
+      vInOld = vIn;
+    }
+  }
   // FIN Mediones
 
   /***************************************************************************/
@@ -170,18 +184,21 @@ void loop() {
   if(encoder.encoderChanged()){
     encoderValue = encoder.readEncoder();
    if (!showMenu) {
-      //encoderValue = encoder.readEncoder();
-      ampereSetpoint = encoderValue/100.0;
-      Output2 = ampereToDutycycle(ampereSetpoint*.5, MOSFET2);
-      if(isPowerOn){ // Si esta encendido lo musetro en una ventana temporal
-        lcd_printNewSetpoint(ampereSetpoint);
+      // Calculo el Setpoint necesario en valores de Ampere normalizados
+      ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
+
+      // Se actualizo el Sepoint, por que se debera actualizar la pantalla
+      if(isPowerOn){ // Si esta encendido se musetrara en una ventana temporal
+        lcd_printNewSetpoint(ampereSetpoint, controlMode);
         isTheSetpointUpdated = true;
       }
-      else{ // Si esta APAGADO lo muestro en lugar de la corriente medida
+      else{ // Si esta APAGADO se muestrara en lugar de la corriente medida
         printTinySetpoint = true;
       }
 
+      Output2 = ampereToDutycycle(ampereSetpoint*.5, MOSFET2);
       if(isPowerOn){
+        // Calculo el Setpoint necesario en valores que interpreta el PID
         Setpoint = ampereToAdc(ampereSetpoint);
       }
       
@@ -369,9 +386,6 @@ void loop() {
         pwm_setDuty1(Output);
         pwm_setDuty2(Output2); // Valor fijo a la mitad del setpoint
       }
-
-      // Calculo wIn
-      wIn = vIn * iIn;
       // Wh
       totalWh += (wIn / 360000.0);  // PID_WINDOW_SIZE / 3600000.0 = 1/360000.0
       // Ah
@@ -439,7 +453,7 @@ void loop() {
       if(forceRePrint){
         // Reimprimir toda la pantalla
         forceRePrint = false;
-        lcd_printBaseFrame();
+        lcd_printBaseFrame(controlMode);
         wasXhUpdated = true;
         wasVUpdated = true;
         if(isPowerOn){
@@ -468,15 +482,23 @@ void loop() {
       }
       if(isPowerOn){ // Solo muestro la corriente cuando esta encendido. Caso contrario, el Setpoint
         if(wasIUpdated){
-          // Print Iin
-          lcd_printIin(iIn);
+          if(controlMode==C_CONST_MODE){
+            // Print Iin
+            lcd_printIin(iIn);
+          }
+          else if(controlMode==P_CONST_MODE){
+            // Print Power In
+            lcd_printPin(wIn);
+          }
           wasIUpdated = false;
         }
       }
       else {
-        if(printTinySetpoint)
-          lcd_printTinyNewSetpoint(ampereSetpoint);
-        printTinySetpoint = false;
+        if(printTinySetpoint){
+          // mientras no este en funcionamiento la carga, se mostrara el setpoint
+          lcd_printTinyNewSetpoint(ampereSetpoint, controlMode);
+          printTinySetpoint = false;
+        }
       }
 
       lcd_display();
