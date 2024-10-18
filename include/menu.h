@@ -43,7 +43,7 @@ public:
     void displayMenu(){
         encoder_setBasicParameters(0, menuItemsCount-1, true);
 
-        sprintf(menuList[0],"Menu:");
+        sprintf(menuList[0],"Menu");
 
         for (int i = 0; i < menuItemsCount; i++) {
             sprintf(menuList[i+1] ,"%s", menuItems[i]->name);

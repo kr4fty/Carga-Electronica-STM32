@@ -15,6 +15,10 @@ void menu_exit() // libera memoria y sale del menu inmediatamente
     showMenu = false;
 }
 
+void menu_goback()
+{
+
+}
 
 void menu_init(){
     // Agrega elementos al menú principal
@@ -25,26 +29,29 @@ void menu_init(){
 
     // Submenu Backlight
     MenuItem* subMenu1 = new MenuItem("Backlight");
-    subMenu1->subMenuItemCount = 2;
+    subMenu1->subMenuItemCount = 3;
     subMenu1->subMenu = new MenuItem[subMenu1->subMenuItemCount];
     subMenu1->subMenu[0] = MenuItem("ON", lcd_backlightOn);
     subMenu1->subMenu[1] = MenuItem("OFF", lcd_backlightOff);
+    subMenu1->subMenu[2] = MenuItem("Atras", menu_goback);
 
     // Submenu "Modo"
     MenuItem* subMenu2 = new MenuItem("Modo");
-    subMenu2->subMenuItemCount = 3;
+    subMenu2->subMenuItemCount = 4;
     subMenu2->subMenu = new MenuItem[subMenu2->subMenuItemCount];
     subMenu2->subMenu[0] = MenuItem("Corriente CTE");
     subMenu2->subMenu[1] = MenuItem("Potencia  CTE");
     subMenu2->subMenu[2] = MenuItem("Tiempo");
+    subMenu2->subMenu[3] = MenuItem("Atras", menu_goback);
 
     // Submenu Calibracion
     MenuItem* subMenu3 = new MenuItem("Calibracion");
-    subMenu3->subMenuItemCount = 3;
+    subMenu3->subMenuItemCount = 4;
     subMenu3->subMenu = new MenuItem[subMenu3->subMenuItemCount];
     subMenu3->subMenu[0] = MenuItem("Calibrar", calibration_calibrate);
     subMenu3->subMenu[1] = MenuItem("Parametros", calibration_show);
-    subMenu3->subMenu[2] = MenuItem("Borrar cfg", calibration_clean);
+    subMenu3->subMenu[2] = MenuItem("Borrar cfg", calibration_resetParameters);
+    subMenu3->subMenu[3] = MenuItem("Atras", menu_goback);
 
     // Asocia los submenús a las opciones del menú principal
     menu.addSubMenu("Backlight", subMenu1);

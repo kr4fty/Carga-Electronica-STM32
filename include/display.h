@@ -375,14 +375,29 @@ void lcd_printERROR(uint8_t x, uint8_t y, uint8_t sz=1)
 void lcd_printMenuItem(const char *str, uint8_t posy, uint8_t color=COLOR_BW)
 {
     uint8_t str_len=strlen(str);
+    uint8_t i, diff;
     char aux[15];
-    // Relleno de caracteres ' ' hasta completar 14, max caracteres por linea
-    for(uint8_t i=0; i<14; i++){
-        if(i<str_len){
-            aux[i] = str[i];
+    diff = 14 - str_len;
+    if(posy){
+        // Relleno de caracteres ' ' hasta completar 14, max caracteres por linea
+        for(i=0; i<14; i++){
+            if(i<str_len){
+                aux[i] = str[i];
+            }
+            else{
+                aux[i] = ' ';
+            }
         }
-        else{
-            aux[i] = ' ';
+    }
+    else{
+        // Centro el texto del Titulo del Menu/Submenu
+        for(i=0; i<14; i++){
+            if((i<diff/2) || i>=(str_len+diff/2)){
+                aux[i] = '='; // Relleno con caracteres '=' hacia los lados
+            }
+            else { // En el centro el Titulo
+                aux[i] = str[i-diff/2];
+            }
         }
     }
     aux[14] = '\0';

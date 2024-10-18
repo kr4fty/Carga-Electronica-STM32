@@ -59,7 +59,7 @@ void calibration_calibrate()
 }
 
 // Reinicia los parametro a valores por defecto
-void calibration_clean()
+void calibration_resetParameters()
 {
     iAdcOffset = IADCOFFSET;
     AdcRaw_1A = ADCRAW_1A;

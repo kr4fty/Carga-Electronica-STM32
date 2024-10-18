@@ -52,11 +52,11 @@ void setup() {
   {
     calibration_calibrate();
     if(!iAdcOffset || !AdcRaw_1A){
-      calibration_clean();
+      calibration_resetParameters();
     }
   }
   else{
-    calibration_clean();
+    calibration_resetParameters();
   }
 
   windowStartTime = millis();
@@ -242,7 +242,7 @@ void loop() {
           delay(20);
           tone(BUZZER_PIN, 5000, 50);
           
-          Setpoint =ampereToAdc(ampereSetpoint);
+          Setpoint = ampereToAdc(ampereSetpoint);
           /*if(ampereSetpoint<1){
             myPID.SetTunings(KP_AGG, KI_AGG, KD_AGG);
           }

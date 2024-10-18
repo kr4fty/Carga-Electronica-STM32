@@ -26,10 +26,11 @@ void encoder_init()
     encoder.setAcceleration(150); //or set the value - larger number = more accelearation; 0 or 1 means disabled acceleration
     encoder.setEncoderValue(0);
 }
-void encoder_setBasicParameters(long minValue, long maxValue, bool circleValues=false , long newValue=0)
+void encoder_setBasicParameters(long minValue, long maxValue, bool circleValues=false , long newValue=0, long accel=150)
 {
     encoder.setBoundaries(minValue, maxValue, circleValues);
     encoder.setEncoderValue(newValue);
+    encoder.setAcceleration(accel);
 }
 
 enum ClickType {
@@ -55,6 +56,7 @@ bool isButtonDown()
 {
     return digitalReadFast(digitalPinToPinName(BUTTON_PIN))? false : true;
 }
+
 bool isButtonUp()
 {
     return digitalReadFast(digitalPinToPinName(BUTTON_PIN))? true : false;
