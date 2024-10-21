@@ -23,11 +23,13 @@ void menu_goback() // Por ahora no deberia hacer nada en especial
 void menu_modeCurrentContant()
 {
     controlMode = 1;
+    menu_exit();
 }
 
 void menu_modePowerContant()
 {
     controlMode = 2;
+    menu_exit();
 }
 
 void menu_init(){

@@ -21,7 +21,6 @@
 #define IADCOFFSET    513.4 // ADC medido en vacio
 #define ADCRAW_1A     555.1 // ADC medido con una corriente de 1A
 #define ADC_1A_DIFF   41.65 // Diferencia, en valores de ADC, desde 0 a 1A
-#define C_1A            1.0 // 1A
                          
 #define MU            0.001 // Tasa de aprendizaje, Filtro Adaptativo con 0<x<1
 

@@ -15,6 +15,8 @@
 #include "modes.h"
 
 long encoderValue = 0;
+float ampereSetpoint; // Contiene el valor del Setpoint expresado en Ampers
+float powerSetpoint;  // Contiene el valor de Setpoint expresado en Watts
 
 double Setpoint, Input, Output; // Parametro PID
 //Specify the links and initial tuning parameters
@@ -66,6 +68,15 @@ void setup() {
   encoderValue = encoder.readEncoder();
   Setpoint = 0;
 
+  if(controlMode == C_CONST_MODE){
+    powerSetpoint = 0.0; // 0 Watt
+    ampereSetpoint = C_1A;// 1 Ampere
+  }
+  else if(controlMode == P_CONST_MODE){
+    powerSetpoint = P_1W; // 1 Watt
+    ampereSetpoint = 0.0;// 0 Ampere
+  }
+
   tone(BUZZER_PIN, 434, 100);
   lcd_printBaseFrame(controlMode);
 }
@@ -88,10 +99,10 @@ bool isTheSetpointUpdated; // Para tener prioridad al mostrar nuevo setpoint
 bool printTinySetpoint=true;
 unsigned long timeToPrintNewSetpoint, windowNewSetpoint=1000;
 double Output2; // Contiene el duty del segundo MOSFET. Varia con el setpoint
-float ampereSetpoint=C_1A; // Contiene el valor del Setpoint expresado en ampere
 uint8_t key; // 0: no click, 1: corta, 2: larga, 3: doble pulsacion
+uint8_t oldControlMode; // Contiene el estado anterior del modo de control
 
-long oldEncoderValue;
+long oldEncoderValue; // Para restaurar el valor del encoder al salir del menú
 
 void loop() {
   /***************************************************************************/
@@ -130,9 +141,10 @@ void loop() {
 
   // Si vario la Vin entonces recalculo el setpoint para el modo P_CONST_MODE
   if(controlMode == P_CONST_MODE){
-    if(vIn =! vInOld && isPowerOn){
+    if(vIn != vInOld && isPowerOn){
       // Actualizo valores
-      ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
+      powerSetpoint = encoderValue / 10.0;
+      ampereSetpoint = ampereSetpoint = powerSetpoint / vIn;
       Setpoint = ampereToAdc(ampereSetpoint);
       vInOld = vIn;
     }
@@ -185,11 +197,24 @@ void loop() {
     encoderValue = encoder.readEncoder();
    if (!showMenu) {
       // Calculo el Setpoint necesario en valores de Ampere normalizados
-      ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
+      //ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
+      if(controlMode == C_CONST_MODE){
+        ampereSetpoint = encoderValue / 100.0;
+      }
+      else if(controlMode == P_CONST_MODE){
+        powerSetpoint = encoderValue / 10.0;
+        ampereSetpoint = powerSetpoint / vIn;
+      }
 
-      // Se actualizo el Sepoint, por que se debera actualizar la pantalla
+      // Se actualizo el Sepoint, por lo que se debera actualizar la pantalla
       if(isPowerOn){ // Si esta encendido se musetrara en una ventana temporal
-        lcd_printNewSetpoint(ampereSetpoint, controlMode);
+        if(controlMode == C_CONST_MODE){
+          lcd_printNewSetpoint(ampereSetpoint, controlMode);
+        }
+        else if(controlMode == P_CONST_MODE){
+          lcd_printNewSetpoint(powerSetpoint, controlMode);
+        }
+        
         isTheSetpointUpdated = true;
       }
       else{ // Si esta APAGADO se muestrara en lugar de la corriente medida
@@ -307,7 +332,18 @@ void loop() {
         batteryConnected = true;          
         forceRePrint = true;
 
-        encoder_setBasicParameters(0, 1000, false, oldEncoderValue);
+        // NUevo modo de control seleccionado. Inicializo el setpoint por defecto
+        if(controlMode != oldControlMode){
+          if(controlMode == C_CONST_MODE){
+            encoder_setBasicParameters(0, 1000, false, C_1A*100);
+            ampereSetpoint = C_1A;
+          }
+          else if(controlMode == P_CONST_MODE){
+            encoder_setBasicParameters(0, 1000, false, P_1W*10);
+            powerSetpoint = P_1W;
+          }
+          oldControlMode = controlMode;
+        }
       }
     }
   }
@@ -487,7 +523,7 @@ void loop() {
             lcd_printIin(iIn);
           }
           else if(controlMode==P_CONST_MODE){
-            // Print Power In
+            // Print Win
             lcd_printPin(wIn);
           }
           wasIUpdated = false;
@@ -496,7 +532,13 @@ void loop() {
       else {
         if(printTinySetpoint){
           // mientras no este en funcionamiento la carga, se mostrara el setpoint
-          lcd_printTinyNewSetpoint(ampereSetpoint, controlMode);
+          if(controlMode == C_CONST_MODE){
+            lcd_printTinyNewSetpoint(ampereSetpoint, controlMode);
+          }
+          else if(controlMode == P_CONST_MODE){
+            lcd_printTinyNewSetpoint(powerSetpoint, controlMode);
+          }
+          
           printTinySetpoint = false;
         }
       }

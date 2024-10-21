@@ -72,7 +72,8 @@ char buff[20];
 void lcd_init()
 {
     pinMode(LCD_BKLIGHT_PIN, OUTPUT);
-    digitalWrite(LCD_BKLIGHT_PIN, HIGH);
+    // Por defecto arranca con el baclkight apagado
+    digitalWrite(LCD_BKLIGHT_PIN, LOW);
     lcd.begin();
     lcd.cp437(true);
     lcd.setContrast(75);
@@ -141,7 +142,7 @@ void lcd_printCalibrationParameters(double i0Araw, double i1Araw)
     lcd.display();
 }
 
-void lcd_printBaseFrame(uint8_t mode)
+void lcd_printBaseFrame(uint8_t mode=1)
 {
     lcd.clearDisplay();
     lcd.setTextSize(SIZE_M);
@@ -183,7 +184,11 @@ void lcd_printBaseFrame(uint8_t mode)
 void lcd_printNewSetpoint(float value, uint8_t mode=1)
 {
     //floatTostr(value, 4, 2);
-    dtostrf(value, 4, 2, buff);
+    if(mode==2){
+        dtostrf(value, 4, 1, buff);
+    }else{
+        dtostrf(value, 4, 2, buff);
+    }
     
     lcd.setTextSize(SIZE_L);
     lcd.fillRect(0, ((LCDHEIGHT-SIZE_L*FONT_H)/2)-1, 84, (SIZE_L*FONT_H)+1, WHITE);
