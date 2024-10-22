@@ -13,6 +13,7 @@
 #include "myMenu.h"
 #include "calibrate.h"
 #include "modes.h"
+#include "control.h"
 
 long encoderValue = 0;
 float ampereSetpoint; // Contiene el valor del Setpoint expresado en Ampers
@@ -81,7 +82,7 @@ void setup() {
   lcd_printBaseFrame(controlMode);
 }
 
-bool isPowerOn = false, isPowerOnOld; // TRUE: en funcionamiento, False: no ejecutandose
+bool isPowerOn = false; // TRUE: en funcionamiento
 double vRaw; // Valor crudo de la tencion de entrada, sin aplicar filtro, para detectar mas rapidamente la desconexion de la bateria
 double vBattRaw, iBattRaw; // Valores Leidos en los ADC
 bool batteryConnected=true;  // True si se detecto tension de sensado de bateria
@@ -112,10 +113,9 @@ void loop() {
   // Filtro de Wiener, Adaptativo
   vBattRaw = vBattRawOld + MU * (vRaw - vBattRawOld);  
   // Calulo de vIn
-  //vIn = vBattRaw/ADCRAW_1V; // falta de linealidad
   vIn = 0.01935*vBattRaw + 0.25; // Funcion obtenida por regresion lineal
 
-  if(vBattRaw!=vBattRawOld){// si cambio V entonces actualizo valor en el LCD
+  if(vBattRaw != vBattRawOld){// si cambio V entonces actualizo valor en el LCD
     wasVUpdated = true;
     vBattRawOld = vBattRaw;
   }
@@ -126,7 +126,7 @@ void loop() {
   // Calculo iIn
   iIn = (iBattRaw - iAdcOffset) / Adc1aDiff;
 
-  if(iBattRaw!=iBattRawOld){ // si cambio I entonces actualizo valor en el LCD
+  if(iBattRaw != iBattRawOld){ // si cambio I entonces actualizo valor en el LCD
     if(isPowerOn){
       wasIUpdated = true;
     }
@@ -143,8 +143,8 @@ void loop() {
   if(controlMode == P_CONST_MODE){
     if(vIn != vInOld && isPowerOn){
       // Actualizo valores
-      powerSetpoint = encoderValue / 10.0;
-      ampereSetpoint = ampereSetpoint = powerSetpoint / vIn;
+      ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
+
       Setpoint = ampereToAdc(ampereSetpoint);
       vInOld = vIn;
     }
@@ -181,9 +181,7 @@ void loop() {
 
       batteryConnected = false;
       if(isPowerOn){
-        pwm_setDuty1(0);
-        pwm_setDuty2(0);
-        Setpoint = 0; // Lo seteo al valor de ADC para 0A
+        control_stopOutputsAndReset();
         //myPID.SetMode(MANUAL);  // Apagamos el PID
       }
     }
@@ -197,15 +195,8 @@ void loop() {
     encoderValue = encoder.readEncoder();
    if (!showMenu) {
       // Calculo el Setpoint necesario en valores de Ampere normalizados
-      //ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
-      if(controlMode == C_CONST_MODE){
-        ampereSetpoint = encoderValue / 100.0;
-      }
-      else if(controlMode == P_CONST_MODE){
-        powerSetpoint = encoderValue / 10.0;
-        ampereSetpoint = powerSetpoint / vIn;
-      }
-
+      ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
+      
       // Se actualizo el Sepoint, por lo que se debera actualizar la pantalla
       if(isPowerOn){ // Si esta encendido se musetrara en una ventana temporal
         if(controlMode == C_CONST_MODE){
@@ -309,10 +300,7 @@ void loop() {
           tone(BUZZER_PIN, 436, 100);
           tone(BUZZER_PIN, 200, 150);
 
-          pwm_setDuty1(0);
-          pwm_setDuty2(0);
-
-          Setpoint = 0;
+          control_stopOutputsAndReset();
           //myPID.SetMode(MANUAL);  // Apagamos el PID
 
           coolerFan_powerOff();
@@ -332,16 +320,22 @@ void loop() {
         batteryConnected = true;          
         forceRePrint = true;
 
-        // NUevo modo de control seleccionado. Inicializo el setpoint por defecto
+        // Inicializo el setpoint por defecto para cada modo
+        if(controlMode == C_CONST_MODE){
+          encoder_setBasicParameters(0, 1000, false, C_1A*100);
+          ampereSetpoint = C_1A;
+        }
+        else if(controlMode == P_CONST_MODE){
+          encoder_setBasicParameters(0, 1000, false, P_1W*10);
+          powerSetpoint = P_1W;
+        }
+
+        // Nuevo modo de control seleccionado. Reinicio valores
         if(controlMode != oldControlMode){
-          if(controlMode == C_CONST_MODE){
-            encoder_setBasicParameters(0, 1000, false, C_1A*100);
-            ampereSetpoint = C_1A;
-          }
-          else if(controlMode == P_CONST_MODE){
-            encoder_setBasicParameters(0, 1000, false, P_1W*10);
-            powerSetpoint = P_1W;
-          }
+          control_stopOutputsAndReset();
+
+          isPowerOn = false; // Apago si estaba en funcionamiento
+          digitalWrite(LED, HIGH); // Apago Led indicador de estado encendido
           oldControlMode = controlMode;
         }
       }
@@ -374,9 +368,7 @@ void loop() {
     if(!isItOverheating){ // Notificacion por exceso de temperatura, solo una vez
       
       if(isPowerOn){
-        pwm_setDuty1(0);
-        pwm_setDuty2(0);
-        Setpoint = iAdcOffset; // Lo seteo al valor de ADC para 0A
+        control_stopOutputsAndReset();
         //myPID.SetMode(MANUAL);  // Apagamos el PID
       }
 
@@ -571,10 +563,7 @@ void loop() {
     tone(BUZZER_PIN, 436, 100);
     tone(BUZZER_PIN, 200, 150);
 
-    pwm_setDuty1(0);
-    pwm_setDuty2(0);
-
-    Setpoint = 0;
+    control_stopOutputsAndReset();
   }
   // END Serial port
   #endif
