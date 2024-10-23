@@ -35,55 +35,69 @@ void menu_modePowerContant()
 
 void menu_modeTime()
 {
-    encoder_setBasicParameters(1, 3, true,1);
-    long evalue;    // Valor leido desde el encoder
+    long eValue;    // Valor leido desde el encoder
     uint8_t key;
     Tiempo time;    // contendra el tiempo de funcionamiento seleccionado
     bool selectedTime = false;
+    
+    lcd_printClock(time.horas, time.minutos, time.segundos, 1);
+    lcd_drawLine(1, BLACK);
+    
+    encoder_setBasicParameters(1, 3, true, 1, 1);
+    eValue = 1;
 
     while(!selectedTime){
-        evalue=encoder.readEncoder();
+        if(encoder.encoderChanged()){
+            // limpio linea anterior
+            lcd_drawLine(eValue, WHITE);
 
-        // Imprimo la hora con los colores invertidos en fragmento seleccionado
-        lcd_printClock(time.horas, time.minutos, time.segundos, evalue);
+            eValue = encoder.readEncoder();
+            lcd_drawLine(eValue, BLACK);
+        }        
         
         key = isButtonClicked();
         if(key == SHORT_CLICK){
+            lcd_drawLine(eValue, WHITE);
             key = 0;
-            switch (evalue)
+            switch (eValue)
             {
                 case 1: // Configuro la hora
-                    encoder_setBasicParameters(0, 23, true,0);
+                    encoder_setBasicParameters(0, 23, true, time.horas, 1);
                     while(key != SHORT_CLICK){
-                        evalue=encoder.readEncoder();
-                        lcd_printClock(evalue, time.minutos, time.segundos, 1);
+                        eValue=encoder.readEncoder();
+                        lcd_printPartialClock(eValue, 1, COLOR_WB);
                         key = isButtonClicked();
                     }
-                    time.horas = evalue;
+                    lcd_printPartialClock(eValue, 1, COLOR_BW);
+                    time.horas = eValue;
                     break;
-                case 2:
-                    encoder_setBasicParameters(0, 59, true,0);
+                case 2: // Configuro los Minutos
+                    encoder_setBasicParameters(0, 59, true, time.minutos, 1);
                     while(key != SHORT_CLICK){
-                        evalue=encoder.readEncoder();
-                        lcd_printClock(time.horas, evalue, time.segundos, 2);
+                        eValue=encoder.readEncoder();
+                        lcd_printPartialClock(eValue, 2, COLOR_WB);
                         key = isButtonClicked();
                     }
-                    time.minutos = evalue;
+                    lcd_printPartialClock(eValue, 2, COLOR_BW);
+                    time.minutos = eValue;
                     break;
-                case 3:
-                    encoder_setBasicParameters(0, 59, true,0);
+                case 3: // Configuro los Segundos
+                    encoder_setBasicParameters(0, 59, true, time.segundos, 1);
                     while(key != SHORT_CLICK){
-                        evalue=encoder.readEncoder();
-                        lcd_printClock(time.horas, time.minutos, evalue, 3);
+                        eValue=encoder.readEncoder();
+                        lcd_printPartialClock(eValue, 3, COLOR_WB);
                         key = isButtonClicked();
                     }
-                    time.segundos = evalue;
+                    lcd_printPartialClock(eValue, 3, COLOR_BW);
+                    time.segundos = eValue;
                     break;
                 
                 default:
                     break;
             }
-            encoder_setBasicParameters(1, 3, true,1);
+            encoder_setBasicParameters(1, 3, true,1, 1);
+            eValue = 1;
+            lcd_drawLine(1, BLACK);
         }
         else if(key == LONG_CLICK){
             // Guardo el tiempo seleccionado
