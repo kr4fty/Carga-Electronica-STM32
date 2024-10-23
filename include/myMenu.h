@@ -36,23 +36,29 @@ void menu_modePowerContant()
 void menu_modeTime()
 {
     long eValue;    // Valor leido desde el encoder
+    long oldEValue; // Valor guardado antes de entrar a configurar tiempo
     uint8_t key;
     Tiempo time;    // contendra el tiempo de funcionamiento seleccionado
     bool selectedTime = false;
+
+    // Recupero si habia un valor previo guardado
+    time = clock_totalTime_to_standar_format(timeDuration);
     
     lcd_printClock(time.horas, time.minutos, time.segundos, 1);
     lcd_drawLine(1, BLACK);
     
     encoder_setBasicParameters(1, 3, true, 1, 1);
     eValue = 1;
-
+    oldEValue = eValue;
     while(!selectedTime){
         if(encoder.encoderChanged()){
             // limpio linea anterior
-            lcd_drawLine(eValue, WHITE);
+            lcd_drawLine(oldEValue, WHITE);
 
             eValue = encoder.readEncoder();
             lcd_drawLine(eValue, BLACK);
+
+            oldEValue = eValue;
         }        
         
         key = isButtonClicked();
@@ -95,14 +101,16 @@ void menu_modeTime()
                 default:
                     break;
             }
-            encoder_setBasicParameters(1, 3, true,1, 1);
-            eValue = 1;
-            lcd_drawLine(1, BLACK);
+            encoder_setBasicParameters(1, 3, true, oldEValue, 1);
+            eValue = oldEValue;
+            lcd_drawLine(oldEValue, BLACK);
         }
         else if(key == LONG_CLICK){
             // Guardo el tiempo seleccionado
             timeDuration = clock_standar_format_to_totalTime(time);
+            totalTime = timeDuration;
             lcd_printClock(time.horas, time.minutos, time.segundos, 0, timeDuration);
+            clock_resetClock(timeDuration);
             delay(5000);
             selectedTime = true;
         }

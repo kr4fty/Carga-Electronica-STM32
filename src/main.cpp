@@ -257,6 +257,8 @@ void loop() {
         clock_resetClock();
         totalmAh = 0;
         totalWh = 0;
+        totalTime = 0;
+        timeDuration = NO_LIMIT;
 
         tone(BUZZER_PIN, 1000,300);
       }
@@ -426,18 +428,25 @@ void loop() {
   // Comprueba si ha pasado el intervalo de 1 segundo
   if (isPowerOn && batteryConnected && (currentMillis - previousMillis)>=TIME_1SEG) {
     previousMillis = currentMillis;  // Guarda el tiempo actual
-    // Actuzalizar el Tiempo solo si esta en funcionamiento
-    clock_update();
-    isPrintTime = true;
-
-    // Si tiempo transcurrido es mayor al limite seleccionado, apago
-    if((totalTime>=timeDuration) && (timeDuration!=NO_LIMIT) && isPowerOn){
+    
+    if(timeDuration == NO_LIMIT){
+      // Incremento el tiempo
+      clock_update();
+    }
+    else if(totalTime > 0){
+      // Decremento el tiempo
+      clock_decrement_time();
+    }
+    else{ // Si se supero el periodo de tiempo seleccionado, apago
       isPowerOn = false;
       // Apago la salida PWM y envio notificacion en pantalla
       control_powerOff();
       // Reseteo el reloj, por si quiero volver a prender la carga
-      clock_resetClock();
+      clock_resetClock(timeDuration);
+      // Apago Led indicador de estado
+      digitalWrite(LED, HIGH);
     }
+    isPrintTime = true;
   }
   // FIN RELOJ
 

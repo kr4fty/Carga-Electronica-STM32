@@ -7,12 +7,12 @@
 
 unsigned long previousMillis=0; // Almacena el último tiempo en que se ejecutó la acción
 unsigned long currentMillis;    // Obtiene el tiempo actual
-unsigned long totalTime=0;      // Tiempo total en segundos
+long totalTime=0;      // Tiempo total en segundos
 unsigned long timeDuration=NO_LIMIT;   // Tiempo que estara el proceso encendido
 
-uint8_t seconds = 0;
-uint8_t minutes = 0;
-uint8_t hours = 0;
+int8_t seconds = 0;
+int8_t minutes = 0;
+int8_t hours = 0;
 
 // Definición de la estructura para almacenar horas, minutos y segundos
 typedef struct {
@@ -33,6 +33,22 @@ void clock_update()
             hours++;
             if (hours >= 24) {
                 hours = 0; // Reiniciar a 0 después de 24 horas
+            }
+        }
+    }
+}
+void clock_decrement_time()
+{
+    totalTime--;
+    seconds--;
+    if (seconds < 0) {
+        seconds = 59;
+        minutes--;
+        if (minutes < 0) {
+            minutes = 59;
+            hours--;
+            if (hours < 0) {
+                hours = 23; // Reiniciar a 0 después de 24 horas
             }
         }
     }
@@ -74,12 +90,20 @@ unsigned long clock_standar_format_to_totalTime(Tiempo time)
     return totalT;
 }
 
-void clock_resetClock()
+void clock_resetClock(unsigned long newPeriod=0)
 {
-    seconds = 0;
-    minutes = 0;
-    hours = 0;
-
-    totalTime = 0;
+    if(!newPeriod){
+        seconds = 0;
+        minutes = 0;
+        hours = 0;
+        totalTime = 0;
+    }
+    else{
+        Tiempo time = clock_totalTime_to_standar_format(newPeriod);
+        seconds = time.segundos;
+        minutes = time.minutos;
+        hours = time.horas;
+        totalTime = newPeriod;
+    }
 }
 #endif

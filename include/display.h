@@ -543,7 +543,7 @@ void lcd_printClock(uint8_t hs, uint8_t min, uint8_t seg, uint8_t sel=0, unsigne
         lcd.setCursor(0, SIZE_S*FONT_H*2);
         sprintf(buff, "%02d:%02d:%02d",hs,min,seg);
         lcd.println(buff);
-        lcd.printf("Total: %d", tTime);
+        lcd.printf("Total: %dS", tTime);
     }
     else{
         for(uint8_t i=1; i<4; i++){
