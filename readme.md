@@ -45,74 +45,16 @@ Debido a la inestabilidad de la potencia con respecto a la temperatura de los mo
 - **Tensión de umbral (Vgs threshold):** Es el voltaje mínimo que debe aplicarse entre la puerta y la fuente para que el MOSFET comience a conducir corriente entre el drenador y la fuente.
 - **Disipación de potencia:** Operar en la zona de saturación genera una significativa disipación de potencia en el MOSFET. Por lo tanto, es necesario implementar un sistema de disipación forzada para evitar el sobrecalentamiento.
 
-## Interfaz
+### Modos de Funcionamiento
+* Modo de **Corriente Constante**: Este es el modo predeterminado de operación, en el cual el dispositivo mantiene un nivel de corriente constante, determinado por el operador. Este modo es ideal para evaluar el comportamiento de una fuente o batería al operar bajo una corriente estable.
+* Modo de **Potencia Constante**: En este modo, el dispositivo ajusta automáticamente la corriente para mantener la potencia consumida constante en la carga. Este enfoque es útil en situaciones donde es crítico mantener un nivel de potencia específico.
+* Modo de **Tiempo**: Este modo permite al operador establecer un intervalo de tiempo durante el cual la carga permanecerá activa. Se pueden utilizar cualquiera de los modos anteriores en conjunto con este, según las necesidades de la aplicación.
 
-- **Encendido:** 
-
-Al encender el dispositivo, se mostrará la tensión de entrada y la corriente deseada para la prueba, con la carga inicialmente apagada.
-
-- **Ajuste de Corriente:** 
-
-Gire la perilla para seleccionar una corriente mayor o menor a la configurada por defecto.
-
-- **Inicio del Proceso:** 
-
-Presione el botón para que la carga electrónica se inicie. Presione nuevamente para interrumpir o pausar el proceso.
-
-- **Visualización de Datos:**
-
-Durante el funcionamiento, se mostrarán:
-- Tensión actual de la bateria/fuente
-- Corriente actual que se esta consumiendo
-- Amperes-hora consumidos
-- Watts-hora consumidos
-- Tiempo que la carga esta en funcionamiento
-- Temperatura de los mosfet
-
-### Indicaciones y Alarmas
-
-- **Comprobación de la conexión de voltaje en la entrada:** 
-
-Al iniciar, se verifica la conexión de la batería/fuente. Si no hay conexión, el dispositivo permanecerá en reposo hasta que se detecte una fuente.
-- **Detención por Ausencia de Tensión:**
-
-Si luego de iniciado la carga electronica, se detectara la ausencia de tensión, el proceso se detiene inmediatamente. Se activa una alarma sonora y todos los procesos se pausarán, quedando en espera de reconexión.
-- **Alarma de Temperatura:**
-
-Se monitorea la temperatura de los MOSFET. Si se supera la temperatura crítica, todos los procesos se detendrán de inmediato.
 
 ## Hardware
 
 El diseño del hardware se realizó utilizando KiCad, y se ha optimizado para facilitar la conexión de todos los componentes. A continuación, se detallan los aspectos clave del diseño:
 
-### Esquema de Conexiones
-
-- **Microcontrolador (STM32F103):** 
-  - Conectado al encoder para la selección de corriente.
-  - Interfaz con la pantalla LCD Nokia 5110 para la visualización de datos.
-  - Controla el MOSFET (IRFZ44) a través de un pin PWM.
-  - Monitorea la temperatura mediante el LM35 y la corriente a través del ACS712-05B.
-
-- **Encoder con botón:**
-  - Conectado a un pin digital del STM32 para la entrada de usuario.
-
-- **Pantalla LCD Nokia 5110:**
-  - Conectada a los pines de datos y control del STM32 para la visualización de información.
-
-- **Buzzer:**
-  - Conectado a un pin digital para emitir alarmas sonoras.
-
-- **Sensor de temperatura (LM35):**
-  - Conectado a un pin analógico del STM32 para la lectura de temperatura.
-
-- **Ventilador Cooler Fan:**
-  - Controlado por el STM32 para activar la disipación forzada en caso de sobrecalentamiento.
-
-- **Transistor MOSFET (IRFZ44):**
-  - Conectado a la carga y controlado por el STM32 para regular la corriente.
-
-- **Sensor de corriente (ACS712-05B):**
-  - Conectado a un pin analógico del STM32 para medir la corriente de salida.
 
 ### Consideraciones de Diseño
 

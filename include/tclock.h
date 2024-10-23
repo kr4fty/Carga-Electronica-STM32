@@ -35,6 +35,7 @@ void clock_update()
         }
     }
 }
+
 void clock_decrement_time()
 {
     totalTime--;
@@ -101,4 +102,5 @@ void clock_resetClock(unsigned long newPeriod=0)
         totalTime = newPeriod;
     }
 }
+
 #endif
