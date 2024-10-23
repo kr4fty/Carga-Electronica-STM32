@@ -26,6 +26,7 @@ void encoder_init()
     encoder.setAcceleration(150); //or set the value - larger number = more accelearation; 0 or 1 means disabled acceleration
     encoder.setEncoderValue(0);
 }
+
 void encoder_setBasicParameters(long minValue, long maxValue, bool circleValues=false , long newValue=0, long accel=150)
 {
     encoder.setBoundaries(minValue, maxValue, circleValues);
@@ -50,7 +51,6 @@ unsigned long longPressAfterMiliseconds = 1000; // ¿Cuánto tiempo se considera
 unsigned long lastTimeButtonDown = millis();           // tiempo en el que duro la pulsacion
 unsigned long lastTimeButtonClick;
 unsigned long maxTimeBetween2Events = 300;
-unsigned long shakyClick = 500;
 
 bool isButtonDown()
 {

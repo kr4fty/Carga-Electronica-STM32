@@ -19,6 +19,7 @@ long encoderValue = 0;
 float ampereSetpoint; // Contiene el valor del Setpoint expresado en Ampers
 float powerSetpoint;  // Contiene el valor de Setpoint expresado en Watts
 
+
 double Setpoint, Input, Output; // Parametro PID
 //Specify the links and initial tuning parameters
 PID myPID(&Input, &Output, &Setpoint, KP_AGG, KI_AGG, KD_AGG, DIRECT);
@@ -293,14 +294,7 @@ void loop() {
         }
         // APAGADO
         else{
-          notificationPriority = 2;
-          notification_remove(3);
-          notification_add("   POWER OFF  ", notificationPriority);
-          
-          tone(BUZZER_PIN, 436, 100);
-          tone(BUZZER_PIN, 200, 150);
-
-          control_stopOutputsAndReset();
+          control_powerOff();
           //myPID.SetMode(MANUAL);  // Apagamos el PID
 
           coolerFan_powerOff();
@@ -435,6 +429,15 @@ void loop() {
     // Actuzalizar el Tiempo solo si esta en funcionamiento
     clock_update();
     isPrintTime = true;
+
+    // Si tiempo transcurrido es mayor al limite seleccionado, apago
+    if((totalTime>=timeDuration) && (timeDuration!=NO_LIMIT) && isPowerOn){
+      isPowerOn = false;
+      // Apago la salida PWM y envio notificacion en pantalla
+      control_powerOff();
+      // Reseteo el reloj, por si quiero volver a prender la carga
+      clock_resetClock();
+    }
   }
   // FIN RELOJ
 

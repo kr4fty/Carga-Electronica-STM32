@@ -186,7 +186,7 @@ void lcd_printNewSetpoint(float value, uint8_t mode=1)
     //floatTostr(value, 4, 2);
     if(mode==2){
         dtostrf(value, 4, 1, buff);
-    }else{
+    }else if(mode==1){
         dtostrf(value, 4, 2, buff);
     }
     
@@ -483,13 +483,67 @@ void lcd_printMenu(char strs[][14], uint8_t strSz, uint8_t actualPos=1)
     }
 }
 
-void lcd_pintSelectedMenu(const char *str){
+void lcd_printSelectedMenu(const char *str){
     lcd.clearDisplay();
     lcd.setTextSize(SIZE_S);
     lcd.setCursor(0, 0);
     lcd.println("Seleccionado: ");
     lcd.print(str);
 
+    lcd.display();
+}
+
+void lcd_printClock(uint8_t hs, uint8_t min, uint8_t seg, uint8_t sel=0, unsigned long tTime=0)
+{
+    lcd.clearDisplay();
+    lcd.setTextSize(SIZE_S);
+    lcd.print("TIME SELECT:");
+
+    if(sel == 0){
+        lcd.setTextSize(SIZE_S);
+        lcd.setCursor(0, SIZE_S*FONT_H*2);
+        sprintf(buff, "%02d:%02d:%02d",hs,min,seg);
+        lcd.println(buff);
+        lcd.printf("Total: %d", tTime);
+    }
+    else{
+        for(uint8_t i=1; i<4; i++){
+            if(sel == i){
+                lcd.setTextColor(WHITE, BLACK);
+            }
+            else{
+                lcd.setTextColor(BLACK, WHITE);
+            }
+            switch(i){
+                case 1:
+                        lcd.setCursor(0, SIZE_M*FONT_H*1);
+                        lcd.setTextSize(SIZE_M);
+                        lcd.printf("%02d",hs);
+                        lcd.setCursor(2*SIZE_M*FONT_W, SIZE_S*FONT_H*2+FONT_H/2);
+                        lcd.setTextSize(SIZE_S);
+                        lcd.setTextColor(BLACK, WHITE);
+                        lcd.printf(":");
+                        break;
+                case 2:
+                        lcd.setCursor(2*SIZE_M*FONT_W+SIZE_S*FONT_W, SIZE_M*FONT_H*1);
+                        lcd.setTextSize(SIZE_M);
+                        lcd.printf("%02d",min);
+                        lcd.setCursor(4*SIZE_M*FONT_W+SIZE_S*FONT_W, SIZE_S*FONT_H*2+FONT_H/2);
+                        lcd.setTextSize(SIZE_S);
+                        lcd.setTextColor(BLACK, WHITE);
+                        lcd.printf(":");
+                        break;
+                case 3:
+                        lcd.setCursor(4*SIZE_M*FONT_W+2*SIZE_S*FONT_W, SIZE_M*FONT_H*1);
+                        lcd.setTextSize(SIZE_M);
+                        lcd.printf("%02d",seg);
+                        break;
+                default:
+                        break;
+            }
+            lcd.setTextColor(BLACK, WHITE);
+        }
+    }
     lcd.display();
 }
 

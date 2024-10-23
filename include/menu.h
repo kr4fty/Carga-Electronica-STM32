@@ -118,7 +118,7 @@ private:
         if (selectedItem->action) {
             selectedItem->action(); // Llama a la función asociada
         }  else{ 
-            lcd_pintSelectedMenu(selectedItem->name);
+            lcd_printSelectedMenu(selectedItem->name);
             delay(1000); // Muestra la selección durante 1 segundo
         }
     }
