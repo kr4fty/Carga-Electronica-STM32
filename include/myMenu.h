@@ -47,9 +47,10 @@ void menu_modeTime()
     lcd_printClock(time.horas, time.minutos, time.segundos, 1);
     lcd_drawLine(1, BLACK);
     
-    encoder_setBasicParameters(1, 3, true, 1, 1);
     eValue = 1;
+    encoder_setBasicParameters(1, 3, true, 1, eValue);
     oldEValue = eValue;
+    
     while(!selectedTime){
         if(encoder.encoderChanged()){
             // limpio linea anterior
