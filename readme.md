@@ -8,6 +8,11 @@ Este proyecto está basado en un microcontrolador STM32F103, el cual controla la
 
 ----------------- **BAJO SU RESPONSABILIDAD** ----------------------
 
+### Video
+
+[Demo](https://github.com/user-attachments/assets/59047016-5cc4-44e5-a77e-8e39651e7eba)
+
+
 ## Preparación Previa
 
 Dado que cada transistor MOSFET presenta un voltaje umbral de puerta a fuente (Vgs Threshold) único, independientemente del fabricante o del código de identificación, es imperativo llevar a cabo mediciones específicas para determinar este voltaje umbral, así como la relación entre el ciclo de trabajo (Duty Cycle) y la corriente.
