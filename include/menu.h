@@ -119,7 +119,7 @@ private:
             selectedItem->action(); // Llama a la función asociada
         }  else{ 
             lcd_printSelectedMenu(selectedItem->name);
-            delay(1000); // Muestra la selección durante 1 segundo
+            while(!isButtonClicked()); // Muestra la selección mientas no haya un click
         }
     }
     void displaySubMenu(MenuItem* subMenu){

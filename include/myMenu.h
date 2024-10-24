@@ -122,8 +122,9 @@ void menu_modeTime()
             totalTime = timeDuration;
             lcd_printconfiguredTime(time.horas, time.minutos, time.segundos, timeDuration, controlMode);
             clock_resetClock(timeDuration);
-            delay(3000);
-            selectedTime = true;
+            // Espero hasta que se haga un click en el boton
+            while(!isButtonClicked());
+            selectedTime = true; // Se selecciono el tiempo, entonces salgo del while
         }
     }
 
