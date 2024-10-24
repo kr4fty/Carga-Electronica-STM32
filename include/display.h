@@ -506,10 +506,44 @@ void lcd_drawLine(uint8_t posX, uint8_t color=BLACK)
         case 3:
             lcd.drawLine((posX-1)*(2*SIZE_M*FONT_W + SIZE_S*FONT_W), 2*SIZE_M*FONT_H+1, (posX-1)*(3*SIZE_M*FONT_W + SIZE_S*FONT_W), 2*SIZE_M*FONT_H+1, color);
             break;
+        case 4:
+            lcd.drawLine(4*SIZE_S*FONT_W, 6*SIZE_S*FONT_H-1, 11*SIZE_S*FONT_W, 6*SIZE_S*FONT_H-1, color);
+            break;
         
         default:
             break;
     }
+
+    lcd.display();
+}
+
+void lcd_printSelectXConst(uint8_t mode)
+{
+    lcd.setCursor(4*SIZE_S*FONT_W, 5*SIZE_S*FONT_H-2);
+    if(mode==1){
+        lcd.print("A Const");
+    }
+    else if(mode==2){
+        lcd.print("W Const");
+    }
+    lcd.display();
+}
+
+void lcd_printconfiguredTime(uint8_t hs, uint8_t min, uint8_t seg, unsigned long tTime=0, uint8_t mode=1)
+{
+    lcd.clearDisplay();
+    lcd.drawLine(0, 0, 14*SIZE_S*FONT_W, 0, BLACK);
+    lcd.setCursor(0,2);
+    lcd.setTextSize(SIZE_S);
+    lcd.print("TIME SELECT:");
+    lcd.drawLine(0, 1*SIZE_S*FONT_H+2, 14*SIZE_S*FONT_W, 1*SIZE_S*FONT_H+2, BLACK);
+
+    lcd.setTextSize(SIZE_S);
+    lcd.setCursor(0, 2*SIZE_S*FONT_H);
+    sprintf(buff, "%02d:%02d:%02d",hs,min,seg);
+    lcd.println(buff);
+    lcd.printf("Total: %dS\n", tTime);
+    lcd.printf("Modo: %s", mode==1?"A Const":"W Const");
 
     lcd.display();
 }
@@ -532,38 +566,35 @@ void lcd_printPartialClock(uint8_t value, uint8_t posx, uint8_t color=COLOR_BW)
     lcd.display();
 }
 
-void lcd_printClock(uint8_t hs, uint8_t min, uint8_t seg, uint8_t sel=0, unsigned long tTime=0)
+void lcd_printClock(uint8_t hs, uint8_t min, uint8_t seg, uint8_t mode)
 {
     lcd.clearDisplay();
+    lcd.drawLine(0, 0, 14*SIZE_S*FONT_W, 0, BLACK);
+    lcd.setCursor(0,2);
     lcd.setTextSize(SIZE_S);
     lcd.print("TIME SELECT:");
+    lcd.drawLine(0, 1*SIZE_S*FONT_H+2, 14*SIZE_S*FONT_W, 1*SIZE_S*FONT_H+2, BLACK);
 
-    if(sel == 0){
-        lcd.setTextSize(SIZE_S);
-        lcd.setCursor(0, SIZE_S*FONT_H*2);
-        sprintf(buff, "%02d:%02d:%02d",hs,min,seg);
-        lcd.println(buff);
-        lcd.printf("Total: %dS", tTime);
-    }
-    else{
-        for(uint8_t i=1; i<4; i++){
-            switch(i){
-                case 1: // imprimo Hora modificada
-                        lcd_printPartialClock(hs, i);
-                        lcd.setCursor(2*SIZE_M*FONT_W, SIZE_S*FONT_H*2+FONT_H/2);
-                        lcd.printf(":");
-                        break;
-                case 2: // imprimo Minutos modificados
-                        lcd_printPartialClock(min, i);
-                        lcd.setCursor(4*SIZE_M*FONT_W+SIZE_S*FONT_W, SIZE_S*FONT_H*2+FONT_H/2);
-                        lcd.printf(":");
-                        break;
-                case 3: // imprimo Segundos modificados
-                        lcd_printPartialClock(seg, i);
-                        break;
-                default:
-                        break;
-            }
+    for(uint8_t i=1; i<=4; i++){
+        switch(i){
+            case 1: // imprimo Hora modificada
+                    lcd_printPartialClock(hs, i);
+                    lcd.setCursor(2*SIZE_M*FONT_W, SIZE_S*FONT_H*2+FONT_H/2);
+                    lcd.printf(":");
+                    break;
+            case 2: // imprimo Minutos modificados
+                    lcd_printPartialClock(min, i);
+                    lcd.setCursor(4*SIZE_M*FONT_W+SIZE_S*FONT_W, SIZE_S*FONT_H*2+FONT_H/2);
+                    lcd.printf(":");
+                    break;
+            case 3: // imprimo Segundos modificados
+                    lcd_printPartialClock(seg, i);
+                    break;
+            case 4:
+                    lcd_printSelectXConst(mode);
+                    break;
+            default:
+                    break;
         }
     }
     lcd.display();

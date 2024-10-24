@@ -7,7 +7,7 @@
 
 unsigned long previousMillis=0; // Almacena el último tiempo en que se ejecutó la acción
 unsigned long currentMillis;    // Obtiene el tiempo actual
-long totalTime=0;      // Tiempo total en segundos
+long totalTime=0;               // Tiempo total transcurrido, en segundos
 unsigned long timeDuration=NO_LIMIT;   // Tiempo que estara el proceso encendido
 
 // Definición de la estructura para almacenar horas, minutos y segundos

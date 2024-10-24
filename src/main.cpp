@@ -254,11 +254,11 @@ void loop() {
         notificationPriority = 1;
         notification_add("RESET COUNTERS", notificationPriority);
 
-        clock_resetClock();
+        clock_resetClock(timeDuration);
         totalmAh = 0;
         totalWh = 0;
         totalTime = 0;
-        timeDuration = NO_LIMIT;
+        //timeDuration = NO_LIMIT;
 
         tone(BUZZER_PIN, 1000,300);
       }

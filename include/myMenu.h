@@ -44,19 +44,19 @@ void menu_modeTime()
     // Recupero si habia un valor previo guardado
     time = clock_totalTime_to_standar_format(timeDuration);
     
-    lcd_printClock(time.horas, time.minutos, time.segundos, 1);
+    lcd_printClock(time.horas, time.minutos, time.segundos, controlMode);
     lcd_drawLine(1, BLACK);
     
     eValue = 1;
-    encoder_setBasicParameters(1, 3, true, 1, eValue);
+    encoder_setBasicParameters(1, 4, true, eValue, 1);
     oldEValue = eValue;
     
     while(!selectedTime){
         if(encoder.encoderChanged()){
+            eValue = encoder.readEncoder();
             // limpio linea anterior
             lcd_drawLine(oldEValue, WHITE);
-
-            eValue = encoder.readEncoder();
+            // Dibujo el nuevo
             lcd_drawLine(eValue, BLACK);
 
             oldEValue = eValue;
@@ -98,11 +98,21 @@ void menu_modeTime()
                     lcd_printPartialClock(eValue, 3, COLOR_BW);
                     time.segundos = eValue;
                     break;
+                case 4: // I cte. o W cte.
+                        if(controlMode == 1){
+                            controlMode = 2;                          
+                        }
+                        else if(controlMode == 2){
+                            controlMode = 1;                          
+                        }
+
+                        lcd_printSelectXConst(controlMode);
+                        break;
                 
                 default:
                     break;
             }
-            encoder_setBasicParameters(1, 3, true, oldEValue, 1);
+            encoder_setBasicParameters(1, 4, true, oldEValue, 1);
             eValue = oldEValue;
             lcd_drawLine(oldEValue, BLACK);
         }
@@ -110,15 +120,23 @@ void menu_modeTime()
             // Guardo el tiempo seleccionado
             timeDuration = clock_standar_format_to_totalTime(time);
             totalTime = timeDuration;
-            lcd_printClock(time.horas, time.minutos, time.segundos, 0, timeDuration);
+            lcd_printconfiguredTime(time.horas, time.minutos, time.segundos, timeDuration, controlMode);
             clock_resetClock(timeDuration);
-            delay(5000);
+            delay(3000);
             selectedTime = true;
         }
     }
 
     // Libero recursos y salgo del menu
     menu_exit();
+}
+
+void menu_setDefeultMode()  // Reconfiguro a valores por defecto
+{
+    controlMode = 1;
+    totalTime = 0;
+    timeDuration = NO_LIMIT;
+    clock_resetClock(timeDuration);
 }
 
 void menu_init(){
@@ -138,12 +156,13 @@ void menu_init(){
 
     // Submenu "Modo"
     MenuItem* subMenu2 = new MenuItem("Modo");
-    subMenu2->subMenuItemCount = 4;
+    subMenu2->subMenuItemCount = 5;
     subMenu2->subMenu = new MenuItem[subMenu2->subMenuItemCount];
     subMenu2->subMenu[0] = MenuItem("Corriente CTE", menu_modeCurrentContant);
     subMenu2->subMenu[1] = MenuItem("Potencia  CTE", menu_modePowerContant);
     subMenu2->subMenu[2] = MenuItem("Tiempo",  menu_modeTime);
-    subMenu2->subMenu[3] = MenuItem("Atras", menu_goback);
+    subMenu2->subMenu[3] = MenuItem("Reset Mode Set",  menu_setDefeultMode);
+    subMenu2->subMenu[4] = MenuItem("Atras", menu_goback);
 
     // Submenu Calibracion
     MenuItem* subMenu3 = new MenuItem("Calibracion");
