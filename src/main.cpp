@@ -262,8 +262,12 @@ void loop() {
         clock_resetClock(timeDuration);
         totalmAh = 0;
         totalWh = 0;
-        totalTime = 0;
-        //timeDuration = NO_LIMIT;
+        if(timeDuration == NO_LIMIT){
+          totalTime = 0;
+        }
+        else{
+          totalTime = timeDuration;
+        }
 
         tone(BUZZER_PIN, 1000,300);
       }

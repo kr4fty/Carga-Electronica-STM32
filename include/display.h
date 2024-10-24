@@ -521,10 +521,10 @@ void lcd_printSelectXConst(uint8_t mode)
 {
     lcd.setCursor(4*SIZE_S*FONT_W, 5*SIZE_S*FONT_H-2);
     if(mode==1){
-        lcd.print("A Const");
+        lcd.print("C Const");
     }
     else if(mode==2){
-        lcd.print("W Const");
+        lcd.print("P Const");
     }
     lcd.display();
 }
@@ -543,7 +543,7 @@ void lcd_printconfiguredTime(uint8_t hs, uint8_t min, uint8_t seg, unsigned long
     sprintf(_buff, "%02d:%02d:%02d",hs,min,seg);
     lcd.println(_buff);
     lcd.printf("Total: %dS\n", tTime);
-    lcd.printf("Modo: %s", mode==1?"A Const":"W Const");
+    lcd.printf("Modo: %s", mode==1?"C Const":"P Const");
 
     lcd.display();
 }
