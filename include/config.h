@@ -70,7 +70,7 @@
 
 //#define FREQUENCY         10000 // 10KHz
 #define PWM_INITIAL_DUTY      0 // 0%
-#define PWM_RESOLUTION     4095 // Resolución de 12 bits
+#define PWM__RESOLUTION    4095 // Resolución de 12 bits
 
 // VBATT IBATT
 #define VBATT_SENSE_PIN     PA4

@@ -6,10 +6,10 @@
 #include "encoder.h"
 #include "display.h"
 
-double vBattRawOld, iBattRawOld;
-double iAdcOffset;  // Lectura del ADC medida en vacio (0 A)
-double AdcRaw_1A;   // Lectura del ADC midiendo 1A
-double Adc1aDiff;   // Contiene la diferencia en valores de ADC, entre 1A y 0A
+extern double vBattRawOld, iBattRawOld;
+extern double iAdcOffset;  // Lectura del ADC medida en vacio (0 A)
+extern double AdcRaw_1A;   // Lectura del ADC midiendo 1A
+extern double Adc1aDiff;   // Contiene la diferencia en valores de ADC, entre 1A y 0A
 
 // Mostrar los parametros de referencia
 void calibration_show()

@@ -17,7 +17,7 @@ Adafruit_PCD8544 lcd = Adafruit_PCD8544(LCD_SCLK_PIN, LCD_DIN_PIN, LCD_DC_PIN, L
 #define DISPLAY_UPDATE_WINDOW 200 // Actualizo cada 200 mili segundos
 
 bool updateDisplay = false;
-char buff[20];
+char _buff[20];
 
 /*void floatTostr(float numero, uint8_t size_buff, uint8_t decimales)
 {
@@ -28,16 +28,16 @@ char buff[20];
         switch (size_buff-decimales-1) // digitos de la parte entera
         {
         case 0:
-            sprintf(buff,".");
+            sprintf(_buff,".");
             break;
         case 1:
-            sprintf(buff,"%1d.",parte_entera); // Obtenemos parte Entera
+            sprintf(_buff,"%1d.",parte_entera); // Obtenemos parte Entera
             break;
         case 2:
-            sprintf(buff,"%2d.",parte_entera); // Obtenemos parte Entera
+            sprintf(_buff,"%2d.",parte_entera); // Obtenemos parte Entera
             break;
         case 3:
-            sprintf(buff,"%3d.",parte_entera); // Obtenemos parte Entera
+            sprintf(_buff,"%3d.",parte_entera); // Obtenemos parte Entera
             break;
         default:
             break;
@@ -47,26 +47,26 @@ char buff[20];
         switch (decimales)
         {
         case 1:
-            sprintf(buff, "%s%01d", buff, parte_decimal);
+            sprintf(_buff, "%s%01d", _buff, parte_decimal);
             break;
         case 2:
-            sprintf(buff, "%s%02d", buff, parte_decimal);
+            sprintf(_buff, "%s%02d", _buff, parte_decimal);
             break;
         case 3:
-            sprintf(buff, "%s%03d", buff, parte_decimal);
+            sprintf(_buff, "%s%03d", _buff, parte_decimal);
             break;
         case 4:
-            sprintf(buff, "%s%04d", buff, parte_decimal);
+            sprintf(_buff, "%s%04d", _buff, parte_decimal);
             break;
         case 5:
-            sprintf(buff, "%s%05d", buff, parte_decimal);
+            sprintf(_buff, "%s%05d", _buff, parte_decimal);
             break;
         default:
             break;
         }
     }
     else
-        sprintf(buff,"NULL");
+        sprintf(_buff,"NULL");
 }*/
 
 void lcd_init()
@@ -113,14 +113,14 @@ void lcd_printCalibration()
 void lcd_printIraw(float iRaw, uint8_t color=COLOR_BW)
 {
     //floatTostr(iRaw, 5, 2);
-    dtostrf(iRaw, 5, 2, buff);
+    dtostrf(iRaw, 5, 2, _buff);
 
     lcd.setTextSize(SIZE_S);
     lcd.setCursor(9*SIZE_S*FONT_W, 5*SIZE_S*FONT_H);
     if(color == COLOR_WB){
         lcd.setTextColor(WHITE, BLACK);
     }
-    lcd.print(buff);
+    lcd.print(_buff);
     lcd.setTextColor(BLACK, WHITE);
 
     lcd.display();
@@ -135,10 +135,10 @@ void lcd_printCalibrationParameters(double i0Araw, double i1Araw)
     lcd.drawLine(0*SIZE_S*FONT_W, 1*SIZE_S*FONT_H+2, 14*SIZE_S*FONT_W, 1*SIZE_S*FONT_H+2, BLACK);
 
     lcd.setCursor(0*SIZE_S*FONT_W, 2*SIZE_S*FONT_H);
-    dtostrf(i0Araw, 6, 2, buff);
-    lcd.printf("adc 0A: %s\n", buff);
-    dtostrf(i1Araw, 6, 2, buff);
-    lcd.printf("adc 1A: %s", buff);
+    dtostrf(i0Araw, 6, 2, _buff);
+    lcd.printf("adc 0A: %s\n", _buff);
+    dtostrf(i1Araw, 6, 2, _buff);
+    lcd.printf("adc 1A: %s", _buff);
     lcd.display();
 }
 
@@ -185,19 +185,19 @@ void lcd_printNewSetpoint(float value, uint8_t mode=1)
 {
     //floatTostr(value, 4, 2);
     if(mode==2){
-        dtostrf(value, 4, 1, buff);
+        dtostrf(value, 4, 1, _buff);
     }else if(mode==1){
-        dtostrf(value, 4, 2, buff);
+        dtostrf(value, 4, 2, _buff);
     }
     
     lcd.setTextSize(SIZE_L);
     lcd.fillRect(0, ((LCDHEIGHT-SIZE_L*FONT_H)/2)-1, 84, (SIZE_L*FONT_H)+1, WHITE);
     lcd.setCursor(0, (LCDHEIGHT-(SIZE_L*FONT_H))/2);
     lcd.setTextColor(BLACK,WHITE);
-    lcd.print(buff);
+    lcd.print(_buff);
     lcd.setCursor(1, (LCDHEIGHT-(SIZE_L*FONT_H))/2+1);
     lcd.setTextColor(BLACK);
-    lcd.print(buff);
+    lcd.print(_buff);
     lcd.setTextSize(SIZE_M);
     lcd.setCursor(6*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
     // Dependiendo del modo varia la unidad del Setpoint
@@ -227,15 +227,15 @@ void lcd_printTinyNewSetpoint(float value, uint8_t mode=1)
 {
     //floatTostr(value, 6, 2);
     if(mode == 2){
-        dtostrf(value, 6, 1, buff);
+        dtostrf(value, 6, 1, _buff);
     }else {
-        dtostrf(value, 6, 2, buff);
+        dtostrf(value, 6, 2, _buff);
     }
 
     lcd.setTextSize(SIZE_M);
     lcd.setCursor(0*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
     lcd.setTextColor(WHITE, BLACK);
-    lcd.print(buff);
+    lcd.print(_buff);
     lcd.setTextColor(BLACK, WHITE);
 
     updateDisplay = true;
@@ -316,11 +316,11 @@ void lcd_printOverTemperatureMessage()
 
 void lcd_printAmpHour(float a_h)
 {
-    sprintf(buff, "%4d",(int)a_h);
+    sprintf(_buff, "%4d",(int)a_h);
 
     lcd.setTextSize(SIZE_S);
     lcd.setCursor(0*SIZE_S*FONT_W, 4*SIZE_S*FONT_H);
-    lcd.print(buff);
+    lcd.print(_buff);
 
     updateDisplay = true;
 }
@@ -331,27 +331,27 @@ void lcd_printWattHour(float w_h)
 
     if(w_h<1){
         lcd.setCursor(8*SIZE_S*FONT_W, 4*SIZE_S*FONT_H);
-        sprintf(buff, "%3d",(int)(w_h*1000));
-        lcd.print(buff);
+        sprintf(_buff, "%3d",(int)(w_h*1000));
+        lcd.print(_buff);
         lcd.print("m");
     }
     else if(w_h<10){
         lcd.setCursor(8*SIZE_S*FONT_W, 4*SIZE_S*FONT_H);
         //floatTostr(w_h, 4, 2);
-        dtostrf(w_h, 4, 2, buff);
-        lcd.print(buff);
+        dtostrf(w_h, 4, 2, _buff);
+        lcd.print(_buff);
     }
     else if(w_h<100){
         lcd.setCursor(8*SIZE_S*FONT_W, 4*SIZE_S*FONT_H);
         //floatTostr(w_h, 4, 1);
-        dtostrf(w_h, 4, 1, buff);
-        lcd.print(buff);
+        dtostrf(w_h, 4, 1, _buff);
+        lcd.print(_buff);
     }
     else{
         lcd.setCursor(7*SIZE_S*FONT_W, 4*SIZE_S*FONT_H);
         //floatTostr(w_h, 4, 1);
-        dtostrf(w_h, 4, 1, buff);
-        lcd.print(buff);
+        dtostrf(w_h, 4, 1, _buff);
+        lcd.print(_buff);
     }
 
     updateDisplay = true;
@@ -359,14 +359,14 @@ void lcd_printWattHour(float w_h)
 
 void lcd_printTime(uint8_t hs, uint8_t min, uint8_t seg, uint8_t color=COLOR_BW)
 {
-    sprintf(buff, "%02d:%02d:%02d",hs,min,seg);
+    sprintf(_buff, "%02d:%02d:%02d",hs,min,seg);
 
     lcd.setTextSize(SIZE_S);
     lcd.setCursor(0*SIZE_S*FONT_W, 5*SIZE_S*FONT_H);
     if(color == COLOR_WB){
         lcd.setTextColor(WHITE, BLACK);
     }
-    lcd.print(buff);
+    lcd.print(_buff);
     lcd.setTextColor(BLACK, WHITE);
 
     updateDisplay = true;
@@ -374,11 +374,11 @@ void lcd_printTime(uint8_t hs, uint8_t min, uint8_t seg, uint8_t color=COLOR_BW)
 
 void lcd_printTemperature(float mosfet_temp)
 {
-    sprintf(buff, "%3d",(int)mosfet_temp);
+    sprintf(_buff, "%3d",(int)mosfet_temp);
 
     lcd.setTextSize(SIZE_S);
     lcd.setCursor(9*SIZE_S*FONT_W, 5*SIZE_S*FONT_H);
-    lcd.print(buff);
+    lcd.print(_buff);
 
     updateDisplay = true;
 }
@@ -386,11 +386,11 @@ void lcd_printTemperature(float mosfet_temp)
 void lcd_printVin(float v_in)
 {
     //floatTostr(v_in, 6, 2);
-    dtostrf(v_in, 6, 2, buff);
+    dtostrf(v_in, 6, 2, _buff);
 
     lcd.setTextSize(SIZE_M);
     lcd.setCursor(0*SIZE_M*FONT_W, 0*SIZE_M*FONT_H);
-    lcd.print(buff);
+    lcd.print(_buff);
 
     updateDisplay = true;
 }
@@ -398,11 +398,11 @@ void lcd_printVin(float v_in)
 void lcd_printIin(float i_in)
 {
     //floatTostr(i_in, 6, 2);
-    dtostrf(i_in, 6, 2, buff);
+    dtostrf(i_in, 6, 2, _buff);
 
     lcd.setTextSize(SIZE_M);
     lcd.setCursor(0*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
-    lcd.print(buff);
+    lcd.print(_buff);
 
     updateDisplay = true;
 }
@@ -410,11 +410,11 @@ void lcd_printIin(float i_in)
 void lcd_printPin(float p_in)
 {
     //floatTostr(p_in, 6, 1);
-    dtostrf(p_in, 6, 1, buff);
+    dtostrf(p_in, 6, 1, _buff);
 
     lcd.setTextSize(SIZE_M);
     lcd.setCursor(0*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
-    lcd.print(buff);
+    lcd.print(_buff);
 
     updateDisplay = true;
 }
@@ -540,8 +540,8 @@ void lcd_printconfiguredTime(uint8_t hs, uint8_t min, uint8_t seg, unsigned long
 
     lcd.setTextSize(SIZE_S);
     lcd.setCursor(0, 2*SIZE_S*FONT_H);
-    sprintf(buff, "%02d:%02d:%02d",hs,min,seg);
-    lcd.println(buff);
+    sprintf(_buff, "%02d:%02d:%02d",hs,min,seg);
+    lcd.println(_buff);
     lcd.printf("Total: %dS\n", tTime);
     lcd.printf("Modo: %s", mode==1?"A Const":"W Const");
 

@@ -15,9 +15,14 @@
 #include "modes.h"
 #include "control.h"
 
-long encoderValue = 0;
-float ampereSetpoint; // Contiene el valor del Setpoint expresado en Ampers
-float powerSetpoint;  // Contiene el valor de Setpoint expresado en Watts
+long encoderValue = 0;// Valor leido desde el encoder
+float ampereSetpoint;// Contiene el valor del Setpoint expresado en Ampers
+float powerSetpoint;// Contiene el valor de Setpoint expresado en Watts
+double vBattRawOld; // Valor de lectura anterior del pin ADC que sensa la V
+double iBattRawOld; // Valor de lectura anterior del pin ADC que sensa la I
+double iAdcOffset;  // Lectura del ADC medida en vacio (0 A)
+double AdcRaw_1A;   // Lectura del ADC midiendo 1A
+double Adc1aDiff;   // Contiene la diferencia en valores de ADC, entre 1A y 0A
 
 
 double Setpoint, Input, Output; // Parametro PID

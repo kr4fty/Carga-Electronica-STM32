@@ -44,7 +44,7 @@ enum ClickType {
 bool wasButtonDown    = false; // se presiono el boton
 bool checkDoubleClick = false; // si detecta una pulsacion rapida es posible que venga una doble pulsacion
 bool longClickDetected;        // True: se forzo pulzacion larga, ignorar click al soltar el boton
-uint8_t clickCounter=0; // 
+uint8_t _clickCounter=0; // 
 //paramaters for button
 unsigned long shortPressAfterMiliseconds = 250; // Tiempo de espera para una pulsación corta
 unsigned long longPressAfterMiliseconds = 1000; // ¿Cuánto tiempo se considera una pulsación larga?
@@ -100,8 +100,8 @@ uint8_t isButtonClicked()
         }
         else if (wasButtonDown){
             //Serial.printf("button up\n");
-            clickCounter++;
-            //Serial.printf("Clicks = %d Time: %d ", clickCounter, timeDiff);
+            _clickCounter++;
+            //Serial.printf("Clicks = %d Time: %d ", _clickCounter, timeDiff);
             wasButtonDown = false;
 
             if (timeDiff > shortPressAfterMiliseconds){ // Se detecto pulsacion corta
@@ -113,20 +113,20 @@ uint8_t isButtonClicked()
         }
     }
     // Pasado un tiempo maxTimeBetween2Events, veo si fue un click corto o un doble click rapido
-    if(timeDiff>maxTimeBetween2Events && clickCounter){
-        if(clickCounter==1){ // Solo se detecto una pulsacion, entonces es una pulsacion corta
+    if(timeDiff>maxTimeBetween2Events && _clickCounter){
+        if(_clickCounter==1){ // Solo se detecto una pulsacion, entonces es una pulsacion corta
             key = SHORT_CLICK;
             //Serial.printf("Pulsacion Corta\n");
 
         }
-        else if(clickCounter>1){ // Se detecto varias pulsaciones, entonces es un doble click (podria haber 3 o mas :P)
+        else if(_clickCounter>1){ // Se detecto varias pulsaciones, entonces es un doble click (podria haber 3 o mas :P)
             if(checkDoubleClick){
                 key = DOUBLE_CLICK;
                 //Serial.printf("Doble Pulsacion\n");
             }
         }
         
-        clickCounter = 0;
+        _clickCounter = 0;
         checkDoubleClick = false;
     }
 

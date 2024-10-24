@@ -17,6 +17,7 @@
 #define LIMITED_TIME_MODE 3 // Modo Corriente Constante con un límite de tiempo
 
 extern float powerSetpoint; // Variable global que contine el setPoint de Potencia 
+uint8_t controlMode=C_CONST_MODE; // Modo de control, corriente cte. por defecto
 
 #define C_1A            1.0 // 1A
 #define P_1W            1.0 // 1W

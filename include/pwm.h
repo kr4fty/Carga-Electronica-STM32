@@ -32,7 +32,7 @@ void pwm_init(void) {
 
     // 4. Configurar el TIM3 para PWM
     TIM3->PSC = 1; // Prescaler (1 significa que la frecuencia del timer es 36 MHz)
-    TIM3->ARR = PWM_RESOLUTION; // Periodo para 12 bits
+    TIM3->ARR = PWM__RESOLUTION; // Periodo para 12 bits
 
     // 5. Configurar el canal 4 (PB1)
     TIM3->CCR4 = PWM_INITIAL_DUTY; // Ciclo de trabajo inicial para PB1

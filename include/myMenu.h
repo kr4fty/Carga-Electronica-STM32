@@ -9,7 +9,7 @@
 MenuLibraryWithSubmenus menu;
 
 bool showMenu; //True: si se muestra el menu y no las mediciones
-uint8_t controlMode=1; // Modo de control, corriente cte. por defecto (C_CONST_MODE es 1)
+extern uint8_t controlMode; // Modo de control, corriente cte. por defecto (C_CONST_MODE es 1)
 
 void menu_exit() // libera memoria y sale del menu inmediatamente
 {
