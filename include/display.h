@@ -138,7 +138,11 @@ void lcd_printCalibrationParameters(double i0Araw, double i1Araw)
     dtostrf(i0Araw, 6, 2, _buff);
     lcd.printf("adc 0A: %s\n", _buff);
     dtostrf(i1Araw, 6, 2, _buff);
-    lcd.printf("adc 1A: %s", _buff);
+    lcd.printf("adc 1A: %s\n\n", _buff);
+
+    lcd.setTextColor(WHITE, BLACK);
+    lcd.print("Click -> Salir");
+    lcd.setTextColor(BLACK, WHITE);
     lcd.display();
 }
 
@@ -529,7 +533,7 @@ void lcd_printSelectXConst(uint8_t mode)
     lcd.display();
 }
 
-void lcd_printconfiguredTime(uint8_t hs, uint8_t min, uint8_t seg, unsigned long tTime=0, uint8_t mode=1)
+void lcd_printConfiguredTime(uint8_t hs, uint8_t min, uint8_t seg, unsigned long tTime=0, uint8_t mode=1)
 {
     lcd.clearDisplay();
     lcd.drawLine(0, 0, 14*SIZE_S*FONT_W, 0, BLACK);
@@ -543,7 +547,10 @@ void lcd_printconfiguredTime(uint8_t hs, uint8_t min, uint8_t seg, unsigned long
     sprintf(_buff, "%02d:%02d:%02d",hs,min,seg);
     lcd.println(_buff);
     lcd.printf("Total: %dS\n", tTime);
-    lcd.printf("Modo: %s", mode==1?"C Const":"P Const");
+    lcd.printf("Modo: %s\n", mode==1?"C Const":"P Const");
+    lcd.setTextColor(WHITE, BLACK);
+    lcd.print("Click -> Salir");
+    lcd.setTextColor(BLACK, WHITE);
 
     lcd.display();
 }

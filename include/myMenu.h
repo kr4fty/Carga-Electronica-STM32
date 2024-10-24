@@ -120,7 +120,7 @@ void menu_modeTime()
             // Guardo el tiempo seleccionado
             timeDuration = clock_standar_format_to_totalTime(time);
             totalTime = timeDuration;
-            lcd_printconfiguredTime(time.horas, time.minutos, time.segundos, timeDuration, controlMode);
+            lcd_printConfiguredTime(time.horas, time.minutos, time.segundos, timeDuration, controlMode);
             clock_resetClock(timeDuration);
             // Espero hasta que se haga un click en el boton
             while(!isButtonClicked());
