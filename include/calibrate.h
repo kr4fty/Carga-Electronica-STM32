@@ -25,13 +25,13 @@ void calibration_calibrate()
 
     iBattRawOld = analogRead(IBATT_SENSE_PIN);
     for(int i=0; i<5000; i++){
-      iAdcOffset = analogRead(IBATT_SENSE_PIN);
-      iAdcOffset = iBattRawOld + MU * (iAdcOffset - iBattRawOld);
-      iBattRawOld = iAdcOffset;
-      if(!(i%50)){
-        lcd_printIraw(iAdcOffset);
-      }
-      delay(1);
+        iAdcOffset = analogRead(IBATT_SENSE_PIN);
+        iAdcOffset = iBattRawOld + MU * (iAdcOffset - iBattRawOld);
+        iBattRawOld = iAdcOffset;
+        if(!(i%50)){
+            lcd_printIraw(iAdcOffset);
+        }
+        delay(1);
     }
     encoder_setBasicParameters(0, 4095, false, 2400);
     long encoderValue = encoder.readEncoder();
@@ -40,17 +40,16 @@ void calibration_calibrate()
     pwm_setDuty2(0);
 
     while(!isButtonClicked()){
-      if (encoder.encoderChanged()){
-        encoderValue = encoder.readEncoder();
-                
-        pwm_setDuty1(encoderValue);
-      }
+        if (encoder.encoderChanged()){
+            encoderValue = encoder.readEncoder();
+            pwm_setDuty1(encoderValue);
+        }
 
-      AdcRaw_1A = analogRead(IBATT_SENSE_PIN);
-      AdcRaw_1A = iBattRawOld + MU * (AdcRaw_1A - iBattRawOld);
-      iBattRawOld = AdcRaw_1A;
-      lcd_printIraw(AdcRaw_1A, COLOR_WB);
-      delay(1);
+        AdcRaw_1A = analogRead(IBATT_SENSE_PIN);
+        AdcRaw_1A = iBattRawOld + MU * (AdcRaw_1A - iBattRawOld);
+        iBattRawOld = AdcRaw_1A;
+        lcd_printIraw(AdcRaw_1A, COLOR_WB);
+        delay(1);
     }
     pwm_setDuty1(0);
     Adc1aDiff = AdcRaw_1A - iAdcOffset;
