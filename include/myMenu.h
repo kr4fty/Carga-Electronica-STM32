@@ -24,18 +24,24 @@ void menu_goback() // Por ahora no deberia hacer nada en especial
 void menu_modeCurrentContant()
 {
     controlMode = 1;
+    timeDuration = NO_LIMIT;
+    totalTime = 0;
     menu_exit();
 }
 
 void menu_modePowerContant()
 {
     controlMode = 2;
+    timeDuration = NO_LIMIT;
+    totalTime = 0;
     menu_exit();
 }
 
 void menu_modeResistanceContant()
 {
     controlMode = 3;
+    timeDuration = NO_LIMIT;
+    totalTime = 0;
     menu_exit();
 }
 

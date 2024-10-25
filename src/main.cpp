@@ -254,8 +254,8 @@ void loop() {
     // Tiempo de muestra de la Ventana temporal que imprime el nuevo SETPOINT
     if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint)){
             isTheSetpointUpdated = false;
-            forceRePrint = true;
-            batteryConnected = true;  // si estando encendido se desconecta y luego modifico el setpoint, no se reimprime la notificacion
+            // si estando encendido se desconecta y luego modifico el setpoint, no se reimprime la notificacion
+            control_forceReprintDisplay();
 
             tone(BUZZER_PIN, 7000, 20);
             delay(75);
@@ -279,14 +279,8 @@ void loop() {
                 notification_add("RESET COUNTERS", notificationPriority);
 
                 clock_resetClock(timeDuration);
-                totalmAh = 0;
-                totalWh = 0;
-                if(timeDuration == NO_LIMIT){
-                    totalTime = 0;
-                }
-                else{
-                    totalTime = timeDuration;
-                    }
+                
+                control_resetCounters();
 
                 tone(BUZZER_PIN, 1000,300);
             }
@@ -341,8 +335,7 @@ void loop() {
         else{ // Se ingresa al Menú
             menu.executeMenuAction(); // Ejecuta la acción asociada al ítem del menú seleccionado.
             if(!showMenu){      // Restauro los valores
-                batteryConnected = true;          
-                forceRePrint = true;
+                control_forceReprintDisplay();
 
                 // Inicializo el setpoint por defecto para cada modo
                 switch (controlMode){
@@ -361,18 +354,21 @@ void loop() {
                     default:
                         break;
                 }
-                encoderValue = encoder.readEncoder();
-                // Calculo el Setpoint necesario en valores de Ampere normalizados
-                ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
 
                 // Nuevo modo de control seleccionado. Reinicio valores
-                if(controlMode != oldControlMode){
-                    control_stopOutputsAndReset();
-
-                    isPowerOn = false; // Apago si estaba en funcionamiento
-                    digitalWrite(LED, HIGH); // Apago Led indicador de estado encendido
-                    oldControlMode = controlMode;
-                }
+                // Apago si estaba en funcionamiento
+                isPowerOn = false; 
+                // Apago las salidas PWM
+                control_stopOutputsAndReset();
+                // Reinicio los contadores
+                control_resetCounters();
+                // Reinicio el tiempo a valores por defecto, de acuerdo el modo seleccionado
+                clock_resetClock(timeDuration);
+                // Vuelvo a calcular el Setpoint para el nuevo modo seleccionado
+                encoderValue = encoder.readEncoder();
+                ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
+                // Apago Led indicador de estado encendido
+                digitalWrite(LED, HIGH); 
             }
         }
     }
@@ -497,7 +493,7 @@ void loop() {
             if(newNotification){
                 if(notification_hasExpired()){
                     // Fuerzo reimprimir toda la pantalla
-                    forceRePrint = true;
+                    control_forceReprintDisplay();
 
                     /* Se coloca aquí porque, al reconectar la batería tras una desconexión,
                     * se genera un sobreimpulso que puede dañar la fuente/batería. Por 
@@ -507,7 +503,6 @@ void loop() {
                     if(isPowerOn&&batteryConnected){
                         Setpoint = ampereToAdc(ampereSetpoint);
                     }
-                    batteryConnected = true;  // si estando encendido se desconecta y luego apago la carga, no se reimprime la pantalla
                 }
             }
             else {
@@ -529,9 +524,7 @@ void loop() {
                 }
             }
 
-            if(forceRePrint){
-                // Reimprimir toda la pantalla
-                forceRePrint = false;
+            if(forceRePrint){   // Reimprimir toda la pantalla
                 lcd_printBaseFrame(controlMode);
                 wasXhUpdated = true;
                 wasVUpdated = true;
@@ -543,6 +536,8 @@ void loop() {
                 }
                 isPrintTime = true;
                 wasTempUpdated = true;
+
+                forceRePrint = false;
             }
 
             // Imprimo los Watts-Hora y Ampere-Hora

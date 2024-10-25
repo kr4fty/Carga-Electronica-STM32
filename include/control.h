@@ -4,13 +4,37 @@
 #include "pwm.h"
 #include "notifications.h"
 #include "sound.h"
+#include "tclock.h"
 
-extern double Setpoint;
+extern double Setpoint;         // Setpoint del sistema
+extern float totalmAh;          // mAh totales consumidos
+extern float totalWh;           // Wh totales consumidos
+extern bool batteryConnected;   // True: tengo bateria conectada
+extern bool forceRePrint;       // True: limpia y fuerza la reimpresion en pantalla
 
-void control_stopOutputsAndReset(){
+void control_resetCounters()
+{
+    totalmAh = 0;
+    totalWh = 0;
+    if(timeDuration == NO_LIMIT){
+        totalTime = 0;
+    }
+    else{
+        totalTime = timeDuration;
+    }
+}
+
+void control_stopOutputsAndReset()
+{
     pwm_setDuty1(0);
     pwm_setDuty2(0);
     Setpoint = 0; // Reinicia el setpoint
+}
+
+void control_forceReprintDisplay()
+{
+    batteryConnected = true;
+    forceRePrint = true;
 }
 
 void control_powerOff()
