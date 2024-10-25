@@ -11,6 +11,7 @@ extern float totalmAh;          // mAh totales consumidos
 extern float totalWh;           // Wh totales consumidos
 extern bool batteryConnected;   // True: tengo bateria conectada
 extern bool forceRePrint;       // True: limpia y fuerza la reimpresion en pantalla
+extern bool isPowerOn;          // True: proceso funcionando
 
 void control_resetCounters()
 {
@@ -35,6 +36,20 @@ void control_forceReprintDisplay()
 {
     batteryConnected = true;
     forceRePrint = true;
+}
+
+void control_resetAllForNewMode()
+{
+    // Apago si estaba en funcionamiento
+    isPowerOn = false;
+    // Apago Led indicador de estado encendido
+    digitalWrite(LED, HIGH); 
+    // Apago las salidas PWM
+    control_stopOutputsAndReset();
+    // Reinicio los contadores
+    control_resetCounters();
+    // Reinicio el tiempo a valores por defecto, de acuerdo el modo seleccionado
+    clock_resetClock(timeDuration);
 }
 
 void control_powerOff()

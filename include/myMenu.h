@@ -4,12 +4,14 @@
 #include "menu.h"
 #include "calibrate.h"
 #include "tclock.h"
+#include "control.h"
 
 // Inicializa la librería de menús
 MenuLibraryWithSubmenus menu;
 
-bool showMenu; //True: si se muestra el menu y no las mediciones
+bool showMenu;              //True: si se muestra el menu y no las mediciones
 extern uint8_t controlMode; // Modo de control, corriente cte. por defecto (C_CONST_MODE es 1)
+extern bool isPowerOn;      // True: proceso funcionando
 
 void menu_exit() // libera memoria y sale del menu inmediatamente
 {
@@ -25,6 +27,7 @@ void menu_modeCurrentContant()
 {
     controlMode = 1;
     timeDuration = NO_LIMIT;
+    control_resetAllForNewMode();
     menu_exit();
 }
 
@@ -32,6 +35,7 @@ void menu_modePowerContant()
 {
     controlMode = 2;
     timeDuration = NO_LIMIT;
+    control_resetAllForNewMode();
     menu_exit();
 }
 
@@ -39,6 +43,7 @@ void menu_modeResistanceContant()
 {
     controlMode = 3;
     timeDuration = NO_LIMIT;
+    control_resetAllForNewMode();
     menu_exit();
 }
 
@@ -49,6 +54,10 @@ void menu_modeTime()
     uint8_t key;
     Tiempo time;    // contendra el tiempo de funcionamiento seleccionado
     bool selectedTime = false;
+
+    // Detengo la salida pwm si estaba trabajando
+    isPowerOn = false;
+    control_stopOutputsAndReset();
 
     // Recupero si habia un valor previo guardado
     time = clock_totalTime_to_standar_format(timeDuration);
@@ -134,9 +143,8 @@ void menu_modeTime()
         else if(key == LONG_CLICK){
             // Guardo el tiempo seleccionado
             timeDuration = clock_standar_format_to_totalTime(time);
-            totalTime = timeDuration;
             lcd_printConfiguredTime(time.horas, time.minutos, time.segundos, timeDuration, controlMode);
-            clock_resetClock(timeDuration);
+            control_resetAllForNewMode();
             // Espero hasta que se haga un click en el boton
             while(!isButtonClicked());
             selectedTime = true; // Se selecciono el tiempo, entonces salgo del while

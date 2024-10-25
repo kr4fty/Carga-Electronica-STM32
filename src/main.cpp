@@ -25,7 +25,6 @@ double iAdcOffset;  // Lectura del ADC medida en vacio (0 A)
 double AdcRaw_1A;   // Lectura del ADC midiendo 1A
 double Adc1aDiff;   // Contiene la diferencia en valores de ADC, entre 1A y 0A
 
-
 double Setpoint, Input, Output; // Parametro PID
 //Specify the links and initial tuning parameters
 PID myPID(&Input, &Output, &Setpoint, KP_AGG, KI_AGG, KD_AGG, DIRECT);
@@ -119,6 +118,7 @@ bool printTinySetpoint=true;
 unsigned long timeToPrintNewSetpoint, windowNewSetpoint=1000;
 double Output2; // Contiene el duty del segundo MOSFET. Varia con el setpoint
 uint8_t key; // 0: no click, 1: corta, 2: larga, 3: doble pulsacion
+uint8_t oldControlMode; // Contiene el estado anterior del modo de control
 
 long oldEncoderValue; // Para restaurar el valor del encoder al salir del menú
 
@@ -160,8 +160,10 @@ void loop() {
     if(controlMode==P_CONST_MODE || controlMode==R_CONST_MODE){
         if(vIn != vInOld && isPowerOn){
             // Actualizo valores
-            ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
+            ampereSetpoint = modes_handleEncoderChange(vIn, showMenu?oldEncoderValue:encoderValue, controlMode);
 
+            Output2 = ampereToDutycycle(ampereSetpoint*.5, MOSFET2);
+            
             Setpoint = ampereToAdc(ampereSetpoint);
             vInOld = vIn;
         }
@@ -333,41 +335,45 @@ void loop() {
         } // FIN Modo normal
         else{ // Se ingresa al Menú
             menu.executeMenuAction(); // Ejecuta la acción asociada al ítem del menú seleccionado.
+
             if(!showMenu){      // Restauro los valores
                 control_forceReprintDisplay();
 
-                // Inicializo el setpoint por defecto para cada modo
-                switch (controlMode){
-                    case C_CONST_MODE:
-                        encoder_setBasicParameters(0, 1000, false, C_1A*100);
-                        ampereSetpoint = C_1A;
-                        break;
-                    case P_CONST_MODE:
-                        encoder_setBasicParameters(0, 1000, false, P_1W*10);
-                        powerSetpoint = P_1W;
-                        break;
-                    case R_CONST_MODE:
-                        encoder_setBasicParameters(0, 1000, false, R_10R*10);
-                        resistanceSetpoint = R_10R;
-                        break;
-                    default:
-                        break;
-                }
+                if(oldControlMode != controlMode){ // Nuevo modo seteado
+                    // Inicializo el setpoint por defecto para cada modo
+                    switch (controlMode){
+                        case C_CONST_MODE:
+                            encoder_setBasicParameters(0, 1000, false, C_1A*100);
+                            ampereSetpoint = C_1A;  // 1 Ampere
+                            powerSetpoint = 0.0;    // 0 Watt
+                            resistanceSetpoint = 0.0;// 0 Ohms
+                            break;
+                        case P_CONST_MODE:
+                            encoder_setBasicParameters(0, 1000, false, P_1W*10);
+                            ampereSetpoint = 0.0;   // 0 Ampere
+                            powerSetpoint = P_1W;   // 1 Watt
+                            resistanceSetpoint = 0.0;// 0 Ohms
+                            break;
+                        case R_CONST_MODE:
+                            encoder_setBasicParameters(0, 1000, false, R_10R*10);
+                            ampereSetpoint = 0.0;   // 0 Ampere
+                            powerSetpoint = 0.0;    // 1 Watt
+                            resistanceSetpoint = R_10R;// 10 Ohms
+                            break;
+                        default:
+                            break;
+                    }
 
-                // Nuevo modo de control seleccionado. Reinicio valores
-                // Apago si estaba en funcionamiento
-                isPowerOn = false; 
-                // Apago las salidas PWM
-                control_stopOutputsAndReset();
-                // Reinicio los contadores
-                control_resetCounters();
-                // Reinicio el tiempo a valores por defecto, de acuerdo el modo seleccionado
-                clock_resetClock(timeDuration);
-                // Vuelvo a calcular el Setpoint para el nuevo modo seleccionado
+                    oldControlMode = controlMode;
+                }
+                else{ // No se configuro nuevo modo. Continuo sin cambios
+                    // Recupero el valor del Encoder antes de entrar al menu
+                    encoder_setBasicParameters(0, 1000, false, oldEncoderValue);
+                }
+                
+                // Vuelvo a calcular el Setpoint para el modo seleccionado
                 encoderValue = encoder.readEncoder();
                 ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
-                // Apago Led indicador de estado encendido
-                digitalWrite(LED, HIGH); 
             }
         }
     }
