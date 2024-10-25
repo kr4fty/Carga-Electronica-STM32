@@ -33,6 +33,12 @@ void menu_modePowerContant()
     menu_exit();
 }
 
+void menu_modeResistanceContant()
+{
+    controlMode = 3;
+    menu_exit();
+}
+
 void menu_modeTime()
 {
     long eValue;    // Valor leido desde el encoder
@@ -145,6 +151,7 @@ void menu_init(){
     menu.addMenuItem("Backlight");
     menu.addMenuItem("Modo");
     menu.addMenuItem("Calibracion");
+    menu.addMenuItem("Reset Mode Sel",  menu_setDefeultMode);
     menu.addMenuItem("Salir", menu_exit);
 
     // Submenu Backlight
@@ -161,8 +168,9 @@ void menu_init(){
     subMenu2->subMenu = new MenuItem[subMenu2->subMenuItemCount];
     subMenu2->subMenu[0] = MenuItem("Corriente CTE", menu_modeCurrentContant);
     subMenu2->subMenu[1] = MenuItem("Potencia  CTE", menu_modePowerContant);
-    subMenu2->subMenu[2] = MenuItem("Tiempo",  menu_modeTime);
-    subMenu2->subMenu[3] = MenuItem("Reset Mode Set",  menu_setDefeultMode);
+    subMenu2->subMenu[2] = MenuItem("Resistor  CTE", menu_modeResistanceContant);
+    subMenu2->subMenu[3] = MenuItem("Tiempo",  menu_modeTime);
+    //subMenu2->subMenu[3] = MenuItem("Reset Mode Set",  menu_setDefeultMode);
     subMenu2->subMenu[4] = MenuItem("Atras", menu_goback);
 
     // Submenu Calibracion

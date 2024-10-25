@@ -164,9 +164,8 @@ void lcd_printBaseFrame(uint8_t mode=1)
         case 2: // Modo Potencia Constante
             lcd.print("W");
             break;
-        case 3: // Modo Periodo
-        // Aca, dependiendo de tamaño del periodo, se debera usar Seg, Min u H
-            lcd.print("S");
+        case 3: // Modo Resistencia Constante
+            lcd.print("R");
             break;
         default:
             break;
@@ -188,10 +187,19 @@ void lcd_printBaseFrame(uint8_t mode=1)
 void lcd_printNewSetpoint(float value, uint8_t mode=1)
 {
     //floatTostr(value, 4, 2);
-    if(mode==2){
-        dtostrf(value, 4, 1, _buff);
-    }else if(mode==1){
-        dtostrf(value, 4, 2, _buff);
+    switch (mode)
+    {
+        case 1:
+            dtostrf(value, 4, 2, _buff);
+            break;
+        case 2:
+            dtostrf(value, 4, 1, _buff);
+            break;
+        case 3:
+            dtostrf(value, 4, 1, _buff);
+            break;
+        default:
+            break;
     }
     
     lcd.setTextSize(SIZE_L);
@@ -214,9 +222,8 @@ void lcd_printNewSetpoint(float value, uint8_t mode=1)
         case 2: // Modo Potencia Constante
             lcd.print("W");
             break;
-        case 3: // Modo Periodo
-        // Aca, dependiendo de tamaño del periodo, se debera usar Seg, Min u H
-            lcd.print("S");
+        case 3: // Modo Resistencia Constante
+            lcd.print("R");
             break;
         default:
             break;
@@ -230,10 +237,19 @@ void lcd_printNewSetpoint(float value, uint8_t mode=1)
 void lcd_printTinyNewSetpoint(float value, uint8_t mode=1)
 {
     //floatTostr(value, 6, 2);
-    if(mode == 2){
-        dtostrf(value, 6, 1, _buff);
-    }else {
-        dtostrf(value, 6, 2, _buff);
+    switch (mode)
+    {
+        case 1:
+            dtostrf(value, 6, 2, _buff);
+            break;
+        case 2:
+            dtostrf(value, 6, 1, _buff);
+            break;
+        case 3:
+            dtostrf(value, 6, 1, _buff);
+            break;
+        default:
+            break;
     }
 
     lcd.setTextSize(SIZE_M);
