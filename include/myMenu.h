@@ -4,7 +4,6 @@
 #include "menu.h"
 #include "calibrate.h"
 #include "tclock.h"
-#include "control.h"
 
 // Inicializa la librería de menús
 MenuLibraryWithSubmenus menu;
@@ -26,7 +25,6 @@ void menu_modeCurrentContant()
 {
     controlMode = 1;
     timeDuration = NO_LIMIT;
-    totalTime = 0;
     menu_exit();
 }
 
@@ -34,7 +32,6 @@ void menu_modePowerContant()
 {
     controlMode = 2;
     timeDuration = NO_LIMIT;
-    totalTime = 0;
     menu_exit();
 }
 
@@ -42,7 +39,6 @@ void menu_modeResistanceContant()
 {
     controlMode = 3;
     timeDuration = NO_LIMIT;
-    totalTime = 0;
     menu_exit();
 }
 
@@ -53,10 +49,6 @@ void menu_modeTime()
     uint8_t key;
     Tiempo time;    // contendra el tiempo de funcionamiento seleccionado
     bool selectedTime = false;
-
-    // Apago la salida ya que este es un proceso bloqueante y si estaba en 
-    // funcionamiento algun proceso, no habra control y podria ser peligroso
-    control_stopOutputsAndReset();
 
     // Recupero si habia un valor previo guardado
     time = clock_totalTime_to_standar_format(timeDuration);

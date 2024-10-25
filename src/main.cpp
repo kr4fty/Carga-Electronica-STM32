@@ -119,7 +119,6 @@ bool printTinySetpoint=true;
 unsigned long timeToPrintNewSetpoint, windowNewSetpoint=1000;
 double Output2; // Contiene el duty del segundo MOSFET. Varia con el setpoint
 uint8_t key; // 0: no click, 1: corta, 2: larga, 3: doble pulsacion
-uint8_t oldControlMode; // Contiene el estado anterior del modo de control
 
 long oldEncoderValue; // Para restaurar el valor del encoder al salir del menú
 
