@@ -165,7 +165,7 @@ void lcd_printBaseFrame(uint8_t mode=1)
             lcd.print("W");
             break;
         case 3: // Modo Resistencia Constante
-            lcd.print("R");
+            lcd.print((char)234); // ASCII del caracter 'Ω'
             break;
         default:
             break;
@@ -187,8 +187,7 @@ void lcd_printBaseFrame(uint8_t mode=1)
 void lcd_printNewSetpoint(float value, uint8_t mode=1)
 {
     //floatTostr(value, 4, 2);
-    switch (mode)
-    {
+    switch (mode){
         case 1:
             dtostrf(value, 4, 2, _buff);
             break;
@@ -223,7 +222,7 @@ void lcd_printNewSetpoint(float value, uint8_t mode=1)
             lcd.print("W");
             break;
         case 3: // Modo Resistencia Constante
-            lcd.print("R");
+            lcd.print((char)234); // ASCII del caracter 'Ω'
             break;
         default:
             break;
@@ -237,8 +236,7 @@ void lcd_printNewSetpoint(float value, uint8_t mode=1)
 void lcd_printTinyNewSetpoint(float value, uint8_t mode=1)
 {
     //floatTostr(value, 6, 2);
-    switch (mode)
-    {
+    switch (mode){
         case 1:
             dtostrf(value, 6, 2, _buff);
             break;
@@ -439,6 +437,18 @@ void lcd_printPin(float p_in)
     updateDisplay = true;
 }
 
+void lcd_printRout(float rOut)
+{
+    //floatTostr(p_in, 6, 1);
+    dtostrf(rOut, 6, 1, _buff);
+
+    lcd.setTextSize(SIZE_M);
+    lcd.setCursor(0*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
+    lcd.print(_buff);
+
+    updateDisplay = true;
+}
+
 void lcd_printERROR(uint8_t x, uint8_t y, uint8_t sz=1)
 {
     lcd.setCursor(x*sz*FONT_W, y*sz*FONT_H);
@@ -515,8 +525,7 @@ void lcd_printSelectedMenu(const char *str){
 
 void lcd_drawLine(uint8_t posX, uint8_t color=BLACK)
 {
-    switch (posX)
-    {
+    switch (posX){
         case 1:
             lcd.drawLine(0, 2*SIZE_M*FONT_H+1, 2*SIZE_M*FONT_W, 2*SIZE_M*FONT_H+1, color);
             break;
@@ -540,17 +549,25 @@ void lcd_drawLine(uint8_t posX, uint8_t color=BLACK)
 void lcd_printSelectXConst(uint8_t mode)
 {
     lcd.setCursor(4*SIZE_S*FONT_W, 5*SIZE_S*FONT_H-2);
-    if(mode==1){
-        lcd.print("C Const");
-    }
-    else if(mode==2){
-        lcd.print("P Const");
+    switch (mode){
+        case 1:
+            lcd.print("C Const");
+            break;
+        case 2:
+            lcd.print("P Const");
+            break;
+        case 3:
+            lcd.print("R Const");
+            break;
+        default:
+            break;
     }
     lcd.display();
 }
 
 void lcd_printConfiguredTime(uint8_t hs, uint8_t min, uint8_t seg, unsigned long tTime=0, uint8_t mode=1)
 {
+    char aux[14];
     lcd.clearDisplay();
     lcd.drawLine(0, 0, 14*SIZE_S*FONT_W, 0, BLACK);
     lcd.setCursor(0,2);
@@ -563,7 +580,20 @@ void lcd_printConfiguredTime(uint8_t hs, uint8_t min, uint8_t seg, unsigned long
     sprintf(_buff, "%02d:%02d:%02d",hs,min,seg);
     lcd.println(_buff);
     lcd.printf("Total: %dS\n", tTime);
-    lcd.printf("Modo: %s\n", mode==1?"C Const":"P Const");
+    switch (mode){
+        case 1:
+            sprintf(aux,"C Const");
+            break;
+        case 2:
+            sprintf(aux,"P Const");
+            break;
+        case 3:
+            sprintf(aux,"R Const");
+            break;
+        default:
+            break;
+    }
+    lcd.printf("Modo: %s\n", aux);
     lcd.setTextColor(WHITE, BLACK);
     lcd.print("Click -> Salir");
     lcd.setTextColor(BLACK, WHITE);

@@ -78,18 +78,18 @@ void setup() {
 
     switch (controlMode){
         case C_CONST_MODE:
-            powerSetpoint = 0.0;    // 0 Watt
             ampereSetpoint = C_1A;  // 1 Ampere
+            powerSetpoint = 0.0;    // 0 Watt
             resistanceSetpoint = 0.0;// 0 Ohms
             break;
         case P_CONST_MODE:
-            powerSetpoint = P_1W;   // 1 Watt
             ampereSetpoint = 0.0;   // 0 Ampere
+            powerSetpoint = P_1W;   // 1 Watt
             resistanceSetpoint = 0.0;// 0 Ohms
             break;
         case R_CONST_MODE:
-            powerSetpoint = 0.0;    // 1 Watt
             ampereSetpoint = 0.0;   // 0 Ampere
+            powerSetpoint = 0.0;    // 1 Watt
             resistanceSetpoint = R_10R;// 10 Ohms
             break;
         default:
@@ -211,7 +211,7 @@ void loop() {
     /***************************************************************************/
     if(encoder.encoderChanged()){
         encoderValue = encoder.readEncoder();
-     if (!showMenu) {
+        if (!showMenu) {
             // Calculo el Setpoint necesario en valores de Ampere normalizados
             ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
             
@@ -338,7 +338,7 @@ void loop() {
                 oldEncoderValue = encoderValue;
             }
         } // FIN Modo normal
-        else{ // Modo Configuracion/Seleccion
+        else{ // Se ingresa al Menú
             menu.executeMenuAction(); // Ejecuta la acción asociada al ítem del menú seleccionado.
             if(!showMenu){      // Restauro los valores
                 batteryConnected = true;          
@@ -361,6 +361,9 @@ void loop() {
                     default:
                         break;
                 }
+                encoderValue = encoder.readEncoder();
+                // Calculo el Setpoint necesario en valores de Ampere normalizados
+                ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
 
                 // Nuevo modo de control seleccionado. Reinicio valores
                 if(controlMode != oldControlMode){
@@ -558,13 +561,21 @@ void loop() {
             }
             if(isPowerOn){ // Solo muestro la corriente cuando esta encendido. Caso contrario, el Setpoint
                 if(wasIUpdated){
-                    if(controlMode==C_CONST_MODE){
-                        // Print Iin
-                        lcd_printIin(iIn);
-                    }
-                    else if(controlMode==P_CONST_MODE){
-                        // Print Win
-                        lcd_printPin(wIn);
+                    switch (controlMode){
+                        case C_CONST_MODE:
+                            // Print Iin
+                            lcd_printIin(iIn);
+                            break;
+                        case P_CONST_MODE:
+                            // Print Win
+                            lcd_printPin(wIn);
+                            break;
+                        case R_CONST_MODE:
+                            // Print Rout
+                            lcd_printRout(vIn/iIn);
+                            break;
+                        default:
+                            break;
                     }
                     wasIUpdated = false;
                 }

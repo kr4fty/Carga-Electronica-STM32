@@ -72,8 +72,7 @@ void menu_modeTime()
         if(key == SHORT_CLICK){
             lcd_drawLine(eValue, WHITE);
             key = 0;
-            switch (eValue)
-            {
+            switch (eValue){
                 case 1: // Configuro la hora
                     encoder_setBasicParameters(0, 23, true, time.horas, 1);
                     while(key != SHORT_CLICK){
@@ -105,11 +104,18 @@ void menu_modeTime()
                     time.segundos = eValue;
                     break;
                 case 4: // I cte. o W cte.
-                        if(controlMode == 1){
-                            controlMode = 2;                          
-                        }
-                        else if(controlMode == 2){
-                            controlMode = 1;                          
+                        switch (controlMode){
+                            case 1:
+                                controlMode = 2;
+                                break;
+                            case 2:
+                                controlMode = 3;
+                                break;
+                            case 3:
+                                controlMode = 1;
+                                break;
+                            default:
+                                break;
                         }
 
                         lcd_printSelectXConst(controlMode);
