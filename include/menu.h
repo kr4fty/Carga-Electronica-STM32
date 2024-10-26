@@ -134,14 +134,12 @@ private:
         lcd_printMenu(menuList, subMenu->subMenuItemCount+1, menuIndex);
     }
     void updateSelectedSubenuItem(MenuItem* subMenu){
-        lcd_printMenuItem(subMenu->subMenu[oldMenuIndex].name, oldMenuIndex+1);
-
-        lcd_printMenuItem(subMenu->subMenu[menuIndex].name, menuIndex+1, COLOR_WB); 
+        lcd_printSelected(oldMenuIndex+1);
+        lcd_printSelected(menuIndex+1, COLOR_WB);
     }
     void updateSelectedMenuItem(){
-        lcd_printMenuItem(menuItems[oldMenuIndex]->name, oldMenuIndex+1);
-
-        lcd_printMenuItem(menuItems[menuIndex]->name, menuIndex+1, COLOR_WB);  
+        lcd_printSelected(oldMenuIndex+1);
+        lcd_printSelected(menuIndex+1, COLOR_WB);
     }
 };
 
