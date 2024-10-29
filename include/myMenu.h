@@ -155,6 +155,12 @@ void menu_modeTime()
     menu_exit();
 }
 
+void menu_loadTest()
+{
+    control_performLoadTest();
+    menu_exit();
+}
+
 void menu_setDefeultMode()  // Reconfiguro a valores por defecto
 {
     controlMode = 1;
@@ -165,18 +171,18 @@ void menu_setDefeultMode()  // Reconfiguro a valores por defecto
 
 void menu_init(){
     // Agrega elementos al menú principal
-    menu.addMenuItem("Backlight");
+    menu.addMenuItem("Configurar");
     menu.addMenuItem("Modo");
     menu.addMenuItem("Calibracion");
-    menu.addMenuItem("Reset Mode Sel",  menu_setDefeultMode);
+    menu.addMenuItem("Prueba de Carga",  menu_loadTest);
     menu.addMenuItem("Salir", menu_exit);
 
     // Submenu Backlight
-    MenuItem* subMenu1 = new MenuItem("Backlight");
+    MenuItem* subMenu1 = new MenuItem("Configurar");
     subMenu1->subMenuItemCount = 3;
     subMenu1->subMenu = new MenuItem[subMenu1->subMenuItemCount];
-    subMenu1->subMenu[0] = MenuItem("ON", lcd_backlightOn);
-    subMenu1->subMenu[1] = MenuItem("OFF", lcd_backlightOff);
+    subMenu1->subMenu[0] = MenuItem("Backlight", lcd_toggleLed);
+    subMenu1->subMenu[1] = MenuItem("Reset Mode Sel", menu_setDefeultMode);
     subMenu1->subMenu[2] = MenuItem("Atras", menu_goback);
 
     // Submenu "Modo"
@@ -200,7 +206,7 @@ void menu_init(){
     subMenu3->subMenu[3] = MenuItem("Atras", menu_goback);
 
     // Asocia los submenús a las opciones del menú principal
-    menu.addSubMenu("Backlight", subMenu1);
+    menu.addSubMenu("Configurar", subMenu1);
     menu.addSubMenu("Modo", subMenu2);
     menu.addSubMenu("Calibracion", subMenu3);
 

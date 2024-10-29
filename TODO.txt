@@ -156,3 +156,9 @@ Agregar Modos de funcionamiento
           la corriente al mismo tiempo(en el mejor de los casos solo variara 
           uno, dependiendo del tipo de fuente). Por lo que el Setpoint debera 
           ajustarse continuamente ya que solo podemos controla la corriente.
+        * Modo Inteligente (Prueba de carga)
+          Con este modo se intentaria comprobar el valor de corriente maxima
+          entregada por una fuente.
+          En dicho modo se deberia ir subiendo, desde 0 por ejemplo, la
+          corriente hasta que veamos que la fuente cae por debajo de un 10/15% de
+          su valor nominal

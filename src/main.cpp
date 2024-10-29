@@ -119,8 +119,9 @@ unsigned long timeToPrintNewSetpoint, windowNewSetpoint=1000;
 double Output2; // Contiene el duty del segundo MOSFET. Varia con el setpoint
 uint8_t key; // 0: no click, 1: corta, 2: larga, 3: doble pulsacion
 uint8_t oldControlMode; // Contiene el estado anterior del modo de control
-
 long oldEncoderValue; // Para restaurar el valor del encoder al salir del menú
+unsigned long timeLoadTestStart;
+float vInNominal, vMaxForImax, iMax;
 
 void loop() {
     /***************************************************************************/
@@ -149,6 +150,9 @@ void loop() {
         }
         else{
             iAdcOffset = iBattRaw; // Corriente medida, valores de ADC, a 0A
+
+            // Guardo la tension nominal en vacio
+            vInNominal = vIn;
         }
         iBattRawOld = iBattRaw;
     }
@@ -207,63 +211,101 @@ void loop() {
     }
     // FIN DETECCION DE TENSION DE ENTRADA
 
+    if(!isLoadTestRunning){ // No se selecciono la Pruba de Carga
     /***************************************************************************/
     /*                            SETEO DE CORRIENTE                           */
     /***************************************************************************/
-    if(encoder.encoderChanged()){
-        encoderValue = encoder.readEncoder();
-        if (!showMenu) {
-            // Calculo el Setpoint necesario en valores de Ampere normalizados
-            ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
-            
-            // Se actualizo el Sepoint, por lo que se debera actualizar la pantalla
-            if(isPowerOn){ // Si esta encendido se musetrara en una ventana temporal
-                switch (controlMode){
-                    case C_CONST_MODE:
-                        lcd_printNewSetpoint(ampereSetpoint, controlMode);
-                        break;
-                    case P_CONST_MODE:
-                        lcd_printNewSetpoint(powerSetpoint, controlMode);
-                        break;
-                    case R_CONST_MODE:
-                        lcd_printNewSetpoint(resistanceSetpoint, controlMode);
-                        break;
-                    default:
-                        break;
+        if(encoder.encoderChanged()){
+            encoderValue = encoder.readEncoder();
+            if (!showMenu) {
+                // Calculo el Setpoint necesario en valores de Ampere normalizados
+                ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
+                
+                // Se actualizo el Sepoint, por lo que se debera actualizar la pantalla
+                if(isPowerOn){ // Si esta encendido se musetrara en una ventana temporal
+                    switch (controlMode){
+                        case C_CONST_MODE:
+                            lcd_printNewSetpoint(ampereSetpoint, controlMode);
+                            break;
+                        case P_CONST_MODE:
+                            lcd_printNewSetpoint(powerSetpoint, controlMode);
+                            break;
+                        case R_CONST_MODE:
+                            lcd_printNewSetpoint(resistanceSetpoint, controlMode);
+                            break;
+                        default:
+                            break;
+                    }
+                    
+                    isTheSetpointUpdated = true;
+                }
+                else{ // Si esta APAGADO se muestrara en lugar de la corriente medida
+                    printTinySetpoint = true;
+                }
+
+                Output2 = ampereToDutycycle(ampereSetpoint*.5, MOSFET2);
+                if(isPowerOn){
+                    // Calculo el Setpoint necesario en valores que interpreta el PID
+                    Setpoint = ampereToAdc(ampereSetpoint);
                 }
                 
-                isTheSetpointUpdated = true;
-            }
-            else{ // Si esta APAGADO se muestrara en lugar de la corriente medida
-                printTinySetpoint = true;
-            }
+                tone(BUZZER_PIN, 600, 10);
 
-            Output2 = ampereToDutycycle(ampereSetpoint*.5, MOSFET2);
-            if(isPowerOn){
-                // Calculo el Setpoint necesario en valores que interpreta el PID
-                Setpoint = ampereToAdc(ampereSetpoint);
+                timeToPrintNewSetpoint = millis() + windowNewSetpoint;
             }
-            
-            tone(BUZZER_PIN, 600, 10);
-
-            timeToPrintNewSetpoint = millis() + windowNewSetpoint;
+            else{
+                menu.highlightMenuItem(encoderValue); // Resalto el nuevo Iten seleccionado mediante el encoder
+            }
         }
-        else{
-            menu.highlightMenuItem(encoderValue); // Resalto el nuevo Iten seleccionado mediante el encoder
-        }
-    }
-    // Tiempo de muestra de la Ventana temporal que imprime el nuevo SETPOINT
-    if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint)){
-            isTheSetpointUpdated = false;
-            // si estando encendido se desconecta y luego modifico el setpoint, no se reimprime la notificacion
-            control_forceReprintDisplay();
+        // Tiempo de muestra de la Ventana temporal que imprime el nuevo SETPOINT
+        if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint)){
+                isTheSetpointUpdated = false;
+                // si estando encendido se desconecta y luego modifico el setpoint, no se reimprime la notificacion
+                control_forceReprintDisplay();
 
-            tone(BUZZER_PIN, 7000, 20);
-            delay(75);
-            tone(BUZZER_PIN, 7000, 80);
-    }
+                tone(BUZZER_PIN, 7000, 20);
+                delay(75);
+                tone(BUZZER_PIN, 7000, 80);
+        }
         // FIN CONFIGURACION DE CORRIENTE DE CARGA
+    }
+    /***************************************************************************/
+    /*                              PRUEBA DE CARGA                            */
+    /***************************************************************************/
+    else{
+        // Cada determinado tiempo incremento ampereSetpoint
+        if(isPowerOn && isLoadTestRunning){
+            if(millis() > (timeLoadTestStart+250)){
+                ampereSetpoint += 0.01;
+                Output2 = ampereToDutycycle(ampereSetpoint*.5, MOSFET2);                
+                Setpoint = ampereToAdc(ampereSetpoint);
+                
+                timeLoadTestStart = millis();
+            }
+        }
 
+        // Verifico que la tension no haya caido por debajo de 85% de la nominal
+        if(vIn < (0.85*vInNominal)){// Cayo por debajo, apago el control
+            // Apago las salidas PWM
+            control_powerOff();
+            // Presento informe de salida
+            lcd_printShowLoadTestResults(vMaxForImax, iMax);
+            // Espero por un click en el boton
+            while(!isButtonClicked());
+            // Re imprimo todo como si se encendiese por primera vez
+            isPowerOn = false;
+            control_forceReprintDisplay();
+            // Limpio contadores y reloj
+            control_resetAllForNewMode();
+            // Desabilito la prueba
+            isLoadTestRunning = false;
+        }
+        else{ // Todo normal por aqui
+            vMaxForImax = vIn;
+            iMax = iIn;
+        }
+        
+    }
 
     /***************************************************************************/
     /*                           ENCENDIDO Y APAGADO                           */
@@ -373,7 +415,12 @@ void loop() {
                 
                 // Vuelvo a calcular el Setpoint para el modo seleccionado
                 encoderValue = encoder.readEncoder();
-                ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
+                if(!isLoadTestRunning){
+                    ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
+                }
+                else{
+                    ampereSetpoint = 0;
+                }
             }
         }
     }
@@ -466,7 +513,7 @@ void loop() {
     currentMillis = millis();  // Obtiene el tiempo actual
 
     // Comprueba si ha pasado el intervalo de 1 segundo
-    if (isPowerOn && batteryConnected && (currentMillis - previousMillis)>=TIME_1SEG) {
+    if (isPowerOn && batteryConnected && (currentMillis - previousMillis)>=TIME_1SEG && !isLoadTestRunning) {
         previousMillis = currentMillis;  // Guarda el tiempo actual
         
         if(timeDuration == NO_LIMIT){
@@ -526,6 +573,10 @@ void loop() {
                         lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds());
                     }
                     isPrintTime = false;
+                }
+                // Solo para modo Prueba de carga imprimo AmpereSetpoint en lugar del reloj
+                if(isLoadTestRunning){
+                    lcd_printAmpereSetpoint(ampereSetpoint);
                 }
             }
 

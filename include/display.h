@@ -18,6 +18,7 @@ Adafruit_PCD8544 lcd = Adafruit_PCD8544(LCD_SCLK_PIN, LCD_DIN_PIN, LCD_DC_PIN, L
 
 bool updateDisplay = false;
 char _buff[20];
+bool backlightStatus;
 
 /*void floatTostr(float numero, uint8_t size_buff, uint8_t decimales)
 {
@@ -72,8 +73,9 @@ char _buff[20];
 void lcd_init()
 {
     pinMode(LCD_BKLIGHT_PIN, OUTPUT);
-    // Por defecto arranca con el baclkight apagado
-    digitalWrite(LCD_BKLIGHT_PIN, LOW);
+    // Por defecto arranca con el baclkight encendido
+    backlightStatus = HIGH;
+    digitalWrite(LCD_BKLIGHT_PIN, backlightStatus);
     lcd.begin();
     lcd.cp437(true);
     lcd.setContrast(75);
@@ -84,7 +86,7 @@ void lcd_init()
     lcd.setCursor(8, LCDHEIGHT/2-4);
     lcd.print("INICIANDO...");
     lcd.display();
-    delay(1000);
+    delay(2000);
     lcd.clearDisplay();
 }
 
@@ -96,6 +98,12 @@ void lcd_backlightOn()
 void lcd_backlightOff()
 {
     digitalWrite(LCD_BKLIGHT_PIN, LOW);
+}
+
+void lcd_toggleLed() // Cambia de estado el led cada vez que se lo invoca
+{
+    digitalWrite(LCD_BKLIGHT_PIN, digitalRead(LCD_BKLIGHT_PIN)?LOW:HIGH);
+    backlightStatus = digitalRead(LCD_BKLIGHT_PIN);
 }
 
 void lcd_printCalibration()
@@ -648,6 +656,33 @@ void lcd_printClock(uint8_t hs, uint8_t min, uint8_t seg, uint8_t mode)
                     break;
         }
     }
+    lcd.display();
+}
+
+void lcd_printAmpereSetpoint(float ampsetpoint)
+{
+    dtostrf(ampsetpoint, 4, 2, _buff);
+    lcd.setTextSize(SIZE_S);
+    lcd.setCursor(0*SIZE_S*FONT_W, 5*SIZE_S*FONT_H);
+    lcd.printf("Amp:%s", _buff);
+
+    updateDisplay = true;
+}
+
+void lcd_printShowLoadTestResults(float vin, float iin)
+{
+    lcd.clearDisplay();
+    lcd_printVin(vin);
+    lcd.setTextSize(SIZE_M);
+    lcd.setCursor(6*SIZE_M*FONT_W, 0*SIZE_M*FONT_H);
+    lcd.print("V");
+    lcd_printIin(iin);
+    lcd.setCursor(6*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
+    lcd.print("A");
+    lcd.setTextSize(SIZE_S);
+    lcd.setCursor(0, 5*SIZE_S*FONT_H);
+    lcd.print("  RESULTADOS  ");
+    
     lcd.display();
 }
 

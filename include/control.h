@@ -5,6 +5,7 @@
 #include "notifications.h"
 #include "sound.h"
 #include "tclock.h"
+#include "modes.h"
 
 extern double Setpoint;         // Setpoint del sistema
 extern float totalmAh;          // mAh totales consumidos
@@ -12,6 +13,7 @@ extern float totalWh;           // Wh totales consumidos
 extern bool batteryConnected;   // True: tengo bateria conectada
 extern bool forceRePrint;       // True: limpia y fuerza la reimpresion en pantalla
 extern bool isPowerOn;          // True: proceso funcionando
+bool isLoadTestRunning = false; // True: se esta ejecutando la Prueba de Carga
 
 void control_resetCounters()
 {
@@ -62,6 +64,14 @@ void control_powerOff()
     tone(BUZZER_PIN, 200, 150);
 
     control_stopOutputsAndReset();
+}
+
+void control_performLoadTest()
+{
+    controlMode = C_CONST_MODE;
+    control_resetAllForNewMode();
+
+    isLoadTestRunning = true;
 }
 
 #endif // CONTROL_H
