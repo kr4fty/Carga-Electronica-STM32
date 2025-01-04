@@ -197,7 +197,12 @@ void lcd_printNewSetpoint(float value, uint8_t mode=1)
     //floatTostr(value, 4, 2);
     switch (mode){
         case 1:
-            dtostrf(value, 4, 2, _buff);
+            if(value>=1.0){
+                dtostrf(value, 4, 2, _buff);
+            }
+            else{
+                dtostrf(value*1000, 3, 0, _buff);
+            }
             break;
         case 2:
             dtostrf(value, 4, 1, _buff);
@@ -224,7 +229,13 @@ void lcd_printNewSetpoint(float value, uint8_t mode=1)
         case 0: // Sin modo de operacion
             break;
         case 1: // Modo Corriente Constante
-            lcd.print("A");
+            if(value>=1.0){
+                lcd.print("A");
+            }
+            else{
+                lcd.setCursor(5*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
+                lcd.print("mA");
+            }
             break;
         case 2: // Modo Potencia Constante
             lcd.print("W");
@@ -246,7 +257,12 @@ void lcd_printTinyNewSetpoint(float value, uint8_t mode=1)
     //floatTostr(value, 6, 2);
     switch (mode){
         case 1:
-            dtostrf(value, 6, 2, _buff);
+            if(value>=1.0){
+                dtostrf(value, 6, 2, _buff);
+            }
+            else{
+                dtostrf(value*1000, 5, 0, _buff);
+            }
             break;
         case 2:
             dtostrf(value, 6, 1, _buff);
@@ -263,6 +279,10 @@ void lcd_printTinyNewSetpoint(float value, uint8_t mode=1)
     lcd.setTextColor(WHITE, BLACK);
     lcd.print(_buff);
     lcd.setTextColor(BLACK, WHITE);
+    if(value<1.0){
+        lcd.setCursor(5*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
+        lcd.print("m");
+    }
 
     updateDisplay = true;
 }
@@ -424,9 +444,18 @@ void lcd_printVin(float v_in)
 void lcd_printIin(float i_in)
 {
     //floatTostr(i_in, 6, 2);
-    dtostrf(i_in, 6, 2, _buff);
+    if(i_in>=1.0){
+        dtostrf(i_in, 6, 2, _buff);
+    }
+    else{
+        dtostrf(i_in*1000, 5, 0, _buff);
+    }
 
     lcd.setTextSize(SIZE_M);
+    if(i_in<1.0){
+        lcd.setCursor(5*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
+        lcd.print("m");
+    }
     lcd.setCursor(0*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
     lcd.print(_buff);
 

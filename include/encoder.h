@@ -54,7 +54,8 @@ unsigned long maxTimeBetween2Events = 300;
 
 bool isButtonDown()
 {
-    return digitalReadFast(digitalPinToPinName(BUTTON_PIN))? false : true;
+    //return digitalReadFast(digitalPinToPinName(BUTTON_PIN))? false : true;
+    return digitalRead(BUTTON_PIN)? false : true;
 }
 
 bool isButtonUp()

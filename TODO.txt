@@ -160,5 +160,11 @@ Agregar Modos de funcionamiento
           Con este modo se intentaria comprobar el valor de corriente maxima
           entregada por una fuente.
           En dicho modo se deberia ir subiendo, desde 0 por ejemplo, la
-          corriente hasta que veamos que la fuente cae por debajo de un 10/15% de
-          su valor nominal
+          corriente hasta que veamos que la fuente cae por debajo de un 10/15% 
+          de su valor nominal
+
+Formas en que se muestra la Corriente
+-------------------------------------
+    Para corriente menor a 1A, 1000mA, se deberia mostrar otra escala
+
+        por ejemplo: en lugar de mostrar 0.15A se deberia mostrar 150mA
