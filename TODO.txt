@@ -170,8 +170,8 @@ Formas en que se muestra la Corriente [HECHO]
         por ejemplo: en lugar de mostrar 0.15A se deberia mostrar 150mA
 
 
-Notificacion cuando no esta conectado la fuente/bateria
--------------------------------------------------------
+Notificacion cuando se conecta/desconecta la fuente/bateria estando Menu activo
+-------------------------------------------------------------------------------
     Resulta molesto la notificacion de "No battery" cuando se ingresa a la
     configuracion.
     En caso de ingresar al Menu, deberia inabilitarse las notificaciones hasta

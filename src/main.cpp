@@ -181,12 +181,15 @@ void loop() {
     if(vRaw > VBATT_MIN){
         // Bateria conectada
         if(!batteryConnected){
-            // Solo mostramos una vez el mensaje
-            notificationPriority = 3;
-            time_mseg = 500;
-            notification_add("BATT CONNECTED", notificationPriority, time_mseg, COLOR_BW);
+            // Solo se muestra si no se esta el Menu de configuracion activo
+            if(!showMenu){
+                // Solo mostramos una vez el mensaje
+                notificationPriority = 3;
+                time_mseg = 500;
+                notification_add("BATT CONNECTED", notificationPriority, time_mseg, COLOR_BW);
 
-            batteryConnected = true;
+                batteryConnected = true;
+            }
         }
     }
     else{ // NO SE DETECTO TENSION DE ENTRADA!!!
