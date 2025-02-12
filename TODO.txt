@@ -10,7 +10,7 @@ IMPLEMENTACION DE UN DAC (BluePill no cuenta con DAC)
                     ganancia de 1.51
             http://sim.okawa-denshi.jp/en/OPseikiLowkeisan.htm
 
-Manejo de un LCD [ ECHO ]
+Manejo de un LCD [ HECHO ]
 -------------------------
     Se usara un lcd de un Nokia 3310
 
@@ -163,8 +163,19 @@ Agregar Modos de funcionamiento
           corriente hasta que veamos que la fuente cae por debajo de un 10/15% 
           de su valor nominal
 
-Formas en que se muestra la Corriente
+Formas en que se muestra la Corriente [HECHO]
 -------------------------------------
     Para corriente menor a 1A, 1000mA, se deberia mostrar otra escala
 
         por ejemplo: en lugar de mostrar 0.15A se deberia mostrar 150mA
+
+
+Notificacion cuando no esta conectado la fuente/bateria
+-------------------------------------------------------
+    Resulta molesto la notificacion de "No battery" cuando se ingresa a la
+    configuracion.
+    En caso de ingresar al Menu, deberia inabilitarse las notificaciones hasta
+    que se sale de dicho Menu.
+
+        Solo voy a mostrar la notificacion de Bateria desconectada, cuando no
+        este dentro del Menu

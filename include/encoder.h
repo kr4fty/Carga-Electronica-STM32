@@ -18,6 +18,7 @@ void readEncoderISR()
 
 void encoder_init()
 {
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
     encoder.begin();
     encoder.setup(readEncoderISR);
     bool circleValues = false;

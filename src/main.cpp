@@ -177,7 +177,7 @@ void loop() {
     /***************************************************************************/
     /*                 ¿SE CONECTO LA FUENTE A LA ENTRADA?                     */
     /***************************************************************************/
-    // Bateria/Fuente conectada y funcionando?
+    // Bateria/Fuente conectada y funcionando? Deteccion persistente
     if(vRaw > VBATT_MIN){
         // Bateria conectada
         if(!batteryConnected){
@@ -191,18 +191,21 @@ void loop() {
     }
     else{ // NO SE DETECTO TENSION DE ENTRADA!!!
         if(batteryConnected){
-            // Se muestra solo una vez y queda fijo hasta que no se cambie el estado
-            notificationPriority = 3;
-            notification_add("  NO BATTERY  ", notificationPriority, NO_TIME_LIMIT, COLOR_WB);
+            // Solo se muestra si no se esta el Menu de configuracion activo
+            if(!showMenu){
+                // Se muestra solo una vez y queda fijo hasta que no se cambie el estado
+                notificationPriority = 3;
+                notification_add("  NO BATTERY  ", notificationPriority, NO_TIME_LIMIT, COLOR_WB);
 
-            // Emito un Sonido de alerta
-            tone(BUZZER_PIN, 2000, 50);
-            delay(50);
-            tone(BUZZER_PIN, 2000, 50);
-            delay(50);
-            tone(BUZZER_PIN, 2000, 50);
+                // Emito un Sonido de alerta
+                tone(BUZZER_PIN, 2000, 50);
+                delay(50);
+                tone(BUZZER_PIN, 2000, 50);
+                delay(50);
+                tone(BUZZER_PIN, 2000, 50);
 
-            batteryConnected = false;
+                batteryConnected = false;
+            }
             if(isPowerOn){
                 control_stopOutputsAndReset();
                 //myPID.SetMode(MANUAL);  // Apagamos el PID
