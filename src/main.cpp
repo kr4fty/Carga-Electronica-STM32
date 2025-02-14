@@ -66,7 +66,8 @@ void setup() {
         }
     }
     else{
-        calibration_resetParameters();
+        // Recupero los parametros de calibracion de la Corriente desde la EEPROM
+        calibration_readParameters();
     }
 
     windowStartTime = millis();

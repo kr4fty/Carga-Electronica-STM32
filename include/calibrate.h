@@ -5,6 +5,7 @@
 #include "pwm.h"
 #include "encoder.h"
 #include "display.h"
+#include "myEeprom.h"
 
 extern double vBattRawOld, iBattRawOld;
 extern double iAdcOffset;  // Lectura del ADC medida en vacio (0 A)
@@ -55,6 +56,26 @@ void calibration_calibrate()
     Adc1aDiff = AdcRaw_1A - iAdcOffset;
 
     calibration_show();
+
+    // Guardo en EEPROM
+    myEeprom_writeDouble(C_0A_CAL_ADDR,  iAdcOffset);
+    myEeprom_writeDouble(C_1A_CAL_ADDR,  AdcRaw_1A);
+}
+
+// Leo los parametro desde la EEPROM
+void calibration_readParameters()
+{
+    // Recupero Valores desde la EEPROM
+    iAdcOffset = myEeprom_readDouble(C_0A_CAL_ADDR);
+    AdcRaw_1A = myEeprom_readDouble(C_1A_CAL_ADDR);
+    Adc1aDiff = AdcRaw_1A - iAdcOffset;
+
+    // Si hay algun valor medio raro, utilizo los de "constantes.h"
+    if(((iAdcOffset<(512*.95)) || (iAdcOffset>1023)) || ((AdcRaw_1A<(512)) || (AdcRaw_1A>1023)) || (iAdcOffset == AdcRaw_1A)){
+        iAdcOffset = IADCOFFSET;
+        AdcRaw_1A = ADCRAW_1A;
+        Adc1aDiff = ADC_1A_DIFF;
+    }
 }
 
 // Reinicia los parametro a valores por defecto

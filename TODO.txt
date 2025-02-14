@@ -96,7 +96,9 @@ EEPROM
 ------
 Guardar el ultimo valor de corriente utilizado. De este modo en la proxima 
 encendida ya podemos recuperarlo facilmente.
-    Por ahora en SUSPENSO
+
+    Se urilizara la implementacion de Arduino, EEPROM.h
+    
 
 Salida PWM multiple para el control de dos mosfet
 -------------------------------------------------
