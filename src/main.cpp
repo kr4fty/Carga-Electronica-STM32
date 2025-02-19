@@ -19,6 +19,8 @@ long encoderValue = 0;// Valor leido desde el encoder
 float ampereSetpoint;// Contiene el valor del Setpoint expresado en Ampers
 float powerSetpoint;// Contiene el valor de Setpoint expresado en Watts
 float resistanceSetpoint; // Contiene el valor del Setpoint expresado en Ohmios
+float vLimit=0;     // Valor de la tension minima de corte
+long setValue;      // Aux para configurar uno y otro parametro
 double vBattRawOld; // Valor de lectura anterior del pin ADC que sensa la V
 double iBattRawOld; // Valor de lectura anterior del pin ADC que sensa la I
 double iAdcOffset;  // Lectura del ADC medida en vacio (0 A)
@@ -73,12 +75,6 @@ void setup() {
         calibration_readParameters();
     }
 
-    windowStartTime = millis();
-
-    encoder_setBasicParameters(0, 1000, false, C_1A*100); // Seteo por defecto a 1A
-    encoderValue = encoder.readEncoder();
-    Setpoint = 0;
-
     switch (controlMode){
         case C_CONST_MODE:
             ampereSetpoint = C_1A;  // 1 Ampere
@@ -101,6 +97,70 @@ void setup() {
 
     tone(BUZZER_PIN, 434, 100);
     lcd_printBaseFrame(controlMode);
+
+    // Seteo de corriente de carga y tension de corte
+    uint8_t key = isButtonClicked();
+    encoder_setBasicParameters(0, 1, true, 0, 0);
+
+    lcd_printVin(vLimit, COLOR_WB);
+    lcd_printIin(ampereSetpoint, COLOR_BW);
+    lcd.display();
+    while (key != LONG_CLICK) // Sale con una pulsacion larga
+    {
+        if(encoder.encoderChanged()){
+            encoderValue = encoder.readEncoder();
+            setValue = encoderValue;
+            switch (encoderValue){
+                case 0: // Configuera Tension minima de corte
+                    lcd_printVin(vLimit, COLOR_WB);
+                    lcd_printIin(ampereSetpoint, COLOR_BW);
+                    lcd.display();                    
+                    break;
+                case 1: // Configuera Corriente de Carga
+                    lcd_printVin(vLimit, COLOR_BW);
+                    lcd_printIin(ampereSetpoint, COLOR_WB);
+                    lcd.display();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if(key == SHORT_CLICK){ // Entra con una pulsacion corta
+            if(setValue == 1){
+                encoder_setBasicParameters(0, 1000, false, C_1A*100, 150);
+            }
+            else{
+                encoder_setBasicParameters(0, 2000, false, V_31V*100, 150);
+            }
+            key = isButtonClicked();
+            while(key != SHORT_CLICK){ //sale con una pulsacion corta
+                if(encoder.encoderChanged()){
+                    encoderValue = encoder.readEncoder();
+                    if(setValue == 1){
+                        ampereSetpoint = modes_updateCurrentSetpoint(encoderValue);
+                        lcd_printIin(ampereSetpoint, COLOR_WB);
+                    }
+                    else{
+                        vLimit = encoderValue/100.0;
+                        lcd_printVin(vLimit, COLOR_WB);
+                    }
+                    lcd.display();
+                }
+                key = isButtonClicked();
+            }
+            encoder_setBasicParameters(0, 1, true, 0, 0);
+        }
+
+        key = isButtonClicked();
+    }
+
+    windowStartTime = millis();
+
+    encoder_setBasicParameters(0, 1000, false, ampereSetpoint*100); // Seteo por defecto a 1A
+    encoderValue = encoder.readEncoder();
+    Setpoint = 0;
+    
 }
 
 bool isPowerOn = false; // TRUE: en funcionamiento
@@ -320,6 +380,14 @@ void loop() {
     /***************************************************************************/
     /*                           ENCENDIDO Y APAGADO                           */
     /***************************************************************************/
+    // Si se configuro V Limite entonces chequeo que este dentro del rango
+    if(vIn <= vLimit && vRaw > VBATT_MIN){
+        // Apago 
+        isPowerOn = false;
+        // Apago la salida PWM y envio notificacion en pantalla
+        control_powerOff();
+        digitalWrite(LED, HIGH);
+    }
 
     // Deteccion de pulsacion de boton  
     key = isButtonClicked(); // 0: no click, 1: short click, 2: long click, 3: double click
@@ -615,10 +683,15 @@ void loop() {
             }
 
             // Imprimo Tension y Corriente
-            if(wasVUpdated){
-                // Print Vin
-                lcd_printVin(vIn);
-                wasVUpdated = false;
+            if(isPowerOn){
+                if(wasVUpdated){
+                    // Print Vin
+                    lcd_printVin(vIn);
+                    wasVUpdated = false;
+                }
+            }
+            else {
+                lcd_printVin(vLimit, COLOR_WB);
             }
             if(isPowerOn){ // Solo muestro la corriente cuando esta encendido. Caso contrario, el Setpoint
                 if(wasIUpdated){

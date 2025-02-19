@@ -5,6 +5,7 @@
 #include "calibrate.h"
 #include "tclock.h"
 #include "control.h"
+#include "encoder.h"
 
 // Inicializa la librería de menús
 MenuLibraryWithSubmenus menu;
@@ -12,6 +13,7 @@ MenuLibraryWithSubmenus menu;
 bool showMenu;              //True: si se muestra el menu y no las mediciones
 extern uint8_t controlMode; // Modo de control, corriente cte. por defecto (C_CONST_MODE es 1)
 extern bool isPowerOn;      // True: proceso funcionando
+extern float vLimit;        // Contiene la tension limite de descarga
 
 void menu_exit() // libera memoria y sale del menu inmediatamente
 {
@@ -161,6 +163,34 @@ void menu_loadTest()
     menu_exit();
 }
 
+void menu_setVmin()
+{
+    long oldEncValue = encoder.readEncoder();
+    long encoderValue;
+    uint8_t key;
+
+    encoder_setBasicParameters(0, 2000, false, vLimit*100, 150);
+
+    key = isButtonClicked();
+    lcd.clearDisplay();
+    lcd_printNewSetpoint(vLimit, 4); // imprimimo en modo Vmin limite 
+    lcd.display();
+
+    while(key != SHORT_CLICK){ //sale con una pulsacion corta
+        if(encoder.encoderChanged()){
+            encoderValue = encoder.readEncoder();
+            
+            vLimit = encoderValue/100.0;
+            lcd_printNewSetpoint(vLimit, 4); // imprimimo en modo Vmin limite 
+            lcd.display();
+        }
+        key = isButtonClicked();
+    }
+    
+    encoder_setBasicParameters(0, 1000, false, oldEncValue);
+    menu_exit();
+}
+
 void menu_setDefeultMode()  // Reconfiguro a valores por defecto
 {
     controlMode = 1;
@@ -179,11 +209,12 @@ void menu_init(){
 
     // Submenu Backlight
     MenuItem* subMenu1 = new MenuItem("Configurar");
-    subMenu1->subMenuItemCount = 3;
+    subMenu1->subMenuItemCount = 4;
     subMenu1->subMenu = new MenuItem[subMenu1->subMenuItemCount];
     subMenu1->subMenu[0] = MenuItem("Backlight", lcd_toggleLed);
-    subMenu1->subMenu[1] = MenuItem("Reset Mode Sel", menu_setDefeultMode);
-    subMenu1->subMenu[2] = MenuItem("Atras", menu_goback);
+    subMenu1->subMenu[1] = MenuItem("V minimo", menu_setVmin);
+    subMenu1->subMenu[2] = MenuItem("Reset Mode Sel", menu_setDefeultMode);
+    subMenu1->subMenu[3] = MenuItem("Atras", menu_goback);
 
     // Submenu "Modo"
     MenuItem* subMenu2 = new MenuItem("Modo");

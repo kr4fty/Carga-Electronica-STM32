@@ -55,7 +55,7 @@ public:
         oldMenuIndex = menuIndex;
         menuIndex = encoderValue;
         if (currentSubMenu) {
-            updateSelectedSubenuItem(currentSubMenu);
+            updateSelectedSubMenuItem(currentSubMenu);
         } else {
             updateSelectedMenuItem();
         }
@@ -133,7 +133,7 @@ private:
 
         lcd_printMenu(menuList, subMenu->subMenuItemCount+1, menuIndex);
     }
-    void updateSelectedSubenuItem(MenuItem* subMenu){
+    void updateSelectedSubMenuItem(MenuItem* subMenu){
         lcd_printSelected(oldMenuIndex+1);
         lcd_printSelected(menuIndex+1, COLOR_WB);
     }

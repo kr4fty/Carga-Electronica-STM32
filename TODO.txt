@@ -181,3 +181,29 @@ Notificacion cuando se conecta/desconecta la fuente/bateria estando Menu activo
 
         Solo voy a mostrar la notificacion de Bateria desconectada, cuando no
         este dentro del Menu
+
+Limite inferior, V min, de descarga
+-----------------------------------
+    El limte inferior de descarga es para no dañar las baterias, ya que si
+    bajan por debajo de 2.7V, por ejemplo, podrian dañarse.
+    Tambien si se quiere poner otro limite seguro de caida tension, en fuentes
+    o baterias.
+
+        Al iniciar, girando el Encoder seleccionamos para setear la V min o la
+        Corriente de Carga. Para configurar el parametro deseado hacemos un
+        click, corto, movemos el encoder para setear el valor y por ultimo
+        hacemos otro click corto para volver a la seleccion de configuracion.
+        Una vez seteado los dos parametros o solo el deseado, hacemos un click
+        Largo para continuar y arrancar el proceso.
+
+        En caso de NO querer modificar ninguno de los paramtros en el arranque,
+        solo basta con hacer un Click Largo y ya podemos iniciar el proceso 
+        normalmente.
+        
+        Si quisieramos modificar la V min cuando el proceso ya esta en 
+        funcionamiento, solo debemos entrar al Menu, con Doble click, y ahi
+        vamos a  "Configurar" y seleccionamos "V minimo" para modificarlo.
+
+        Al iniciar, ya configurado los parametros iniciales, o no, y estando el
+        proceso apagado, se mostrara los limtes configurados de Tension y
+        Corriente en colores invertidos.

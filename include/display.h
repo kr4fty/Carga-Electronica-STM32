@@ -210,6 +210,9 @@ void lcd_printNewSetpoint(float value, uint8_t mode=1)
         case 3:
             dtostrf(value, 4, 1, _buff);
             break;
+        case 4:
+            dtostrf(value, 4, 2, _buff);
+            break; 
         default:
             break;
     }
@@ -242,6 +245,9 @@ void lcd_printNewSetpoint(float value, uint8_t mode=1)
             break;
         case 3: // Modo Resistencia Constante
             lcd.print((char)234); // ASCII del caracter 'Ω'
+            break;
+        case 4: // Modo Configuracion de V min limite
+            lcd.print("V");
             break;
         default:
             break;
@@ -429,19 +435,23 @@ void lcd_printTemperature(float mosfet_temp)
     updateDisplay = true;
 }
 
-void lcd_printVin(float v_in)
+void lcd_printVin(float v_in, uint8_t color=COLOR_BW)
 {
     //floatTostr(v_in, 6, 2);
     dtostrf(v_in, 6, 2, _buff);
 
     lcd.setTextSize(SIZE_M);
     lcd.setCursor(0*SIZE_M*FONT_W, 0*SIZE_M*FONT_H);
+    if(color == COLOR_WB){
+        lcd.setTextColor(WHITE, BLACK);
+    }
     lcd.print(_buff);
+    lcd.setTextColor(BLACK, WHITE);
 
     updateDisplay = true;
 }
 
-void lcd_printIin(float i_in)
+void lcd_printIin(float i_in, uint8_t color=COLOR_BW)
 {
     //floatTostr(i_in, 6, 2);
     if(i_in>=1.0){
@@ -457,7 +467,11 @@ void lcd_printIin(float i_in)
         lcd.print("m");
     }
     lcd.setCursor(0*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
+    if(color == COLOR_WB){
+        lcd.setTextColor(WHITE, BLACK);
+    }
     lcd.print(_buff);
+    lcd.setTextColor(BLACK, WHITE);
 
     updateDisplay = true;
 }
