@@ -42,6 +42,9 @@ void setup() {
     #endif
     pinMode(LED, OUTPUT);
     digitalWrite(LED, HIGH);
+
+    // Para evitar que ingrese accidentalmente a modo Calibracion
+    delay(100);
     
     lcd_init();
     encoder_init();
