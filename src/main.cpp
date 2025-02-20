@@ -219,8 +219,15 @@ void setup() {
 
     encoder_setBasicParameters(0, 1000, false, ampereSetpoint*100); // Seteo por defecto a 1A
     encoderValue = encoder.readEncoder();
-    Setpoint = 0;
+
+    // Arranco automáticamente el proceso
+    Setpoint = ampereToAdc(ampereSetpoint);
     
+    tone(BUZZER_PIN, 4000, 50);
+    delay(20);
+    tone(BUZZER_PIN, 4500, 50);
+    delay(20);
+    tone(BUZZER_PIN, 5000, 50);
 }
 
 bool isPowerOn = true; // TRUE: en funcionamiento
