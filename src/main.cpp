@@ -113,6 +113,7 @@ void setup() {
      *************************************************************************/
     encoder_setBasicParameters(0, 1, true, 0, 0);
     key = isButtonClicked();
+    uint8_t color;
 
     while (key != SHORT_CLICK) // Sale con una pulsación corta
     {
@@ -144,6 +145,10 @@ void setup() {
         }
 
         if(key == LONG_CLICK){ // Entra con una Pulsación Larga
+            // Emito un Sonido de alerta
+            tone(BUZZER_PIN, 2500, 50);
+            delay(50);
+            tone(BUZZER_PIN, 2500, 50);
             // Re configuro los parámetros iniciales del encoder dependiendo de lo vayamos a configurar
             switch(setValue){
                 case 0:
@@ -156,17 +161,34 @@ void setup() {
                     break;
             }
             key = isButtonClicked();
+            windowStartTime = millis();
             while(key != SHORT_CLICK){ //sale con una pulsación corta
+                // Parpadear el seleccionado
+                if(millis()>windowStartTime+500){
+                    color==COLOR_BW? color=COLOR_WB: color=COLOR_BW;
+                    switch(setValue){
+                        case 0:
+                            lcd_printIin(ampereSetpoint, color);
+                            break;
+                        case 1:
+                            lcd_printVin(vLimit, color);
+                            break;
+                        default:
+                            break;
+                    }
+                    lcd.display();
+                    windowStartTime = millis();
+                }
                 if(encoder.encoderChanged()){
                     encoderValue = encoder.readEncoder();
                     switch(setValue){
                         case 0: 
                             ampereSetpoint = modes_updateCurrentSetpoint(encoderValue);
-                            lcd_printIin(ampereSetpoint, COLOR_WB);
+                            lcd_printIin(ampereSetpoint, color);
                             break;
                         case 1:
                             vLimit = encoderValue/100.0;
-                            lcd_printVin(vLimit, COLOR_WB);
+                            lcd_printVin(vLimit, color);
                             break;
                         default:
                             break;
@@ -175,7 +197,19 @@ void setup() {
                 }
                 key = isButtonClicked();
             }
+
             encoder_setBasicParameters(0, 1, true, 0, 0);
+            switch(setValue){
+                case 0:
+                    lcd_printIin(ampereSetpoint, COLOR_WB);
+                    break;
+                case 1:
+                    lcd_printVin(vLimit, COLOR_WB);
+                    break;
+                default:
+                    break;
+            }
+            lcd.display();
         }
 
         key = isButtonClicked();
