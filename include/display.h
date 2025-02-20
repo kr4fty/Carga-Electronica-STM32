@@ -244,9 +244,9 @@ void lcd_printNewSetpoint(float value, uint8_t mode=1)
             lcd.print("W");
             break;
         case 3: // Modo Resistencia Constante
-            lcd.print((char)234); // ASCII del caracter 'Ω'
+            lcd.print((char)234); // ASCII del carácter 'Ω'
             break;
-        case 4: // Modo Configuracion de V min limite
+        case 4: // Modo Configuración de V min limite
             lcd.print("V");
             break;
         default:
@@ -366,20 +366,28 @@ void lcd_printOverTemperatureMessage()
     updateDisplay = true;
 }
 
-void lcd_printAmpHour(float a_h)
+void lcd_printAmpHour(float a_h, uint8_t color=COLOR_BW)
 {
     sprintf(_buff, "%4d",(int)a_h);
 
     lcd.setTextSize(SIZE_S);
     lcd.setCursor(0*SIZE_S*FONT_W, 4*SIZE_S*FONT_H);
+    if(color == COLOR_WB){
+        lcd.setTextColor(WHITE, BLACK);
+    }
     lcd.print(_buff);
+    lcd.setTextColor(BLACK, WHITE);
 
     updateDisplay = true;
 }
 
-void lcd_printWattHour(float w_h)
+void lcd_printWattHour(float w_h, uint8_t color=COLOR_BW)
 {
     lcd.setTextSize(SIZE_S);
+
+    if(color == COLOR_WB){
+        lcd.setTextColor(WHITE, BLACK);
+    }
 
     if(w_h<1){
         lcd.setCursor(8*SIZE_S*FONT_W, 4*SIZE_S*FONT_H);
@@ -405,6 +413,7 @@ void lcd_printWattHour(float w_h)
         dtostrf(w_h, 4, 1, _buff);
         lcd.print(_buff);
     }
+    lcd.setTextColor(BLACK, WHITE);
 
     updateDisplay = true;
 }
@@ -424,13 +433,17 @@ void lcd_printTime(uint8_t hs, uint8_t min, uint8_t seg, uint8_t color=COLOR_BW)
     updateDisplay = true;
 }
 
-void lcd_printTemperature(float mosfet_temp)
+void lcd_printTemperature(float mosfet_temp, uint8_t color=COLOR_BW)
 {
     sprintf(_buff, "%3d",(int)mosfet_temp);
 
     lcd.setTextSize(SIZE_S);
     lcd.setCursor(9*SIZE_S*FONT_W, 5*SIZE_S*FONT_H);
+    if(color == COLOR_WB){
+        lcd.setTextColor(WHITE, BLACK);
+    }
     lcd.print(_buff);
+    lcd.setTextColor(BLACK, WHITE);
 
     updateDisplay = true;
 }

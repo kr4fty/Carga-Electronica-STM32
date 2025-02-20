@@ -42,16 +42,27 @@ enum ClickType {
     DOUBLE_CLICK    // Doble pulsacion
 };
 
-bool wasButtonDown    = false; // se presiono el boton
-bool checkDoubleClick = false; // si detecta una pulsacion rapida es posible que venga una doble pulsacion
-bool longClickDetected;        // True: se forzo pulzacion larga, ignorar click al soltar el boton
+bool wasButtonDown    = false; // se presiono el botón
+bool checkDoubleClick = false; // si detecta una pulsación rápida es posible que venga una doble pulsación
+bool longClickDetected;        // True: se forzó pulsación larga, ignorar click al soltar el botón
 uint8_t _clickCounter=0; // 
+int8_t lastMovementDirection = 0; // 1 right; -1 left
+
 //paramaters for button
 unsigned long shortPressAfterMiliseconds = 250; // Tiempo de espera para una pulsación corta
 unsigned long longPressAfterMiliseconds = 1000; // ¿Cuánto tiempo se considera una pulsación larga?
-unsigned long lastTimeButtonDown = millis();           // tiempo en el que duro la pulsacion
+unsigned long lastTimeButtonDown = millis();           // tiempo en el que duro la pulsación
 unsigned long lastTimeButtonClick;
 unsigned long maxTimeBetween2Events = 300;
+
+int8_t encoder_getDirection()
+{
+    int8_t direction = 0;
+    if(1){
+    }
+
+    return direction;
+}
 
 bool isButtonDown()
 {
@@ -64,7 +75,7 @@ bool isButtonUp()
     return digitalReadFast(digitalPinToPinName(BUTTON_PIN))? true : false;
 }
 
-// Devuelve el tipo de pulsacion detectatado. Caso contrario, un NO_CLICK
+// Devuelve el tipo de pulsación detectado. Caso contrario, un NO_CLICK
 uint8_t isButtonClicked()
 {
     unsigned long timeDiff = millis() - lastTimeButtonDown;

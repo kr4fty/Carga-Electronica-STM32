@@ -15,19 +15,21 @@
 #include "modes.h"
 #include "control.h"
 
-long encoderValue = 0;// Valor leido desde el encoder
-float ampereSetpoint;// Contiene el valor del Setpoint expresado en Ampers
+long encoderValue = 0;// Valor leído desde el encoder
+float ampereSetpoint;// Contiene el valor del Setpoint expresado en Amperes
 float powerSetpoint;// Contiene el valor de Setpoint expresado en Watts
 float resistanceSetpoint; // Contiene el valor del Setpoint expresado en Ohmios
-float vLimit=0;     // Valor de la tension minima de corte
-long setValue;      // Aux para configurar uno y otro parametro
-double vBattRawOld; // Valor de lectura anterior del pin ADC que sensa la V
-double iBattRawOld; // Valor de lectura anterior del pin ADC que sensa la I
-double iAdcOffset;  // Lectura del ADC medida en vacio (0 A)
+float vLimit=0;     // Valor de la tensión mínima de corte
+long setValue;      // Aux para configurar uno y otro parámetro
+double vBattRawOld; // Valor de lectura anterior del pin ADC que mide V
+double iBattRawOld; // Valor de lectura anterior del pin ADC que mide I
+double iAdcOffset;  // Lectura del ADC medida en vació (0 A)
 double AdcRaw_1A;   // Lectura del ADC midiendo 1A
 double Adc1aDiff;   // Contiene la diferencia en valores de ADC, entre 1A y 0A
+float iIn, vIn, vInOld, wIn, totalmAh, totalWh; // Valores actuales de la V, I y Wh
+uint8_t key; // 0: no click, 1: corta, 2: larga, 3: doble pulsación
 
-double Setpoint, Input, Output; // Parametro PID
+double Setpoint, Input, Output; // Parámetro PID
 //Specify the links and initial tuning parameters
 PID myPID(&Input, &Output, &Setpoint, KP_AGG, KI_AGG, KD_AGG, DIRECT);
 unsigned long windowStartTime;
@@ -45,7 +47,7 @@ void setup() {
     pinMode(LED, OUTPUT);
     digitalWrite(LED, HIGH);
 
-    // Para evitar que ingrese accidentalmente a modo Calibracion
+    // Para evitar que ingrese accidentalmente a modo Calibración
     delay(100);
     
     lcd_init();
@@ -62,7 +64,7 @@ void setup() {
     vBattRawOld = analogRead(VBATT_SENSE_PIN);
     iBattRawOld = analogRead(IBATT_SENSE_PIN);
 
-    // Entrando a modo Calibracion. Medimos una corriente de 1A para luego aplicar relacion
+    // Entrando a modo Calibración. Medimos una corriente de 1A para luego aplicar relación
     if(isButtonDown())
     {
         calibration_calibrate();
@@ -71,7 +73,7 @@ void setup() {
         }
     }
     else{
-        // Recupero los parametros de calibracion de la Corriente desde la EEPROM
+        // Recupero los parámetros de calibración de la Corriente desde la EEPROM
         calibration_readParameters();
     }
 
@@ -79,12 +81,12 @@ void setup() {
         case C_CONST_MODE:
             ampereSetpoint = C_1A;  // 1 Ampere
             powerSetpoint = 0.0;    // 0 Watt
-            resistanceSetpoint = 0.0;// 0 Ohms
+            resistanceSetpoint = 0.0;// 0 Ohm
             break;
         case P_CONST_MODE:
             ampereSetpoint = 0.0;   // 0 Ampere
             powerSetpoint = P_1W;   // 1 Watt
-            resistanceSetpoint = 0.0;// 0 Ohms
+            resistanceSetpoint = 0.0;// 0 Ohm
             break;
         case R_CONST_MODE:
             ampereSetpoint = 0.0;   // 0 Ampere
@@ -96,54 +98,78 @@ void setup() {
     }
 
     tone(BUZZER_PIN, 434, 100);
+
     lcd_printBaseFrame(controlMode);
-
-    // Seteo de corriente de carga y tension de corte
-    uint8_t key = isButtonClicked();
-    encoder_setBasicParameters(0, 1, true, 0, 0);
-
-    lcd_printVin(vLimit, COLOR_WB);
-    lcd_printIin(ampereSetpoint, COLOR_BW);
+    lcd_printVin(vLimit);
+    lcd_printIin(ampereSetpoint, COLOR_WB);
+    lcd_printWattHour(totalWh);
+    lcd_printAmpHour(totalmAh);
+    lcd_printTemperature(26);
+    lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds());
     lcd.display();
-    while (key != LONG_CLICK) // Sale con una pulsacion larga
+
+    /**************************************************************************
+     *                  Configuración inicial de parámetros
+     *************************************************************************/
+    encoder_setBasicParameters(0, 1, true, 0, 0);
+    key = isButtonClicked();
+
+    while (key != SHORT_CLICK) // Sale con una pulsación corta
     {
         if(encoder.encoderChanged()){
             encoderValue = encoder.readEncoder();
             setValue = encoderValue;
-            switch (encoderValue){
-                case 0: // Configuera Tension minima de corte
-                    lcd_printVin(vLimit, COLOR_WB);
-                    lcd_printIin(ampereSetpoint, COLOR_BW);
-                    lcd.display();                    
-                    break;
-                case 1: // Configuera Corriente de Carga
-                    lcd_printVin(vLimit, COLOR_BW);
+            switch (setValue){
+                case 0: // Configura Corriente de Carga
+                    lcd_printVin(vLimit);
                     lcd_printIin(ampereSetpoint, COLOR_WB);
-                    lcd.display();
+                    lcd_printAmpHour(totalmAh);
+                    lcd_printWattHour(totalWh);
+                    lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds());
+                    lcd_printTemperature(26);
+                    break;
+                case 1: // Configura Tensión mínima de corte
+                    lcd_printVin(vLimit, COLOR_WB);
+                    lcd_printIin(ampereSetpoint);
+                    lcd_printAmpHour(totalmAh);
+                    lcd_printWattHour(totalWh);
+                    lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds());
+                    lcd_printTemperature(26);
                     break;
                 default:
                     break;
             }
+            
+            lcd.display(); 
         }
 
-        if(key == SHORT_CLICK){ // Entra con una pulsacion corta
-            if(setValue == 1){
-                encoder_setBasicParameters(0, 1000, false, C_1A*100, 150);
-            }
-            else{
-                encoder_setBasicParameters(0, 2000, false, V_31V*100, 150);
+        if(key == LONG_CLICK){ // Entra con una Pulsación Larga
+            // Re configuro los parámetros iniciales del encoder dependiendo de lo vayamos a configurar
+            switch(setValue){
+                case 0:
+                    encoder_setBasicParameters(0, 1000, false, C_1A*100, 150);
+                    break;
+                case 1:
+                    encoder_setBasicParameters(0, 2000, false, V_31V*100, 150);
+                    break;
+                default:
+                    break;
             }
             key = isButtonClicked();
-            while(key != SHORT_CLICK){ //sale con una pulsacion corta
+            while(key != SHORT_CLICK){ //sale con una pulsación corta
                 if(encoder.encoderChanged()){
                     encoderValue = encoder.readEncoder();
-                    if(setValue == 1){
-                        ampereSetpoint = modes_updateCurrentSetpoint(encoderValue);
-                        lcd_printIin(ampereSetpoint, COLOR_WB);
-                    }
-                    else{
-                        vLimit = encoderValue/100.0;
-                        lcd_printVin(vLimit, COLOR_WB);
+                    switch(setValue){
+                        case 0: 
+                            ampereSetpoint = modes_updateCurrentSetpoint(encoderValue);
+                            lcd_printIin(ampereSetpoint, COLOR_WB);
+                            break;
+                        case 1:
+                            vLimit = encoderValue/100.0;
+                            lcd_printVin(vLimit, COLOR_WB);
+                            break;
+                        default:
+                            break;
                     }
                     lcd.display();
                 }
@@ -163,13 +189,12 @@ void setup() {
     
 }
 
-bool isPowerOn = false; // TRUE: en funcionamiento
-double vRaw; // Valor crudo de la tencion de entrada, sin aplicar filtro, para detectar mas rapidamente la desconexion de la bateria
+bool isPowerOn = true; // TRUE: en funcionamiento
+double vRaw; // Valor crudo de la tensión de entrada, sin aplicar filtro, para detectar mas rápidamente la desconexión de la batería
 double vBattRaw, iBattRaw; // Valores Leidos en los ADC
-bool batteryConnected=true;  // True si se detecto tension de sensado de bateria
-float iIn, vIn, vInOld, wIn, totalmAh, totalWh; // Valores actuales de la V, I y Wh
+bool batteryConnected=true;  // True si se detecto tensión de sensado de batería
 bool wasVUpdated=true, wasIUpdated=true, wasXhUpdated=true, wasTempUpdated=true; //True: Si los valores cambiaron, para re imprimir
-uint16_t mosfetTempRaw, oldMofetTempRaw;
+uint16_t mosfetTempRaw, oldMosfetTempRaw;
 float mosfetTemp; 
 long timeToUpdateDisplay=millis()+DISPLAY_UPDATE_WINDOW;
 uint8_t notificationPriority; // Contiene la prioridad de notificaciones
@@ -181,7 +206,6 @@ bool isTheSetpointUpdated; // Para tener prioridad al mostrar nuevo setpoint
 bool printTinySetpoint=true;
 unsigned long timeToPrintNewSetpoint, windowNewSetpoint=1000;
 double Output2; // Contiene el duty del segundo MOSFET. Varia con el setpoint
-uint8_t key; // 0: no click, 1: corta, 2: larga, 3: doble pulsacion
 uint8_t oldControlMode; // Contiene el estado anterior del modo de control
 long oldEncoderValue; // Para restaurar el valor del encoder al salir del menú
 unsigned long timeLoadTestStart;
@@ -189,13 +213,13 @@ float vInNominal, vMaxForImax, iMax;
 
 void loop() {
     /***************************************************************************/
-    /*                    MEDION DE TENSION Y CORRIENTE                        */
+    /*                    MEDICIÓN DE TENSIÓN Y CORRIENTE                      */
     /***************************************************************************/
     vRaw = analogRead(VBATT_SENSE_PIN);
     // Filtro de Wiener, Adaptativo
     vBattRaw = vBattRawOld + MU * (vRaw - vBattRawOld);  
-    // Calulo de vIn
-    vIn = 0.01935*vBattRaw + 0.25; // Funcion obtenida por regresion lineal
+    // Calculo de vIn
+    vIn = 0.01935*vBattRaw + 0.25; // Función obtenida por regresión lineal
 
     if(vBattRaw != vBattRawOld){// si cambio V entonces actualizo valor en el LCD
         wasVUpdated = true;
@@ -215,7 +239,7 @@ void loop() {
         else{
             iAdcOffset = iBattRaw; // Corriente medida, valores de ADC, a 0A
 
-            // Guardo la tension nominal en vacio
+            // Guardo la tensión nominal en vació
             vInNominal = vIn;
         }
         iBattRawOld = iBattRaw;
@@ -236,16 +260,16 @@ void loop() {
             vInOld = vIn;
         }
     }
-    // FIN Mediones
+    // FIN Mediciones
 
     /***************************************************************************/
     /*                 ¿SE CONECTO LA FUENTE A LA ENTRADA?                     */
     /***************************************************************************/
-    // Bateria/Fuente conectada y funcionando? Deteccion persistente
+    // Batería/Fuente conectada y funcionando? Detección persistente
     if(vRaw > VBATT_MIN){
-        // Bateria conectada
+        // Batería conectada
         if(!batteryConnected){
-            // Solo se muestra si no se esta el Menu de configuracion activo
+            // Solo se muestra si no se esta el Menu de configuración activo
             if(!showMenu){
                 // Solo mostramos una vez el mensaje
                 notificationPriority = 3;
@@ -256,9 +280,9 @@ void loop() {
             }
         }
     }
-    else{ // NO SE DETECTO TENSION DE ENTRADA!!!
+    else{ // NO SE DETECTO TENSIÓN DE ENTRADA!!!
         if(batteryConnected){
-            // Solo se muestra si no se esta el Menu de configuracion activo
+            // Solo se muestra si no se esta el Menu de configuración activo
             if(!showMenu){
                 // Se muestra solo una vez y queda fijo hasta que no se cambie el estado
                 notificationPriority = 3;
@@ -279,9 +303,9 @@ void loop() {
             }
         }
     }
-    // FIN DETECCION DE TENSION DE ENTRADA
+    // FIN DETECCIÓN DE TENSIÓN DE ENTRADA
 
-    if(!isLoadTestRunning){ // No se selecciono la Pruba de Carga
+    if(!isLoadTestRunning){ // No se selecciono la Prueba de Carga
     /***************************************************************************/
     /*                            SETEO DE CORRIENTE                           */
     /***************************************************************************/
@@ -291,8 +315,8 @@ void loop() {
                 // Calculo el Setpoint necesario en valores de Ampere normalizados
                 ampereSetpoint = modes_handleEncoderChange(vIn, encoderValue, controlMode);
                 
-                // Se actualizo el Sepoint, por lo que se debera actualizar la pantalla
-                if(isPowerOn){ // Si esta encendido se musetrara en una ventana temporal
+                // Se actualizo el Setpoint, por lo que se deberá actualizar la pantalla
+                if(isPowerOn){ // Si esta encendido se mostrara en una ventana temporal
                     switch (controlMode){
                         case C_CONST_MODE:
                             lcd_printNewSetpoint(ampereSetpoint, controlMode);
@@ -309,7 +333,7 @@ void loop() {
                     
                     isTheSetpointUpdated = true;
                 }
-                else{ // Si esta APAGADO se muestrara en lugar de la corriente medida
+                else{ // Si esta APAGADO se mostrara en lugar de la corriente medida
                     printTinySetpoint = true;
                 }
 
@@ -324,20 +348,20 @@ void loop() {
                 timeToPrintNewSetpoint = millis() + windowNewSetpoint;
             }
             else{
-                menu.highlightMenuItem(encoderValue); // Resalto el nuevo Iten seleccionado mediante el encoder
+                menu.highlightMenuItem(encoderValue); // Resalto el nuevo Item seleccionado mediante el encoder
             }
         }
         // Tiempo de muestra de la Ventana temporal que imprime el nuevo SETPOINT
         if(isTheSetpointUpdated && (millis()>timeToPrintNewSetpoint)){
                 isTheSetpointUpdated = false;
-                // si estando encendido se desconecta y luego modifico el setpoint, no se reimprime la notificacion
+                // si estando encendido se desconecta y luego modifico el setpoint, no se reimprime la notificación
                 control_forceReprintDisplay();
 
                 tone(BUZZER_PIN, 7000, 20);
                 delay(75);
                 tone(BUZZER_PIN, 7000, 80);
         }
-        // FIN CONFIGURACION DE CORRIENTE DE CARGA
+        // FIN CONFIGURACIÓN DE CORRIENTE DE CARGA
     }
     /***************************************************************************/
     /*                              PRUEBA DE CARGA                            */
@@ -354,23 +378,23 @@ void loop() {
             }
         }
 
-        // Verifico que la tension no haya caido por debajo de 85% de la nominal
+        // Verifico que la tensión no haya caído por debajo de 85% de la nominal
         if(vIn < (0.85*vInNominal)){// Cayo por debajo, apago el control
             // Apago las salidas PWM
             control_powerOff();
             // Presento informe de salida
             lcd_printShowLoadTestResults(vMaxForImax, iMax);
-            // Espero por un click en el boton
+            // Espero por un click en el botón
             while(!isButtonClicked());
             // Re imprimo todo como si se encendiese por primera vez
             isPowerOn = false;
             control_forceReprintDisplay();
             // Limpio contadores y reloj
             control_resetAllForNewMode();
-            // Desabilito la prueba
+            // Deshabilito la prueba
             isLoadTestRunning = false;
         }
-        else{ // Todo normal por aqui
+        else{ // Todo normal por aquí
             vMaxForImax = vIn;
             iMax = iIn;
         }
@@ -380,20 +404,21 @@ void loop() {
     /***************************************************************************/
     /*                           ENCENDIDO Y APAGADO                           */
     /***************************************************************************/
-    // Si se configuro V Limite entonces chequeo que este dentro del rango
-    if(vIn <= vLimit && vRaw > VBATT_MIN){
+    // Verifico los Limites para que el sistema permanezca encendido
+    // Auto-apagado
+    if(vIn <= vLimit && vIn > VBATT_MIN && isPowerOn){
         // Apago 
         isPowerOn = false;
-        // Apago la salida PWM y envio notificacion en pantalla
+        // Apago la salida PWM y envio notificación en pantalla
         control_powerOff();
         digitalWrite(LED, HIGH);
     }
 
-    // Deteccion de pulsacion de boton  
+    // Detección de pulsación de botón  
     key = isButtonClicked(); // 0: no click, 1: short click, 2: long click, 3: double click
     if(key){
         if(!showMenu){ // Modo normal
-            //  HUBO UNA PULSACION LARGA
+            //  HUBO UNA PULSACIÓN LARGA
             if(key == LONG_CLICK){ // Reiniciamos los contadores
 
                 notificationPriority = 1;
@@ -406,7 +431,7 @@ void loop() {
                 tone(BUZZER_PIN, 1000,300);
             }
 
-            // HUBO UN CLICK EN EL BOTON
+            // HUBO UN CLICK EN EL BOTÓN
             else if (key == SHORT_CLICK){
                 isPowerOn = not isPowerOn; // Cambia el estado anterior, de ENCENDIDO -> APAGADO y viceversa
 
@@ -502,7 +527,7 @@ void loop() {
             }
         }
     }
-    // FIN BOTON
+    // FIN BOTÓN
 
     /***************************************************************************/
     /*           CHEQUEO Y CONTROL DE LA TEMPERATURA EN EL MOSFET              */
@@ -512,7 +537,7 @@ void loop() {
     //mosfetTemp = mosfetTempRaw;
     mosfetTemp = 23;
     
-    // Si supera cierta Temp maxima enciendo el Cooler
+    // Si supera cierta Temp máxima enciendo el Cooler
     if(mosfetTemp>FET_MIN_TEMP){
         // Activo el cooler
         //coolerFan_powerOn();
@@ -526,7 +551,7 @@ void loop() {
         // Detenemos la salida PWM
         //pwm_stop();
 
-        if(!isItOverheating){ // Notificacion por exceso de temperatura, solo una vez
+        if(!isItOverheating){ // Notificación por exceso de temperatura, solo una vez
             
             if(isPowerOn){
                 control_stopOutputsAndReset();
@@ -553,9 +578,9 @@ void loop() {
             notification_removeMini(notificationPriority);
         }
     }
-    if(mosfetTempRaw!=oldMofetTempRaw){
+    if(mosfetTempRaw!=oldMosfetTempRaw){
         wasTempUpdated = true;
-        oldMofetTempRaw = mosfetTempRaw;
+        oldMosfetTempRaw = mosfetTempRaw;
     }
     // FIN TEMPERATURA EN EL MOSFET
 
@@ -586,7 +611,7 @@ void loop() {
     // FIN PID
 
     /***************************************************************************/
-    /*                     Actuzalizo Tiempo Transcurrido                      */
+    /*                      Actualizo Tiempo Transcurrido                      */
     /***************************************************************************/
     currentMillis = millis();  // Obtiene el tiempo actual
 
@@ -604,7 +629,7 @@ void loop() {
         }
         else{ // Si se supero el periodo de tiempo seleccionado, apago
             isPowerOn = false;
-            // Apago la salida PWM y envio notificacion en pantalla
+            // Apago la salida PWM y envio notificación en pantalla
             control_powerOff();
             // Reseteo el reloj, por si quiero volver a prender la carga
             clock_resetClock(timeDuration);
@@ -626,7 +651,7 @@ void loop() {
                     control_forceReprintDisplay();
 
                     /* Se coloca aquí porque, al reconectar la batería tras una desconexión,
-                    * se genera un sobreimpulso que puede dañar la fuente/batería. Por 
+                    * se genera un sobre-impulso que puede dañar la fuente/batería. Por 
                     * ello, espero a que desaparezca la notificación de 'conexión de 
                     * batería' antes de reactivar la carga."
                     */
@@ -682,7 +707,7 @@ void loop() {
                 wasXhUpdated = false;
             }
 
-            // Imprimo Tension y Corriente
+            // Imprimo Tensión medida
             if(isPowerOn){
                 if(wasVUpdated){
                     // Print Vin
@@ -693,6 +718,7 @@ void loop() {
             else {
                 lcd_printVin(vLimit, COLOR_WB);
             }
+            // Imprimo Corriente medida
             if(isPowerOn){ // Solo muestro la corriente cuando esta encendido. Caso contrario, el Setpoint
                 if(wasIUpdated){
                     switch (controlMode){
@@ -749,7 +775,7 @@ void loop() {
     if(millis()>nextTime && isPowerOn && millis()<(startTime+WINDOW_10SEG)){
      
         actualTime = (millis()-startTime);
-        // Para graficar y obtener datos utilizando serial_port_plotter
+        // Para gráficar y obtener datos utilizando serial_port_plotter
         //sprintf(buff, "$%d %ld %d;", (int)encoderValue, actualTime, (int)iBattRaw);
         Serial.printf("$%d %ld %d;", encoderValue, (unsigned long)actualTime, (int)iBattRaw);
         nextTime = millis() + WINDOW_CAPTURE;

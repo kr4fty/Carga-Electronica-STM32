@@ -1,12 +1,12 @@
-IMPLEMENTACION DE UN DAC (BluePill no cuenta con DAC)
+IMPLEMENTACIÓN DE UN DAC (BluePill no cuenta con DAC)
 -----------------------------------------------------
     Generar una salida PWM + filtro pasa bajos. Tener en cuenta la frecuencia 
-    del PWM y la frecuencia de corte del filtro para la tasa de bits maxima del
+    del PWM y la frecuencia de corte del filtro para la tasa de bits máxima del
     PWM en nuestra placa BluePill. A su vez la salida este MCU tiene una salida
-    logica de 3.3V, por lo que el filtro debera tener una ganacia, dependiendo
+    lógica de 3.3V, por lo que el filtro deberá tener una ganancia, dependiendo
     de la Vgs Threshold del mosfet
-    SOLUCION IMPLEMENTADA:
-                    Se utliza un Filtro Activo tipo Bessel de 2do Orden con una 
+    SOLUCIÓN IMPLEMENTADA:
+                    Se utiliza un Filtro Activo tipo Bessel de 2do Orden con una 
                     ganancia de 1.51
             http://sim.okawa-denshi.jp/en/OPseikiLowkeisan.htm
 
@@ -14,23 +14,23 @@ Manejo de un LCD [ HECHO ]
 -------------------------
     Se usara un lcd de un Nokia 3310
 
-Control de el mofet que activa el Cooler Fan, driving
+Control de el mosfet que activa el Cooler Fan, driving
 -----------------------------------------------------
-    Como la salida logica del STM32 es 3.3V, tendria que cambiar este IRF540N 
+    Como la salida lógica del STM32 es 3.3V, tendría que cambiar este IRF540N 
     por un 2N7002, por ejemplo. Revisar cuanto consume el cooler!!!
-    SOLUCION IMPLEMENTADA:
+    SOLUCIÓN IMPLEMENTADA:
             Se implementa un driver simple mediante un transistor NPN
             https://www.laboratoriogluon.com/controlar-mosfets-de-potencia-irfz44n-con-3-3v/
 
 
-Sensores de Tension de la Bateria
+Sensores de Tensión de la Batería
 ---------------------------------
-    Se utliza un divisor resistivo
+    Se utiliza un divisor resistivo
 
-    SOLUCION IMPLEMENTADA:
-                            Para calcularla see toma el valor de la tension a 
+    SOLUCIÓN IMPLEMENTADA:
+                            Para calcularla see toma el valor de la tensión a 
                             1V y luego para calcular la V se utiliza la 
-                            relacion:
+                            relación:
                                         V = ADC_V_ACTUAL / ADC_1V
 
 Sensor de corriente ASC712
@@ -54,17 +54,17 @@ Sensor de corriente ASC712
         Vout = 2,5V + 0,925V
         Vout = 3,425V
 
-    SOLUCION IMPLEMENTADA:
+    SOLUCIÓN IMPLEMENTADA:
                             Se toma el valor de la corriente a 0A y luego como 
                             referencia, la de 1A. Luego para calcular la I se
-                            utiliza la relacion:
+                            utiliza la relación:
 
                             I = (ADC_I_ACTUAL-ADC_0A) / (ADC_1A-ADC_0A)
 
 Sensor de Temperatura LM35
 --------------------------
-    Rango de salida: de 0 a 1.5V maximo, en la configuracion basica (2 a 150ºC)
-            NO haria falta un conversor de niveles 3.3 a 5V
+    Rango de salida: de 0 a 1.5V máximo, en la configuración básica (2 a 150ºC)
+            NO haría falta un convertidor de niveles 3.3 a 5V
             http://www.ocfreaks.com/interfacing-lm35-sensor-lpc2148/
 
 Interrupciones del PWM cuando se usa tone()
@@ -73,8 +73,8 @@ Interrupciones del PWM cuando se usa tone()
     salida PWM, se observa que se produce una interrupción en la salida de 
     dicho pin.
     
-    SOLUCION:
-            Se implemento una funcion tone() personalizada, utilizando el TIM2,
+    SOLUCIÓN:
+            Se implemento una función tone() personalizada, utilizando el TIM2,
             canal 2, perteneciente al gpio PA1
 
 Interfaz
@@ -83,56 +83,56 @@ Interfaz
         Mostrar la corriente de Carga deseada
     
     Estando encendido
-        * Mostrar de alguna manera (por presion larga del boton, por ejemplo), 
+        * Mostrar de alguna manera (por presión larga del botón, por ejemplo), 
           la corriente de salida seleccionada
         * Posibilidad de modificar dicha corriente de salida
 
-        SOLUCION IMPLEMENTADA:
+        SOLUCIÓN IMPLEMENTADA:
                                 Al girar el Encoder, se modificara
-                                automaticamente el nuevo Setpoint. No hace
-                                falta presionar el boton. Por ahora :|
+                                automáticamente el nuevo Setpoint. No hace
+                                falta presionar el botón. Por ahora :|
 
 EEPROM
 ------
-Guardar el ultimo valor de corriente utilizado. De este modo en la proxima 
-encendida ya podemos recuperarlo facilmente.
+Guardar el ultimo valor de corriente utilizado. De este modo en la próxima 
+encendida ya podemos recuperarlo fácilmente.
 
-    Se urilizara la implementacion de Arduino, EEPROM.h
+    Se utilizará la implementación de Arduino, EEPROM.h
     
 
-Salida PWM multiple para el control de dos mosfet
+Salida PWM múltiple para el control de dos mosfet
 -------------------------------------------------
     La idea es poder extender el rango de corriente de salida, pero por la 
-    utilizacion de dos MOSFET de modo que la corriente quede divida y por lo 
+    utilización de dos MOSFET de modo que la corriente quede divida y por lo 
     tanto cada uno calentara menos
 
-    SOLUCION IMPLEMENTADA:
-                            Se utliza dutycyle fijo en el segundo MOSFET, a la 
+    SOLUCIÓN IMPLEMENTADA:
+                            Se utiliza dutycyle fijo en el segundo MOSFET, a la
                             mitad del setpoint.
                             ampereSetpoint = dutyCycleToAmpere(dutyCycle);
                         Output2 = ampereToDutycycle(ampereSetpoint/2, MOSFET2);
 
-Ver estado de la Tension de Entrada
+Ver estado de la Tensión de Entrada
 -----------------------------------
-    Esto es para no arrancar el PID si todavia no se conecto la BATERIA/FUENTE
-    Si el PID se sigue calculando en ausencia de Tension, cuando conectamos la
-    bateria, la carga consume el maximo ya que estuvo intentando subirla, 
-    maximo PID.
+    Esto es para no arrancar el PID si todavía no se conecto la BATERÍA/FUENTE
+    Si el PID se sigue calculando en ausencia de Tensión, cuando conectamos la
+    batería, la carga consume el máximo ya que estuvo intentando subirla, 
+    máximo PID.
 
-Pulsacion larga para reiniciar parametros
+Pulsación larga para reiniciar parámetros
 -----------------------------------------
-    Una pulsacion larga me reinicia los contadores de Tiempo, Wh y mAh
+    Una pulsación larga me reinicia los contadores de Tiempo, Wh y mAh
 
-Alarmas por caida en la fuente a testear
+Alarmas por caída en la fuente a testear
 ----------------------------------------
     Indicar si la fuente cae demasiado, por debajo de un 15% por ejemplo, en su
-    tension de salida. Esto para indicar la calidad y si cumple con los 
-    parametros de salida indicadas.
+    tensión de salida. Esto para indicar la calidad y si cumple con los 
+    parámetros de salida indicadas.
 
 dutyCycle a Amperes
 -------------------
     Cuando se setea el nuevo setpoint por medio del encoder, la conversion 
-    deveria ser en funcion del ACS712?????
+    debería ser en función del ACS712?????
 
     selecciono corriente -> convierto a ADC -> convierto a dutyCycle
 
@@ -140,70 +140,97 @@ Agregar Modos de funcionamiento
 -------------------------------
     Por ejemplo:
                 Corriente constante por un determinado Tiempo
-                Whatts constantes
-                Medicion de mAh de una bateria
-                Reaccion frente a pulsos de corriente, para ver si cae la Vin
+                Watts constantes
+                Medición de mAh de una batería
+                Reacción frente a pulsos de corriente, para ver si cae la Vin
 
-    En Modo Potencia constate, que deberia hacer?:
+    En Modo Potencia constate, que debería hacer?:
         * Configurar el *encoder* para tener nuevo rango de limites
-          Si considero que voy a medir un maximo de 100W y con una resolucion
+          Si considero que voy a medir un máximo de 100W y con una resolución
           de 0.1W, por ejemplo, entonces mis limites serian de 0 a 1000.
         * Modificar la variables de control dependiendo del tipo de MODO
           seleccionado.
-          Ahora el Input seria la tension y corriente (potencia) leidas en cada
+          Ahora el Input seria la tensión y corriente (potencia) leídas en cada
           ciclo. A su vez el Setpoint sera la Potencia deseada. En tanto el 
-          Output seguira siendo dutyCycle ya que es el unico parametro que se 
+          Output seguirá siendo dutyCycle ya que es el único parámetro que se 
           puede controlar para controlar la corriente.
-          Tener en cuenta que en este caso variaran tanto la tension como la
+          Tener en cuenta que en este caso variaran tanto la tensión como la
           la corriente al mismo tiempo(en el mejor de los casos solo variara 
-          uno, dependiendo del tipo de fuente). Por lo que el Setpoint debera 
+          uno, dependiendo del tipo de fuente). Por lo que el Setpoint deberá 
           ajustarse continuamente ya que solo podemos controla la corriente.
         * Modo Inteligente (Prueba de carga)
-          Con este modo se intentaria comprobar el valor de corriente maxima
+          Con este modo se intentaría comprobar el valor de corriente máxima
           entregada por una fuente.
-          En dicho modo se deberia ir subiendo, desde 0 por ejemplo, la
+          En dicho modo se debería ir subiendo, desde 0 por ejemplo, la
           corriente hasta que veamos que la fuente cae por debajo de un 10/15% 
           de su valor nominal
 
 Formas en que se muestra la Corriente [HECHO]
 -------------------------------------
-    Para corriente menor a 1A, 1000mA, se deberia mostrar otra escala
+    Para corriente menor a 1A, 1000mA, se debería mostrar otra escala
 
-        por ejemplo: en lugar de mostrar 0.15A se deberia mostrar 150mA
+        por ejemplo: en lugar de mostrar 0.15A se debería mostrar 150mA
 
 
-Notificacion cuando se conecta/desconecta la fuente/bateria estando Menu activo
+Notificación cuando se conecta/desconecta la fuente/batería estando Menu activo
 -------------------------------------------------------------------------------
-    Resulta molesto la notificacion de "No battery" cuando se ingresa a la
-    configuracion.
-    En caso de ingresar al Menu, deberia inabilitarse las notificaciones hasta
+    Resulta molesto la notificación de "No battery" cuando se ingresa a la
+    configuración.
+    En caso de ingresar al Menu, debería inhabilitarse las notificaciones hasta
     que se sale de dicho Menu.
 
-        Solo voy a mostrar la notificacion de Bateria desconectada, cuando no
+        Solo voy a mostrar la notificación de Batería desconectada, cuando no
         este dentro del Menu
 
 Limite inferior, V min, de descarga
 -----------------------------------
-    El limte inferior de descarga es para no dañar las baterias, ya que si
-    bajan por debajo de 2.7V, por ejemplo, podrian dañarse.
-    Tambien si se quiere poner otro limite seguro de caida tension, en fuentes
-    o baterias.
+    El limite inferior de descarga es para no dañar las baterías, ya que si
+    bajan por debajo de 2.7V, por ejemplo, podrían dañarse.
+    También si se quiere poner otro limite seguro de caída tensión, en fuentes
+    o baterías.
 
         Al iniciar, girando el Encoder seleccionamos para setear la V min o la
-        Corriente de Carga. Para configurar el parametro deseado hacemos un
+        Corriente de Carga. Para configurar el parámetro deseado hacemos un
         click, corto, movemos el encoder para setear el valor y por ultimo
-        hacemos otro click corto para volver a la seleccion de configuracion.
-        Una vez seteado los dos parametros o solo el deseado, hacemos un click
+        hacemos otro click corto para volver a la selección de configuración.
+        Una vez seteado los dos parámetros o solo el deseado, hacemos un click
         Largo para continuar y arrancar el proceso.
 
-        En caso de NO querer modificar ninguno de los paramtros en el arranque,
+        En caso de NO querer modificar ninguno de los parámetros en el arranque,
         solo basta con hacer un Click Largo y ya podemos iniciar el proceso 
         normalmente.
         
-        Si quisieramos modificar la V min cuando el proceso ya esta en 
+        Si quisiéramos modificar la V min cuando el proceso ya esta en 
         funcionamiento, solo debemos entrar al Menu, con Doble click, y ahi
-        vamos a  "Configurar" y seleccionamos "V minimo" para modificarlo.
+        vamos a  "Configurar" y seleccionamos "V mínimo" para modificarlo.
 
-        Al iniciar, ya configurado los parametros iniciales, o no, y estando el
-        proceso apagado, se mostrara los limtes configurados de Tension y
+        Al iniciar, ya configurado los parámetros iniciales, o no, y estando el
+        proceso apagado, se mostrara los limites configurados de Tensión y
         Corriente en colores invertidos.
+
+Interfaz simplificada [NO IMPLEMENTADA]
+---------------------
+    La idea es hacerla lo mas simple posible, que para activar la Carga, la 
+    idea es que la misma tenga la menor cantidad de pasos. Por ejemplo:
+
+        Arranca y muestra la Corriente en negrita, signo de que ese parámetro
+        se puede modificar. Caso contrario, girando hacia la derecha, me cambia
+        hacia otro parámetro. Por ejemplo la secuencia:
+
+            ...->Corriente->mAh->Wh->Tiempo->Tensión de corte->Corriente->.....
+        
+        Si giro hacia la izquierda, estando resaltado el parámetro que quisiera
+        modificar, comienza a parpadear (cambiando Negro sobre blanco a Blanco 
+        sobre Negro), se habilita para modificarlo.
+        Luego si el parámetro esta en el valor deseado, solo con hacer un click
+        corto ya quedaría seteado.
+
+        Finalmente para arrancar el proceso hacemos un Click, suponiendo que 
+        los parámetros ya están en los valores deseados.
+
+        En caso de Iniciar y querer usar la configuración por default, solo 
+        bastaría con hacer un Click para que se inicie.
+
+        En caso de ya estar en funcionamiento el proceso y si se quisiera 
+        modificar algún parámetro, solo bastaría con hacer un Doble Click para 
+        ingresar al Menu y desde ahi modificar lo deseado.
