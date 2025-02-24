@@ -77,6 +77,7 @@ void setup() {
         calibration_readParameters();
     }
 
+    vLimit = V_31V;
     switch (controlMode){
         case C_CONST_MODE:
             ampereSetpoint = C_1A;  // 1 Ampere
@@ -111,94 +112,97 @@ void setup() {
     /**************************************************************************
      *                  Configuración inicial de parámetros
      *************************************************************************/
-    encoder_setBasicParameters(0, 1, true, 0, 0);
+    encoder_setBasicParameters(0, 1, true, 0, 2); // 2 es para que funcionen getDirection() y encoderChanged()
     key = isButtonClicked();
     uint8_t color;
 
     while (key != SHORT_CLICK) // Sale con una pulsación corta
     {
         if(encoder.encoderChanged()){
-            encoderValue = encoder.readEncoder();
-            setValue = encoderValue;
-            switch (setValue){
-                case 0: // Configura Corriente de Carga
-                    lcd_printVin(vLimit);
-                    lcd_printIin(ampereSetpoint, COLOR_WB);
-                    lcd_printAmpHour(totalmAh);
-                    lcd_printWattHour(totalWh);
-                    lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds());
-                    lcd_printTemperature(26);
-                    break;
-                case 1: // Configura Tensión mínima de corte
-                    lcd_printVin(vLimit, COLOR_WB);
-                    lcd_printIin(ampereSetpoint);
-                    lcd_printAmpHour(totalmAh);
-                    lcd_printWattHour(totalWh);
-                    lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds());
-                    lcd_printTemperature(26);
-                    break;
-                default:
-                    break;
-            }
-            
-            lcd.display(); 
-        }
-
-        if(key == LONG_CLICK){ // Entra con una Pulsación Larga
-            // Emito un Sonido de alerta
-            tone(BUZZER_PIN, 2500, 50);
-            delay(50);
-            tone(BUZZER_PIN, 2500, 50);
-            // Re configuro los parámetros iniciales del encoder dependiendo de lo vayamos a configurar
-            switch(setValue){
-                case 0:
-                    encoder_setBasicParameters(0, 1000, false, C_1A*100, 150);
-                    break;
-                case 1:
-                    encoder_setBasicParameters(0, 2000, false, V_31V*100, 150);
-                    break;
-                default:
-                    break;
-            }
-            key = isButtonClicked();
-            windowStartTime = millis();
-            while(key != SHORT_CLICK){ //sale con una pulsación corta
-                // Parpadear el seleccionado
-                if(millis()>windowStartTime+500){
-                    color==COLOR_BW? color=COLOR_WB: color=COLOR_BW;
-                    switch(setValue){
-                        case 0:
-                            lcd_printIin(ampereSetpoint, color);
-                            break;
-                        case 1:
-                            lcd_printVin(vLimit, color);
-                            break;
-                        default:
-                            break;
-                    }
-                    lcd.display();
-                    windowStartTime = millis();
+            if(encoder.getDirection()>0){
+                encoderValue = encoder.readEncoder();
+                setValue = encoderValue;
+                switch (setValue){
+                    case 0: // Configura Corriente de Carga
+                        lcd_printVin(vLimit);
+                        lcd_printIin(ampereSetpoint, COLOR_WB);
+                        lcd_printAmpHour(totalmAh);
+                        lcd_printWattHour(totalWh);
+                        lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds());
+                        lcd_printTemperature(26);
+                        break;
+                    case 1: // Configura Tensión mínima de corte
+                        lcd_printVin(vLimit, COLOR_WB);
+                        lcd_printIin(ampereSetpoint);
+                        lcd_printAmpHour(totalmAh);
+                        lcd_printWattHour(totalWh);
+                        lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds());
+                        lcd_printTemperature(26);
+                        break;
+                    default:
+                        break;
                 }
-                if(encoder.encoderChanged()){
-                    encoderValue = encoder.readEncoder();
-                    switch(setValue){
-                        case 0: 
-                            ampereSetpoint = modes_updateCurrentSetpoint(encoderValue);
-                            lcd_printIin(ampereSetpoint, color);
-                            break;
-                        case 1:
-                            vLimit = encoderValue/100.0;
-                            lcd_printVin(vLimit, color);
-                            break;
-                        default:
-                            break;
-                    }
-                    lcd.display();
+                
+                lcd.display(); 
+            }
+            //if(key == LONG_CLICK){ // Entra con una Pulsación Larga
+            else if(encoder.getDirection()<0){ //
+                // Emito un Sonido de alerta
+                tone(BUZZER_PIN, 2500, 50);
+                delay(50);
+                tone(BUZZER_PIN, 2500, 50);
+                // Re configuro los parámetros iniciales del encoder dependiendo de lo vayamos a configurar
+                switch(setValue){
+                    case 0:
+                        encoder_setBasicParameters(0, 1000, false, ampereSetpoint*100, 150);
+                        break;
+                    case 1:
+                        encoder_setBasicParameters(0, 2000, false, vLimit*100, 150);
+                        break;
+                    default:
+                        break;
                 }
                 key = isButtonClicked();
-            }
+                windowStartTime = millis();
+                while(key != SHORT_CLICK){ //sale con una pulsación corta
+                    // Parpadear Parámetro seleccionado
+                    if(millis()>windowStartTime+500){
+                        color==COLOR_BW? color=COLOR_WB: color=COLOR_BW;
+                        switch(setValue){
+                            case 0:
+                                lcd_printIin(ampereSetpoint, color);
+                                break;
+                            case 1:
+                                lcd_printVin(vLimit, color);
+                                break;
+                            default:
+                                break;
+                        }
+                        lcd.display();
+                        windowStartTime = millis();
+                    }
+                    if(encoder.encoderChanged()){
+                        encoderValue = encoder.readEncoder();
+                        switch(setValue){
+                            case 0: 
+                                ampereSetpoint = modes_updateCurrentSetpoint(encoderValue);
+                                lcd_printIin(ampereSetpoint, color);
+                                break;
+                            case 1:
+                                vLimit = encoderValue/100.0;
+                                lcd_printVin(vLimit, color);
+                                break;
+                            default:
+                                break;
+                        }
+                        lcd.display();
+                    }
+                    key = isButtonClicked();
+                }
+                tone(BUZZER_PIN, 2500, 250);
 
-            encoder_setBasicParameters(0, 1, true, 0, 0);
+                encoder_setBasicParameters(0, 1, true, setValue, 2);
+            }
             switch(setValue){
                 case 0:
                     lcd_printIin(ampereSetpoint, COLOR_WB);
@@ -220,17 +224,10 @@ void setup() {
     encoder_setBasicParameters(0, 1000, false, ampereSetpoint*100); // Seteo por defecto a 1A
     encoderValue = encoder.readEncoder();
 
-    // Arranco automáticamente el proceso
-    Setpoint = ampereToAdc(ampereSetpoint);
-    
-    tone(BUZZER_PIN, 4000, 50);
-    delay(20);
-    tone(BUZZER_PIN, 4500, 50);
-    delay(20);
-    tone(BUZZER_PIN, 5000, 50);
+    Setpoint = 0;
 }
 
-bool isPowerOn = true; // TRUE: en funcionamiento
+bool isPowerOn = false; // TRUE: en funcionamiento
 double vRaw; // Valor crudo de la tensión de entrada, sin aplicar filtro, para detectar mas rápidamente la desconexión de la batería
 double vBattRaw, iBattRaw; // Valores Leidos en los ADC
 bool batteryConnected=true;  // True si se detecto tensión de sensado de batería
@@ -447,7 +444,7 @@ void loop() {
     /***************************************************************************/
     // Verifico los Limites para que el sistema permanezca encendido
     // Auto-apagado
-    if(vIn <= vLimit && vIn > VBATT_MIN && isPowerOn){
+    if(vIn <= vLimit && vRaw > VBATT_MIN && isPowerOn){
         // Apago 
         isPowerOn = false;
         // Apago la salida PWM y envio notificación en pantalla
