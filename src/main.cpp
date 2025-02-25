@@ -43,6 +43,8 @@ unsigned long nextTime, startTime, actualTime;
 void setup() {
     #ifdef DEBUG
     Serial.begin(115200);
+    delay(5000);
+    Serial.println("Iniciando");
     #endif
     pinMode(LED, OUTPUT);
     digitalWrite(LED, HIGH);
@@ -77,7 +79,8 @@ void setup() {
         calibration_readParameters();
     }
 
-    vLimit = V_31V;
+    vLimit = V_0V;
+    controlMode; // Por default esta en C_CONST_MODE
     switch (controlMode){
         case C_CONST_MODE:
             ampereSetpoint = C_1A;  // 1 Ampere
@@ -100,44 +103,77 @@ void setup() {
 
     tone(BUZZER_PIN, 434, 100);
 
-    lcd_printBaseFrame(controlMode);
+    lcd_printSelectBaseFrame(controlMode);
     lcd_printVin(vLimit);
     lcd_printIin(ampereSetpoint, COLOR_WB);
-    lcd_printWattHour(totalWh);
-    lcd_printAmpHour(totalmAh);
-    lcd_printTemperature(26);
-    lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds());
+    lcd_printOpMode(controlMode);
     lcd.display();
 
     /**************************************************************************
      *                  Configuración inicial de parámetros
      *************************************************************************/
-    encoder_setBasicParameters(0, 1, true, 0, 2); // 2 es para que funcionen getDirection() y encoderChanged()
+    encoder_setBasicParameters(0, 100, true, 0, 60); // 2 es para que funcionen getDirection() y encoderChanged()
     key = isButtonClicked();
     uint8_t color;
 
+    // Configuración y selección de modo inicial
+    // Hacer un Click Corto si se desea arrancar en la configuración y valores por defecto
     while (key != SHORT_CLICK) // Sale con una pulsación corta
     {
-        if(encoder.encoderChanged()){
+        encoderValue = encoder.encoderChanged();
+        if(encoderValue){
+            // Modo selección de parámetro a modificar
             if(encoder.getDirection()>0){
                 encoderValue = encoder.readEncoder();
-                setValue = encoderValue;
                 switch (setValue){
                     case 0: // Configura Corriente de Carga
-                        lcd_printVin(vLimit);
-                        lcd_printIin(ampereSetpoint, COLOR_WB);
-                        lcd_printAmpHour(totalmAh);
-                        lcd_printWattHour(totalWh);
-                        lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds());
-                        lcd_printTemperature(26);
+                        switch (controlMode){
+                            case C_CONST_MODE:
+                                lcd_printTinyNewSetpoint(ampereSetpoint, controlMode, COLOR_BW);
+                                break;
+                            case P_CONST_MODE:
+                                lcd_printTinyNewSetpoint(powerSetpoint, controlMode, COLOR_BW);
+                                break;
+                            case R_CONST_MODE:
+                                lcd_printTinyNewSetpoint(resistanceSetpoint, controlMode, COLOR_BW);
+                                break;
+                            default:
+                                break;
+                        }
                         break;
-                    case 1: // Configura Tensión mínima de corte
+                    case 1: // Modo de operación
+                        lcd_printOpMode(controlMode, COLOR_BW);
+                        break;
+                    case 2: // Configura Tensión mínima de corte
+                        lcd_printVin(vLimit, COLOR_BW);
+                        break;
+                    default:
+                        break;
+                }
+                
+                setValue = encoderValue%3;
+
+                switch (setValue){
+                    case 0: // Configura Corriente de Carga
+                        switch (controlMode){
+                            case C_CONST_MODE:
+                                lcd_printTinyNewSetpoint(ampereSetpoint, controlMode, COLOR_WB);
+                                break;
+                            case P_CONST_MODE:
+                                lcd_printTinyNewSetpoint(powerSetpoint, controlMode, COLOR_WB);
+                                break;
+                            case R_CONST_MODE:
+                                lcd_printTinyNewSetpoint(resistanceSetpoint, controlMode, COLOR_WB);
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    case 1: // Modo de operación
+                        lcd_printOpMode(controlMode, COLOR_WB);
+                        break;
+                    case 2: // Configura Tensión mínima de corte
                         lcd_printVin(vLimit, COLOR_WB);
-                        lcd_printIin(ampereSetpoint);
-                        lcd_printAmpHour(totalmAh);
-                        lcd_printWattHour(totalWh);
-                        lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds());
-                        lcd_printTemperature(26);
                         break;
                     default:
                         break;
@@ -145,18 +181,33 @@ void setup() {
                 
                 lcd.display(); 
             }
-            //if(key == LONG_CLICK){ // Entra con una Pulsación Larga
-            else if(encoder.getDirection()<0){ //
+            // si giro rápido hacia la izquierda entro en Modo Edición sobre el seleccionado
+            else if(encoder.getDirection()<0 && encoderValue<-2){ //
                 // Emito un Sonido de alerta
                 tone(BUZZER_PIN, 2500, 50);
                 delay(50);
                 tone(BUZZER_PIN, 2500, 50);
                 // Re configuro los parámetros iniciales del encoder dependiendo de lo vayamos a configurar
                 switch(setValue){
-                    case 0:
-                        encoder_setBasicParameters(0, 1000, false, ampereSetpoint*100, 150);
+                    case 0: // Limite principal
+                        switch (controlMode){// Depende del Modo de Operación
+                            case C_CONST_MODE:
+                                encoder_setBasicParameters(0, 1000, false, ampereSetpoint*100);
+                                break;
+                            case P_CONST_MODE:
+                                encoder_setBasicParameters(0, 1000, false, powerSetpoint*10);
+                                break;
+                            case R_CONST_MODE:
+                                encoder_setBasicParameters(0, 1000, false, resistanceSetpoint*10);
+                                break;
+                            default:
+                                break;
+                        }
                         break;
-                    case 1:
+                    case 1: // Modo de Operación
+                        encoder_setBasicParameters(1, 3, true, 0, 0);
+                        break;
+                    case 2: // Limite de Tensión
                         encoder_setBasicParameters(0, 2000, false, vLimit*100, 150);
                         break;
                     default:
@@ -170,9 +221,24 @@ void setup() {
                         color==COLOR_BW? color=COLOR_WB: color=COLOR_BW;
                         switch(setValue){
                             case 0:
-                                lcd_printIin(ampereSetpoint, color);
+                                switch (controlMode){
+                                    case C_CONST_MODE:
+                                        lcd_printTinyNewSetpoint(ampereSetpoint, controlMode, color);
+                                        break;
+                                    case P_CONST_MODE:
+                                        lcd_printTinyNewSetpoint(powerSetpoint, controlMode, color);
+                                        break;
+                                    case R_CONST_MODE:
+                                        lcd_printTinyNewSetpoint(resistanceSetpoint, controlMode, color);
+                                        break;
+                                    default:
+                                        break;
+                                }
                                 break;
-                            case 1:
+                            case 1: // Modo de Operación
+                                lcd_printOpMode(controlMode, color);
+                                break;
+                            case 2: 
                                 lcd_printVin(vLimit, color);
                                 break;
                             default:
@@ -181,14 +247,33 @@ void setup() {
                         lcd.display();
                         windowStartTime = millis();
                     }
+                    // MODIFICACIÓN del parámetro seleccionado
                     if(encoder.encoderChanged()){
                         encoderValue = encoder.readEncoder();
                         switch(setValue){
-                            case 0: 
-                                ampereSetpoint = modes_updateCurrentSetpoint(encoderValue);
-                                lcd_printIin(ampereSetpoint, color);
+                            case 0: // Dependiendo del modo de operación se modifica el parámetro
+                                switch (controlMode){
+                                    case C_CONST_MODE:
+                                        ampereSetpoint = encoderValue / 100.0; // Potencias desde 0 a 10A con una resolución de 0.01A
+                                        lcd_printTinyNewSetpoint(ampereSetpoint, controlMode, color);
+                                        break;
+                                    case P_CONST_MODE:
+                                        powerSetpoint = encoderValue / 10.0; // Potencias desde 0 a 100W con una resolución de 0.1W
+                                        lcd_printTinyNewSetpoint(powerSetpoint, controlMode, color);
+                                        break;
+                                    case R_CONST_MODE:
+                                        resistanceSetpoint = encoderValue / 10.0; // Resistencias desde 0 a 100R con una resolución de 0.1R
+                                        lcd_printTinyNewSetpoint(resistanceSetpoint, controlMode, color);
+                                        break;
+                                    default:
+                                        break;
+                                }
                                 break;
-                            case 1:
+                            case 1: // Modo de Operación
+                                controlMode = encoderValue;
+                                lcd_printOpMode(controlMode, color);
+                                break;
+                            case 2: 
                                 vLimit = encoderValue/100.0;
                                 lcd_printVin(vLimit, color);
                                 break;
@@ -201,33 +286,101 @@ void setup() {
                 }
                 tone(BUZZER_PIN, 2500, 250);
 
-                encoder_setBasicParameters(0, 1, true, setValue, 2);
+                encoder_setBasicParameters(0, 100, true, setValue, 60);
+                
+                lcd_printSelectBaseFrame(controlMode);
+                switch(setValue){
+                    case 0:
+                        lcd_printVin(vLimit);
+                        switch (controlMode){
+                            case C_CONST_MODE:
+                                lcd_printTinyNewSetpoint(ampereSetpoint, controlMode, COLOR_WB);
+                                break;
+                            case P_CONST_MODE:
+                                lcd_printTinyNewSetpoint(powerSetpoint, controlMode, COLOR_WB);
+                                break;
+                            case R_CONST_MODE:
+                                lcd_printTinyNewSetpoint(resistanceSetpoint, controlMode, COLOR_WB);
+                                break;
+                            default:
+                                break;
+                        }
+                        lcd_printOpMode(controlMode);
+                        break;
+                    case 1:// Modo de Operación
+                        lcd_printVin(vLimit);
+                        switch (controlMode){
+                            case C_CONST_MODE:
+                                lcd_printTinyNewSetpoint(ampereSetpoint, controlMode);
+                                break;
+                            case P_CONST_MODE:
+                                lcd_printTinyNewSetpoint(powerSetpoint, controlMode);
+                                break;
+                            case R_CONST_MODE:
+                                lcd_printTinyNewSetpoint(resistanceSetpoint, controlMode);
+                                break;
+                            default:
+                                break;
+                        }
+                        lcd_printOpMode(controlMode, COLOR_WB);
+                        break;
+                    case 2: 
+                        lcd_printVin(vLimit, COLOR_WB);
+                        switch (controlMode){
+                            case C_CONST_MODE:
+                                lcd_printTinyNewSetpoint(ampereSetpoint, controlMode);
+                                break;
+                            case P_CONST_MODE:
+                                lcd_printTinyNewSetpoint(powerSetpoint, controlMode);
+                                break;
+                            case R_CONST_MODE:
+                                lcd_printTinyNewSetpoint(resistanceSetpoint, controlMode);
+                                break;
+                            default:
+                                break;
+                        }
+                        lcd_printOpMode(controlMode);
+                        break;
+                    default:
+                        break;
+                }
+                lcd.display();
             }
-            switch(setValue){
-                case 0:
-                    lcd_printIin(ampereSetpoint, COLOR_WB);
-                    break;
-                case 1:
-                    lcd_printVin(vLimit, COLOR_WB);
-                    break;
-                default:
-                    break;
-            }
-            lcd.display();
         }
 
         key = isButtonClicked();
     }
 
+    lcd_printBaseFrame(controlMode);
+
     windowStartTime = millis();
 
-    encoder_setBasicParameters(0, 1000, false, ampereSetpoint*100); // Seteo por defecto a 1A
+    switch (controlMode){// Depende del Modo de Operación
+        case C_CONST_MODE:
+            encoder_setBasicParameters(0, 1000, false, ampereSetpoint*100);
+            break;
+        case P_CONST_MODE:
+            encoder_setBasicParameters(0, 1000, false, powerSetpoint*10);
+            break;
+        case R_CONST_MODE:
+            encoder_setBasicParameters(0, 1000, false, resistanceSetpoint*10);
+            break;
+        default:
+            break;
+    }
     encoderValue = encoder.readEncoder();
 
-    Setpoint = 0;
+    // Si arranco en C cte. inicializo el setpoint. Para los demas modos se
+    // auto-setean continuamente
+    if(controlMode == C_CONST_MODE){ 
+        Setpoint = ampereToAdc(ampereSetpoint);
+    }
+
+    // Inicio Proceso de control
+    tone(BUZZER_PIN, 2600, 250);
 }
 
-bool isPowerOn = false; // TRUE: en funcionamiento
+bool isPowerOn = true; // TRUE: en funcionamiento
 double vRaw; // Valor crudo de la tensión de entrada, sin aplicar filtro, para detectar mas rápidamente la desconexión de la batería
 double vBattRaw, iBattRaw; // Valores Leidos en los ADC
 bool batteryConnected=true;  // True si se detecto tensión de sensado de batería
@@ -444,7 +597,7 @@ void loop() {
     /***************************************************************************/
     // Verifico los Limites para que el sistema permanezca encendido
     // Auto-apagado
-    if(vIn <= vLimit && vRaw > VBATT_MIN && isPowerOn){
+    if(vIn <= vLimit && vRaw > VBATT_MIN && isPowerOn){// espero 250ms en el arranque
         // Apago 
         isPowerOn = false;
         // Apago la salida PWM y envio notificación en pantalla
@@ -783,13 +936,13 @@ void loop() {
                     // mientras no este en funcionamiento la carga, se mostrara el setpoint
                     switch (controlMode){
                         case C_CONST_MODE:
-                            lcd_printTinyNewSetpoint(ampereSetpoint, controlMode);
+                            lcd_printTinyNewSetpoint(ampereSetpoint, controlMode, COLOR_WB);
                             break;
                         case P_CONST_MODE:
-                            lcd_printTinyNewSetpoint(powerSetpoint, controlMode);
+                            lcd_printTinyNewSetpoint(powerSetpoint, controlMode, COLOR_WB);
                             break;
                         case R_CONST_MODE:
-                            lcd_printTinyNewSetpoint(resistanceSetpoint, controlMode);
+                            lcd_printTinyNewSetpoint(resistanceSetpoint, controlMode, COLOR_WB);
                             break;
                         default:
                         break;

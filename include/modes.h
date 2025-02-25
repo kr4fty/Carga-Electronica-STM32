@@ -24,6 +24,7 @@ uint8_t controlMode=C_CONST_MODE; // Modo de control, corriente cte. por defecto
 #define P_1W            1.0 // 1W
 #define R_10R          10.0 // 10R
 #define V_31V           3.1 // 3.1V
+#define V_0V            0.0 // 0.0V
 
 // Función para actualizar el setpoint en modo Corriente Constante
 float modes_updateCurrentSetpoint(long encoderValue)

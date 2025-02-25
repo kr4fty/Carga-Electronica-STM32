@@ -192,11 +192,68 @@ void lcd_printBaseFrame(uint8_t mode=1)
     updateDisplay = true;
 }
 
+void lcd_printSelectBaseFrame(uint8_t mode=1)
+{
+    lcd.clearDisplay();
+    lcd.setTextSize(SIZE_M);
+    lcd.setCursor(6*SIZE_M*FONT_W, 0*SIZE_M*FONT_H);
+    lcd.print("V");
+    lcd.setCursor(6*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
+    
+    // Dependiendo del modo varia la unidad del Setpoint
+    switch (mode){
+        case 0: // Sin modo de operacion
+            break;
+        case 1: // Modo Corriente Constante
+            lcd.print("A");
+            break;
+        case 2: // Modo Potencia Constante
+            lcd.print("W");
+            break;
+        case 3: // Modo Resistencia Constante
+            lcd.print((char)234); // ASCII del caracter 'Ω'
+            break;
+        default:
+            break;
+    }
+
+    lcd.setTextSize(SIZE_S);
+    lcd.setCursor(0*SIZE_S*FONT_W, 4*SIZE_S*FONT_H);
+    lcd.print("Modo Cte.:");
+
+    updateDisplay = true;
+}
+
+void lcd_printOpMode(uint8_t mode=1, uint8_t color=COLOR_BW)
+{
+    lcd.setTextSize(SIZE_S);
+    lcd.setCursor(0*SIZE_S*FONT_W, 5*SIZE_S*FONT_H);
+    if(color==COLOR_WB){
+        lcd.setTextColor(WHITE, BLACK);
+    }
+    switch (mode){
+        case 0: // Sin modo de operación
+            break;
+        case 1: // Modo Corriente Constante
+            lcd.print("   CORRIENTE  ");
+            break;
+        case 2: // Modo Potencia Constante
+            lcd.print("    POTENCIA  ");
+            break;
+        case 3: // Modo Resistencia Constante
+            lcd.print("  RESISTENCIA ");
+            break;
+        default:
+            break;
+    }
+    lcd.setTextColor(BLACK, WHITE);
+}
+
 void lcd_printNewSetpoint(float value, uint8_t mode=1)
 {
     //floatTostr(value, 4, 2);
     switch (mode){
-        case 1:
+        case 1: // Modo Corriente Constante
             if(value>=1.0){
                 dtostrf(value, 4, 2, _buff);
             }
@@ -204,16 +261,16 @@ void lcd_printNewSetpoint(float value, uint8_t mode=1)
                 dtostrf(value*1000, 3, 0, _buff);
             }
             break;
-        case 2:
+        case 2: // Modo Potencia Constante
             dtostrf(value, 4, 1, _buff);
             break;
-        case 3:
+        case 3: // Modo Resistencia Constante
             dtostrf(value, 4, 1, _buff);
             break;
         case 4:
             dtostrf(value, 4, 2, _buff);
             break; 
-        default:
+        default: // Configuración de V min limite
             break;
     }
     
@@ -229,7 +286,7 @@ void lcd_printNewSetpoint(float value, uint8_t mode=1)
     lcd.setCursor(6*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
     // Dependiendo del modo varia la unidad del Setpoint
     switch (mode){
-        case 0: // Sin modo de operacion
+        case 0: // Sin modo de operación
             break;
         case 1: // Modo Corriente Constante
             if(value>=1.0){
@@ -246,7 +303,7 @@ void lcd_printNewSetpoint(float value, uint8_t mode=1)
         case 3: // Modo Resistencia Constante
             lcd.print((char)234); // ASCII del carácter 'Ω'
             break;
-        case 4: // Modo Configuración de V min limite
+        case 4: // Configuración de V min limite
             lcd.print("V");
             break;
         default:
@@ -258,7 +315,7 @@ void lcd_printNewSetpoint(float value, uint8_t mode=1)
     lcd.display();
 }
 
-void lcd_printTinyNewSetpoint(float value, uint8_t mode=1)
+void lcd_printTinyNewSetpoint(float value, uint8_t mode=1, uint8_t color=COLOR_BW)
 {
     //floatTostr(value, 6, 2);
     switch (mode){
@@ -271,10 +328,20 @@ void lcd_printTinyNewSetpoint(float value, uint8_t mode=1)
             }
             break;
         case 2:
-            dtostrf(value, 6, 1, _buff);
+            if(value>=1.0){
+                dtostrf(value, 6, 1, _buff);
+            }
+            else{
+                dtostrf(value*1000, 5, 0, _buff);
+            }
             break;
         case 3:
-            dtostrf(value, 6, 1, _buff);
+            if(value>=1.0){
+                dtostrf(value, 6, 1, _buff);
+            }
+            else{
+                dtostrf(value*1000, 5, 0, _buff);
+            }
             break;
         default:
             break;
@@ -282,7 +349,9 @@ void lcd_printTinyNewSetpoint(float value, uint8_t mode=1)
 
     lcd.setTextSize(SIZE_M);
     lcd.setCursor(0*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
-    lcd.setTextColor(WHITE, BLACK);
+    if(color==COLOR_WB){
+        lcd.setTextColor(WHITE, BLACK);
+    }
     lcd.print(_buff);
     lcd.setTextColor(BLACK, WHITE);
     if(value<1.0){
