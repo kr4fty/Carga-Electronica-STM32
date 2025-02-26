@@ -10,7 +10,7 @@ Este proyecto está basado en un microcontrolador STM32F103, el cual controla la
 
 ### Video
 
-[Demo](https://github.com/user-attachments/assets/59047016-5cc4-44e5-a77e-8e39651e7eba)
+[Demo](https://github.com/user-attachments/assets/e986f7fb-c2cd-4f63-a5ff-34d32783e475)
 
 
 ## Preparación Previa
