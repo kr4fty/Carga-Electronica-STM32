@@ -112,7 +112,7 @@ void setup() {
     /**************************************************************************
      *                  Configuración inicial de parámetros
      *************************************************************************/
-    encoder_setBasicParameters(0, 100, true, 0, 60); // 2 es para que funcionen getDirection() y encoderChanged()
+    encoder_setBasicParameters(0, 100, true, 0, 60); // 60: >1, para que funcionen getDirection() y encoderChanged()
     key = isButtonClicked();
     uint8_t color;
 

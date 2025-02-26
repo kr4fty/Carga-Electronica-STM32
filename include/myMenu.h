@@ -117,22 +117,14 @@ void menu_modeTime()
                     lcd_printPartialClock(eValue, 3, COLOR_BW);
                     time.segundos = eValue;
                     break;
-                case 4: // I cte. o W cte.
-                        switch (controlMode){
-                            case 1:
-                                controlMode = 2;
-                                break;
-                            case 2:
-                                controlMode = 3;
-                                break;
-                            case 3:
-                                controlMode = 1;
-                                break;
-                            default:
-                                break;
+                case 4: // Selección del modo de operación
+                        encoder_setBasicParameters(1, 3, true, controlMode, 1);
+                        while(key != SHORT_CLICK){
+                            controlMode = encoder.readEncoder();
+                            lcd_printSelectXConst(controlMode, COLOR_WB);
+                            key = isButtonClicked();
                         }
-
-                        lcd_printSelectXConst(controlMode);
+                        lcd_printSelectXConst(controlMode, COLOR_BW);
                         break;
                 
                 default:

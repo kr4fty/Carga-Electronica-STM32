@@ -677,9 +677,12 @@ void lcd_drawLine(uint8_t posX, uint8_t color=BLACK)
     lcd.display();
 }
 
-void lcd_printSelectXConst(uint8_t mode)
+void lcd_printSelectXConst(uint8_t mode, uint8_t color=COLOR_BW)
 {
     lcd.setCursor(4*SIZE_S*FONT_W, 5*SIZE_S*FONT_H-2);
+    if(color==COLOR_WB){
+        lcd.setTextColor(WHITE, BLACK);
+    }
     switch (mode){
         case 1:
             lcd.print("C Const");
@@ -694,6 +697,7 @@ void lcd_printSelectXConst(uint8_t mode)
             break;
     }
     lcd.display();
+    lcd.setTextColor(BLACK, WHITE);
 }
 
 void lcd_printConfiguredTime(uint8_t hs, uint8_t min, uint8_t seg, unsigned long tTime=0, uint8_t mode=1)
