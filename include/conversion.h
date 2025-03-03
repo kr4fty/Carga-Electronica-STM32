@@ -70,7 +70,7 @@ int adcToDutycycle(double adcValue, uint8_t unity=MOSFET1)
     }
 }
 
-/******************** Corriente en funcion del DutyCycle *********************/
+/******************** Corriente en función del DutyCycle *********************/
 #define AA1 4.15812324929972E-06
 #define BB1 -0.0220782703081233
 #define CC1 29.3736470588236

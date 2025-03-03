@@ -186,7 +186,7 @@ void menu_setVmin()
 void menu_setDefeultMode()  // Re configuro a valores por defecto
 {
     controlMode = 1;    // Modo C cte. por defecto   
-    isLoadTestRunning = false; // Deshabilito la prueba
+    isLoadTestRunning = false; // Deshabilito el Modo Prueba de carga
     totalTime = 0;  // Reinicio contador del tiempo de funcionamiento
     timeDuration = NO_LIMIT;
     clock_resetClock(timeDuration);
@@ -220,7 +220,7 @@ void menu_init(){
     //subMenu2->subMenu[3] = MenuItem("Reset Mode Set",  menu_setDefeultMode);
     subMenu2->subMenu[4] = MenuItem("Atras", menu_goback);
 
-    // Submenu Calibracion
+    // Submenu Calibración
     MenuItem* subMenu3 = new MenuItem("Calibracion");
     subMenu3->subMenuItemCount = 4;
     subMenu3->subMenu = new MenuItem[subMenu3->subMenuItemCount];

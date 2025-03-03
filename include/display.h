@@ -73,7 +73,7 @@ bool backlightStatus;
 void lcd_init()
 {
     pinMode(LCD_BKLIGHT_PIN, OUTPUT);
-    // Por defecto arranca con el baclkight encendido
+    // Por defecto arranca con el backlight encendido
     backlightStatus = HIGH;
     digitalWrite(LCD_BKLIGHT_PIN, backlightStatus);
     lcd.begin();
@@ -164,7 +164,7 @@ void lcd_printBaseFrame(uint8_t mode=1)
     
     // Dependiendo del modo varia la unidad del Setpoint
     switch (mode){
-        case 0: // Sin modo de operacion
+        case 0: // Sin modo de operación
             break;
         case 1: // Modo Corriente Constante
             lcd.print("A");
@@ -173,7 +173,7 @@ void lcd_printBaseFrame(uint8_t mode=1)
             lcd.print("W");
             break;
         case 3: // Modo Resistencia Constante
-            lcd.print((char)234); // ASCII del caracter 'Ω'
+            lcd.print((char)234); // ASCII del carácter 'Ω'
             break;
         default:
             break;
@@ -202,7 +202,7 @@ void lcd_printSelectBaseFrame(uint8_t mode=1)
     
     // Dependiendo del modo varia la unidad del Setpoint
     switch (mode){
-        case 0: // Sin modo de operacion
+        case 0: // Sin modo de operación
             break;
         case 1: // Modo Corriente Constante
             lcd.print("A");
@@ -211,7 +211,7 @@ void lcd_printSelectBaseFrame(uint8_t mode=1)
             lcd.print("W");
             break;
         case 3: // Modo Resistencia Constante
-            lcd.print((char)234); // ASCII del caracter 'Ω'
+            lcd.print((char)234); // ASCII del carácter 'Ω'
             break;
         default:
             break;

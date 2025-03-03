@@ -5,7 +5,7 @@
 #include <EEPROM.h>
 #include "calibrate.h"
 
-#define C_0A_CAL_ADDR   0    // Direccion en la eeprom, donde voy a guardar los valores de calibracion
+#define C_0A_CAL_ADDR   0    // Dirección en la eeprom, donde voy a guardar los valores de calibración
 #define C_1A_CAL_ADDR   sizeof(double)
 
 void myEeprom_writeDouble(uint16_t addr,  double value)

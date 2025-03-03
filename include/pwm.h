@@ -2,7 +2,7 @@
  *  PMW.H
  *        Al utilizar el GPIO PB1, este pertenece al canal 4 del TIM3
  *        Como se desea utilizar un rango del ciclo de trabajo desde 0 a 4095,
- *        12 bits de rosolucion del duty, entonces la frecuencia de salida del
+ *        12 bits de resolución del duty, entonces la frecuencia de salida del
  *        pwm sera:
  *                  Fpwm= Fclk/((ARR+1)*(PSC+1)) ~= 8.789KHz
  * 

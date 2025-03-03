@@ -8,18 +8,18 @@
 #include "myEeprom.h"
 
 extern double vBattRawOld, iBattRawOld;
-extern double iAdcOffset;  // Lectura del ADC medida en vacio (0 A)
+extern double iAdcOffset;  // Lectura del ADC medida en vació (0 A)
 extern double AdcRaw_1A;   // Lectura del ADC midiendo 1A
 extern double Adc1aDiff;   // Contiene la diferencia en valores de ADC, entre 1A y 0A
 
-// Mostrar los parametros de referencia
+// Mostrar los parámetros de referencia
 void calibration_show()
 {
     lcd_printCalibrationParameters(iAdcOffset, AdcRaw_1A);
     while(!isButtonClicked());
 }
 
-// Se encarga de de realizar las muestras para obtener los parametros de referencia
+// Se encarga de de realizar las muestras para obtener los parámetros de referencia
 void calibration_calibrate()
 {
     lcd_printCalibration();
@@ -62,7 +62,7 @@ void calibration_calibrate()
     myEeprom_writeDouble(C_1A_CAL_ADDR,  AdcRaw_1A);
 }
 
-// Leo los parametro desde la EEPROM
+// Leo los parámetro desde la EEPROM
 void calibration_readParameters()
 {
     // Recupero Valores desde la EEPROM
@@ -70,7 +70,7 @@ void calibration_readParameters()
     AdcRaw_1A = myEeprom_readDouble(C_1A_CAL_ADDR);
     Adc1aDiff = AdcRaw_1A - iAdcOffset;
 
-    // Si hay algun valor medio raro, utilizo los de "constantes.h"
+    // Si hay algún valor medio raro, utilizo los de "constantes.h"
     if(((iAdcOffset<(512*.95)) || (iAdcOffset>1023)) || ((AdcRaw_1A<(512)) || (AdcRaw_1A>1023)) || (iAdcOffset == AdcRaw_1A)){
         iAdcOffset = IADCOFFSET;
         AdcRaw_1A = ADCRAW_1A;
@@ -78,7 +78,7 @@ void calibration_readParameters()
     }
 }
 
-// Reinicia los parametro a valores por defecto
+// Reinicia los parámetro a valores por defecto
 void calibration_resetParameters()
 {
     iAdcOffset = IADCOFFSET;

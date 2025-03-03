@@ -61,8 +61,8 @@
 
 //MOSFET TEMPERATURE
 #define FET_TEMP_SENSE_PIN  PA3
-#define FET_MAX_TEMP        100 //ºC maximos
-#define FET_MIN_TEMP         30 //ºC minimo para encender el cooler
+#define FET_MAX_TEMP        100 //ºC máximos
+#define FET_MIN_TEMP         30 //ºC mínimo para encender el cooler
 
 // PWM
 #define PWM1_PIN            PB1 // Canal 4 de TIM3
@@ -79,9 +79,9 @@
 //PID
 #define RESOLUTION PWM_RESOLUTION
 
-// MODO DEPURACION
-/*  Para graficar la respuesta con los parametros PID seleccionados
- *  Utilizar la aplicacion, en la PC, serial_port_plotter
+// MODO DEPURACIÓN
+/*  Para gráficar la respuesta con los parámetros PID seleccionados
+ *  Utilizar la aplicación, en la PC, serial_port_plotter
  */
 //#define DEBUG // Descomente esta linea para habilitar
 

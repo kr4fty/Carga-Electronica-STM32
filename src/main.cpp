@@ -863,7 +863,7 @@ void loop() {
                 }
                 // Imprimir tiempo transcurrido
                 // Usando las mini notificaciones puedo mostrar la temperatura
-                if(!newMiniNotificacion && isPrintTime){
+                if(!newMiniNotification && isPrintTime){
                     if(isPowerOn){
                         lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds(), COLOR_WB);
                     }

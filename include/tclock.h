@@ -3,12 +3,12 @@
 
 #include <Arduino.h>
 
-#define NO_LIMIT 0              // Limite de tiempo del proceso intereminado
+#define NO_LIMIT 0              // SIN limite de tiempo
 
 unsigned long previousMillis=0; // Almacena el último tiempo en que se ejecutó la acción
 unsigned long currentMillis;    // Obtiene el tiempo actual
 long totalTime=0;               // Tiempo total en funcionamiento, en segundos
-unsigned long timeDuration=NO_LIMIT;    // Tiempo que estara el proceso encendido
+unsigned long timeDuration=NO_LIMIT;    // Tiempo que estará el proceso encendido
 
 // Definición de la estructura para almacenar horas, minutos y segundos
 typedef struct {

@@ -16,8 +16,8 @@
 #define P_CONST_MODE      2 // Modo Potencia Constante
 #define R_CONST_MODE      3 // Modo Resistencia Constante
 
-extern float powerSetpoint; // Variable global que contine el setPoint de Potencia
-extern float resistanceSetpoint; // Variable global que contine el setPoint de Resistencia
+extern float powerSetpoint; // Variable global que contiene el setPoint de Potencia
+extern float resistanceSetpoint; // Variable global que contiene el setPoint de Resistencia
 uint8_t controlMode=C_CONST_MODE; // Modo de control, corriente cte. por defecto
 
 #define C_1A            1.0 // 1A
