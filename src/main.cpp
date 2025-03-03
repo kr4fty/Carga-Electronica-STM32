@@ -558,6 +558,10 @@ void loop() {
     /*                              PRUEBA DE CARGA                            */
     /***************************************************************************/
     else{
+        if(encoder.encoderChanged() && showMenu){
+            encoderValue = encoder.readEncoder();
+            menu.highlightMenuItem(encoderValue); // Resalto el nuevo Item seleccionado mediante el encoder
+        }
         // Cada determinado tiempo incremento ampereSetpoint
         if(isPowerOn && isLoadTestRunning){
             if(millis() > (timeLoadTestStart+250)){

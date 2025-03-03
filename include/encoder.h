@@ -55,15 +55,6 @@ unsigned long lastTimeButtonDown = millis();           // tiempo en el que duro 
 unsigned long lastTimeButtonClick;
 unsigned long maxTimeBetween2Events = 300;
 
-int8_t encoder_getDirection()
-{
-    int8_t direction = 0;
-    if(1){
-    }
-
-    return direction;
-}
-
 bool isButtonDown()
 {
     //return digitalReadFast(digitalPinToPinName(BUTTON_PIN))? false : true;

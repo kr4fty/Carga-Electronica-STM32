@@ -13,7 +13,7 @@ MenuLibraryWithSubmenus menu;
 bool showMenu;              //True: si se muestra el menu y no las mediciones
 extern uint8_t controlMode; // Modo de control, corriente cte. por defecto (C_CONST_MODE es 1)
 extern bool isPowerOn;      // True: proceso funcionando
-extern float vLimit;        // Contiene la tension limite de descarga
+extern float vLimit;        // Contiene la tensión limite de descarga
 
 void menu_exit() // libera memoria y sale del menu inmediatamente
 {
@@ -21,7 +21,7 @@ void menu_exit() // libera memoria y sale del menu inmediatamente
     showMenu = false;
 }
 
-void menu_goback() // Por ahora no deberia hacer nada en especial
+void menu_goback() // Por ahora no debería hacer nada en especial
 {
 }
 
@@ -51,17 +51,17 @@ void menu_modeResistanceContant()
 
 void menu_modeTime()
 {
-    long eValue;    // Valor leido desde el encoder
+    long eValue;    // Valor leído desde el encoder
     long oldEValue; // Valor guardado antes de entrar a configurar tiempo
     uint8_t key;
-    Tiempo time;    // contendra el tiempo de funcionamiento seleccionado
+    Tiempo time;    // contendrá el tiempo de funcionamiento seleccionado
     bool selectedTime = false;
 
     // Detengo la salida pwm si estaba trabajando
     isPowerOn = false;
     control_stopOutputsAndReset();
 
-    // Recupero si habia un valor previo guardado
+    // Recupero si había un valor previo guardado
     time = clock_totalTime_to_standar_format(timeDuration);
     
     lcd_printClock(time.horas, time.minutos, time.segundos, controlMode);
@@ -139,7 +139,7 @@ void menu_modeTime()
             timeDuration = clock_standar_format_to_totalTime(time);
             lcd_printConfiguredTime(time.horas, time.minutos, time.segundos, timeDuration, controlMode);
             control_resetAllForNewMode();
-            // Espero hasta que se haga un click en el boton
+            // Espero hasta que se haga un click en el botón
             while(!isButtonClicked());
             selectedTime = true; // Se selecciono el tiempo, entonces salgo del while
         }
@@ -165,15 +165,15 @@ void menu_setVmin()
 
     key = isButtonClicked();
     lcd.clearDisplay();
-    lcd_printNewSetpoint(vLimit, 4); // imprimimo en modo Vmin limite 
+    lcd_printNewSetpoint(vLimit, 4); // imprimo Vmin limite 
     lcd.display();
 
-    while(key != SHORT_CLICK){ //sale con una pulsacion corta
+    while(key != SHORT_CLICK){ //sale con una pulsación corta
         if(encoder.encoderChanged()){
             encoderValue = encoder.readEncoder();
             
             vLimit = encoderValue/100.0;
-            lcd_printNewSetpoint(vLimit, 4); // imprimimo en modo Vmin limite 
+            lcd_printNewSetpoint(vLimit, 4); // imprimo nuevo Vmin limite seleccionado
             lcd.display();
         }
         key = isButtonClicked();
@@ -183,10 +183,11 @@ void menu_setVmin()
     menu_exit();
 }
 
-void menu_setDefeultMode()  // Reconfiguro a valores por defecto
+void menu_setDefeultMode()  // Re configuro a valores por defecto
 {
-    controlMode = 1;
-    totalTime = 0;
+    controlMode = 1;    // Modo C cte. por defecto   
+    isLoadTestRunning = false; // Deshabilito la prueba
+    totalTime = 0;  // Reinicio contador del tiempo de funcionamiento
     timeDuration = NO_LIMIT;
     clock_resetClock(timeDuration);
 }
