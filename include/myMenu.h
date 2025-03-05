@@ -192,12 +192,25 @@ void menu_setDefeultMode()  // Re configuro a valores por defecto
     clock_resetClock(timeDuration);
 }
 
+void menu_softReset()
+{
+    // Dirección del registro AIRCR
+    volatile uint32_t* aircr = (uint32_t*)0xE000ED0C;
+
+    // Valor para reiniciar el sistema
+    uint32_t value = 0x05FA0004;
+
+    // Escribir el valor en el registro AIRCR
+    *aircr = value;
+}
+
 void menu_init(){
     // Agrega elementos al menú principal
     menu.addMenuItem("Configurar");
     menu.addMenuItem("Modo de trbjo");
     menu.addMenuItem("V minimo", menu_setVmin);
     menu.addMenuItem("Calibracion");
+    menu.addMenuItem("Reiniciar MCU",menu_softReset);
     menu.addMenuItem("Salir", menu_exit);
 
     // Submenu Backlight

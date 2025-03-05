@@ -26,6 +26,7 @@ void encoder_init()
     //encoder.disableAcceleration(); //acceleration is now enabled by default - disable if you dont need it
     encoder.setAcceleration(150); //or set the value - larger number = more accelearation; 0 or 1 means disabled acceleration
     encoder.setEncoderValue(0);
+    encoder.correctionOffset = 0;
 }
 
 void encoder_setBasicParameters(long minValue, long maxValue, bool circleValues=false , long newValue=0, long accel=150)
