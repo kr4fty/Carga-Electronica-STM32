@@ -11,7 +11,7 @@
 #define SIZE_L      3 // Tamaño grande de la fuente
 #define FONT_H      8 // Altura de la fuente
 #define FONT_W      6 // Ancho de la fuente
-                                        
+#define MAX_DISPLAYED_ITEMS 5   // Cantidad simultanea máxima de Items que se pueden mostrar en el LCD
 
 Adafruit_PCD8544 lcd = Adafruit_PCD8544(LCD_SCLK_PIN, LCD_DIN_PIN, LCD_DC_PIN, LCD_CS_PIN, LCD_RST_PIN);
 #define DISPLAY_UPDATE_WINDOW 200 // Actualizo cada 200 mili segundos
@@ -595,7 +595,7 @@ void lcd_printSelected(uint8_t posy, uint8_t color=COLOR_BW)
 {
     lcd.setCursor(0, posy*FONT_H);
     if(color==COLOR_WB){
-        lcd.print((char)175);
+        lcd.print((char)175); // Ascii de '>>'
     }else{
         lcd.print(" ");
     }
@@ -632,14 +632,24 @@ void lcd_printMenuItem(const char *str, uint8_t posy, uint8_t color=COLOR_BW)
     lcd.display();
 }
 
-void lcd_printMenu(char strs[][14], uint8_t strSz, uint8_t actualPos=1)
+void lcd_printMenu(char strs[][14], uint8_t strSz, uint8_t actualPos=1, uint8_t startIndex=0)
 {
+    uint8_t stopIndex;
+    if( (strSz-1) < MAX_DISPLAYED_ITEMS ){ //(strSz-1): es el total de Items sin el titulo
+        stopIndex = strSz-1;
+    }
+    else{
+        stopIndex = startIndex + MAX_DISPLAYED_ITEMS;
+    }
+
     lcd.clearDisplay();
-    for(uint8_t i=0; i<strSz; i++){
-        if(i==(actualPos+1)){
-            lcd_printMenuItem(strs[i], i, COLOR_WB);
+
+    lcd_printMenuItem(strs[0], 0);  // Impresión del Titulo
+    for(uint8_t posy=1, index=(startIndex+1); index <= stopIndex; posy++, index++){
+        if( index == (actualPos+1) ){
+            lcd_printMenuItem(strs[index], posy, COLOR_WB);
         }else{
-            lcd_printMenuItem(strs[i], i);
+            lcd_printMenuItem(strs[index], posy);
         }
     }
 }

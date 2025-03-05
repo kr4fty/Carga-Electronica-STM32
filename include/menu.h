@@ -26,6 +26,7 @@ public:
         menuIndex = 0;
         menuItemsCount = 0;
         currentSubMenu = nullptr;
+        startIndex = 0;
     }
     void addMenuItem(const char* item, void (*action)()=nullptr) {
         if (menuItemsCount < maxMenuItems) {
@@ -49,11 +50,21 @@ public:
             sprintf(menuList[i+1] ,"%s", menuItems[i]->name);
         }
 
-        lcd_printMenu(menuList, menuItemsCount+1, menuIndex);
+        // Inicializar el índice de inicio
+        startIndex = 0;
+
+        lcd_printMenu(menuList, menuItemsCount+1, menuIndex, startIndex);
     }
-    void highlightMenuItem(long encoderValue){ // Resaltar el nuevo Item seleccionado mediante el encoder
+    void highlightMenuItem(long encoderValue){ // Resalta el nuevo Item seleccionado mediante el encoder
         oldMenuIndex = menuIndex;
         menuIndex = encoderValue;
+
+        // Calcular el índice de inicio para el desplazamiento
+        if (menuIndex >= MAX_DISPLAYED_ITEMS) {
+            startIndex = menuIndex - MAX_DISPLAYED_ITEMS + 1;
+        } else {
+            startIndex = 0;
+        }
         if (currentSubMenu) {
             updateSelectedSubMenuItem(currentSubMenu);
         } else {
@@ -100,6 +111,7 @@ private:
     int menuIndex;
     int oldMenuIndex;
     int menuItemsCount;
+    int startIndex; // Variable para el índice de inicio del desplazamiento
     const int maxMenuItems = 10; // Número máximo de elementos en el menú
     MenuItem* menuItems[10]; // Array para almacenar los elementos del menú
     MenuItem* currentSubMenu; // Puntero al submenú actual
@@ -117,13 +129,13 @@ private:
         // Si hay una acción asociada, la ejecutamos
         if (selectedItem->action) {
             selectedItem->action(); // Llama a la función asociada
-        }  else{ 
+        } else {
             lcd_printSelectedMenu(selectedItem->name);
-            while(!isButtonClicked()); // Muestra la selección mientas no haya un click
+            while(!isButtonClicked()); // Muestra la selección mientras no haya un click
         }
     }
     void displaySubMenu(MenuItem* subMenu){
-        encoder_setBasicParameters(0, subMenu->subMenuItemCount-1, true);
+        encoder_setBasicParameters(0, subMenu->subMenuItemCount-1, true, 0);
 
         sprintf(menuList[0], "%s", subMenu->name);
 
@@ -131,15 +143,30 @@ private:
             sprintf(menuList[i+1], "%s",subMenu->subMenu[i].name);
         }
 
-        lcd_printMenu(menuList, subMenu->subMenuItemCount+1, menuIndex);
+        // Inicializar el índice de inicio
+        startIndex = 0;
+
+        lcd_printMenu(menuList, subMenu->subMenuItemCount+1, menuIndex, startIndex);
     }
     void updateSelectedSubMenuItem(MenuItem* subMenu){
-        lcd_printSelected(oldMenuIndex+1);
-        lcd_printSelected(menuIndex+1, COLOR_WB);
+        // Si nos movemos dentro de los limites (0, MAX_DISPLAYED_ITEMS), solo refresco el Item que se resalto
+        if( (menuIndex<MAX_DISPLAYED_ITEMS) && (oldMenuIndex<MAX_DISPLAYED_ITEMS) && (menuIndex<MAX_DISPLAYED_ITEMS) ){
+            lcd_printSelected(oldMenuIndex+1-startIndex);
+            lcd_printSelected(menuIndex+1-startIndex, COLOR_WB);
+        }
+        else{ // Se salio de los limites, entonces reimprimo toda la pantalla
+            lcd_printMenu(menuList, subMenu->subMenuItemCount+1, menuIndex, startIndex);
+        }
     }
     void updateSelectedMenuItem(){
-        lcd_printSelected(oldMenuIndex+1);
-        lcd_printSelected(menuIndex+1, COLOR_WB);
+        // Si nos movemos dentro de los limites (0, MAX_DISPLAYED_ITEMS), solo refresco el Item que se resalto
+        if( (menuIndex<MAX_DISPLAYED_ITEMS) && (oldMenuIndex<MAX_DISPLAYED_ITEMS) && (menuIndex<MAX_DISPLAYED_ITEMS) ){
+            lcd_printSelected(oldMenuIndex+1-startIndex);
+            lcd_printSelected(menuIndex+1-startIndex, COLOR_WB);
+        }
+        else{ // Se salio de los limites, entonces reimprimo toda la pantalla
+            lcd_printMenu(menuList, menuItemsCount+1, menuIndex, startIndex);
+        }
     }
 };
 

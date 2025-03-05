@@ -707,7 +707,7 @@ void loop() {
                     oldControlMode = controlMode;
                 }
                 else{ // No se configuro nuevo modo. Continuo sin cambios
-                    // Recupero el valor del Encoder antes de entrar al menu
+                    // Recupero el valor del Encoder antes de entrar al Menú
                     encoder_setBasicParameters(0, 1000, false, oldEncoderValue);
                 }
                 
