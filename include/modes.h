@@ -15,6 +15,7 @@
 #define C_CONST_MODE      1 // Modo Corriente Constante
 #define P_CONST_MODE      2 // Modo Potencia Constante
 #define R_CONST_MODE      3 // Modo Resistencia Constante
+#define V_LIMIT           4 // V Limite
 
 extern float powerSetpoint; // Variable global que contiene el setPoint de Potencia
 extern float resistanceSetpoint; // Variable global que contiene el setPoint de Resistencia

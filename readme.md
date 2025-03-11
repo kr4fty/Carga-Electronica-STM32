@@ -50,11 +50,46 @@ Debido a la inestabilidad de la potencia con respecto a la temperatura de los mo
 - **Tensión de umbral (Vgs threshold):** Es el voltaje mínimo que debe aplicarse entre la puerta y la fuente para que el MOSFET comience a conducir corriente entre el drenador y la fuente.
 - **Disipación de potencia:** Operar en la zona de saturación genera una significativa disipación de potencia en el MOSFET. Por lo tanto, es necesario implementar un sistema de disipación forzada para evitar el sobrecalentamiento.
 
-### Modos de Funcionamiento
+#### Modos de Operacion
 * Modo de **Corriente Constante**: Este es el modo predeterminado de operación, en el cual el dispositivo mantiene un nivel de corriente constante, determinado por el operador. Este modo es ideal para evaluar el comportamiento de una fuente o batería al operar bajo una corriente estable.
 * Modo de **Potencia Constante**: En este modo, el dispositivo ajusta automáticamente la corriente para mantener la potencia consumida constante en la carga. Este enfoque es útil en situaciones donde es crítico mantener un nivel de potencia específico.
 * Modo de **Tiempo**: Este modo permite al operador establecer un intervalo de tiempo durante el cual la carga permanecerá activa. Se pueden utilizar cualquiera de los modos anteriores en conjunto con este, según las necesidades de la aplicación.
 
+## Modo de Funcionamiento
+
+ * Al encender el equipo:
+  El sistema muestra una pantalla con los siguientes parámetros:
+    * **Tensión mínima (Vmin Limite):** 0.00 V (por defecto).
+    * **Corriente de carga:** 1.00 A (por defecto).
+    * **Modo de Operación:** "Corriente Constante" (por defecto).
+
+ * Modificación de parámetros:
+    * **Selección de parámetros:** Gira el encoder para resaltar el parámetro deseado (se invertirán los colores en el seleccionado).
+    * **Edición de parámetros:** Realiza un giro rápido hacia la izquierda para entrar en modo edición. El parámetro comenzará a parpadear.
+    * **Ajuste de valores:** Gira el encoder para incrementar o decrementar el valor.
+    * **Confirmación:** Espera 2 segundos para salir del modo edición.
+
+* Inicio del proceso:
+    * **Inicio:** Haz un click corto en el botón para comenzar el proceso.
+    * **Parada:** Un click corto detendrá el proceso.
+
+* Modificación de parámetros estando el proceso en funcionamiento:
+    - Puedes editar los parámetros de la misma manera que en el estado inicial de arranque (selección y edición).
+
+* Menú:
+    * **Acceso al menú:** Haz un doble click en el botón.
+
+    * **Opciones del menú:**
+        * Configurar
+            * Backlight.
+        * Modo de Trabajo (Corriente Cte., Potencia Cte., Resistencia Cte., Tiempo, Prueba de carga, Reset modo actual).
+        * Set Vmin Limite.
+        * Calibración
+            * Calibrar
+            * Ver parámetros
+            *Borrar configuración actual.
+        * Reiniciar MCU
+        * Salir del Menú
 
 ## Hardware
 

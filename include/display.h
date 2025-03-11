@@ -247,6 +247,8 @@ void lcd_printOpMode(uint8_t mode=1, uint8_t color=COLOR_BW)
             break;
     }
     lcd.setTextColor(BLACK, WHITE);
+
+    updateDisplay = true;
 }
 
 void lcd_printNewSetpoint(float value, uint8_t mode=1)
@@ -267,10 +269,10 @@ void lcd_printNewSetpoint(float value, uint8_t mode=1)
         case 3: // Modo Resistencia Constante
             dtostrf(value, 4, 1, _buff);
             break;
-        case 4:
+        case 4: // Configuración de V min limite
             dtostrf(value, 4, 2, _buff);
             break; 
-        default: // Configuración de V min limite
+        default:
             break;
     }
     
@@ -558,27 +560,35 @@ void lcd_printIin(float i_in, uint8_t color=COLOR_BW)
     updateDisplay = true;
 }
 
-void lcd_printPin(float p_in)
+void lcd_printPin(float p_in, uint8_t color=COLOR_BW)
 {
     //floatTostr(p_in, 6, 1);
     dtostrf(p_in, 6, 1, _buff);
 
+    if(color == COLOR_WB){
+        lcd.setTextColor(WHITE, BLACK);
+    }
     lcd.setTextSize(SIZE_M);
     lcd.setCursor(0*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
     lcd.print(_buff);
 
+    lcd.setTextColor(BLACK, WHITE);
     updateDisplay = true;
 }
 
-void lcd_printRout(float rOut)
+void lcd_printRout(float rOut, uint8_t color=COLOR_BW)
 {
     //floatTostr(p_in, 6, 1);
     dtostrf(rOut, 6, 1, _buff);
 
+    if(color == COLOR_WB){
+        lcd.setTextColor(WHITE, BLACK);
+    }
     lcd.setTextSize(SIZE_M);
     lcd.setCursor(0*SIZE_M*FONT_W, 1*SIZE_M*FONT_H);
     lcd.print(_buff);
 
+    lcd.setTextColor(BLACK, WHITE);
     updateDisplay = true;
 }
 
@@ -825,10 +835,105 @@ void lcd_printShowLoadTestResults(float vin, float iin)
     lcd.display();
 }
 
+void lcd_printSelectedParam(uint8_t param, uint8_t mode, uint8_t color=COLOR_BW) // Colorea el parámetro seleccionado
+{
+    if(color == COLOR_WB){
+        lcd.setTextColor(WHITE, BLACK);
+    }
+    // Me posiciono en el sitio adecuado y coloreo
+    switch (param)
+    {
+        case 0:
+            lcd.setTextSize(SIZE_M);
+            lcd.setCursor(6*FONT_W*SIZE_M, 0*FONT_H*SIZE_M);
+            lcd.print("V");
+            break;
+        case 1:
+            lcd.setTextSize(SIZE_M);
+            lcd.setCursor(6*FONT_W*SIZE_M, 1*FONT_H*SIZE_M);
+            switch (mode)
+            {
+                case 1: //C_CONST_MODE
+                    lcd.print("A");
+                    break;
+                case 2: //P_CONST_MODE
+                    lcd.print("W");
+                    break;
+                case 3: //R_CONST_MODE
+                    lcd.print((char)234); // ASCII del carácter 'Ω'
+                    break;
+                default:
+                    break;
+            }
+            
+            break;
+        case 2:
+            lcd.setTextSize(SIZE_S);
+            lcd.setCursor(0*SIZE_S*FONT_W, 4*SIZE_S*FONT_H);
+            lcd.print("Modo Cte.:");
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        default:
+            break;
+    }
+
+    lcd.setTextSize(SIZE_S);
+    lcd.setTextColor(BLACK, WHITE);
+    updateDisplay = true;
+}
+
+void lcd_blinkSelectedParameter(uint8_t param, uint8_t mode, float value, uint8_t color=COLOR_BW)
+{
+    if(color == COLOR_WB){
+        lcd.setTextColor(WHITE, BLACK);
+    }
+    // Me posiciono en el sitio adecuado y coloreo
+    switch (param)
+    {
+        case 0:
+            lcd_printVin(value, color);
+            break;
+        case 1:
+            switch (mode)
+            {
+                case 1: //C_CONST_MODE
+                    lcd_printIin(value, color);
+                    break;
+                case 2: //P_CONST_MODE
+                    lcd_printIin(value, color);
+                    break;
+                case 3: //R_CONST_MODE
+                    lcd_printRout(value, color);
+                    break;
+                default:
+                    break;
+            }
+            
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        default:
+            break;
+    }
+
+    lcd.setTextSize(SIZE_S);
+    lcd.setTextColor(BLACK, WHITE);
+    updateDisplay = true;
+}
+
 void lcd_display()
 {
-    lcd.display();
-    updateDisplay = false;
+    if(updateDisplay){
+        updateDisplay = false;
+        lcd.display();
+    }
 }
 
 #endif
