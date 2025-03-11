@@ -82,12 +82,18 @@ Debido a la inestabilidad de la potencia con respecto a la temperatura de los mo
     * **Opciones del menú:**
         * Configurar
             * Backlight.
-        * Modo de Trabajo (Corriente Cte., Potencia Cte., Resistencia Cte., Tiempo, Prueba de carga, Reset modo actual).
-        * Set Vmin Limite.
+        * Modo de Trabajo
+            * Corriente Cte.
+            * Potencia Cte.
+            * Resistencia Cte.
+            * Tiempo Limite
+            * Prueba de carga
+            * Reset modo actual
+        * Set Vmin Limite
         * Calibración
             * Calibrar
             * Ver parámetros
-            *Borrar configuración actual.
+            * Borrar parámetros
         * Reiniciar MCU
         * Salir del Menú
 
