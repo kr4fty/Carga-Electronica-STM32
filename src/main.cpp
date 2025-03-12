@@ -144,6 +144,7 @@ long pulseCount; // Contador de ticks en cada evento (giro del encoder)
 bool newValue; // True: si hubo un cambio, admitido, en el encoder
 bool modifyParameter; // True: se entro en modo edición del parámetro seleccionado
 bool actualColor; // Color actual del parámetro
+bool firstTime=true; // True: para ejecutar acciones solo en el arranque
 
 void loop() {
     /***************************************************************************/
@@ -278,11 +279,11 @@ void loop() {
         tone(BUZZER_PIN, 7000, 80);
 
         // Recupero configuración previa del contador del encoder
-        if(isPowerOn){
-            encoder_setBasicParameters(0, 199, true, 1, 2);
+        if(firstTime){
+            encoder_setBasicParameters(0, 299, true, paramNumber, 2);
         }
         else{
-            encoder_setBasicParameters(0, 299, true, paramNumber, 2);
+            encoder_setBasicParameters(0, 199, true, 1, 2);
         }
     }
     //
@@ -353,11 +354,11 @@ void loop() {
         }
         else{ // Entrando en modo SELECCIÓN
             oldParamNumber = paramNumber;
-            if(isPowerOn){
-                paramNumber = encoder.readEncoder()%2;
+            if(firstTime){
+                paramNumber = encoder.readEncoder()%3;
             }
             else{
-                paramNumber = encoder.readEncoder()%3;
+                paramNumber = encoder.readEncoder()%2;
             }
 
             lcd_printSelectedParam(oldParamNumber, controlMode); // limpio selección anterior
@@ -527,6 +528,11 @@ void loop() {
 
             // HUBO UN CLICK EN EL BOTÓN
             else if (key == SHORT_CLICK){
+                // Una vez que se ejecuto el proceso de control ya no se 
+                // mostraran algunas opciones que se ejecutan solo al arranque
+                if(firstTime){
+                    firstTime = false;
+                }
                 isPowerOn = not isPowerOn; // Cambia el estado anterior, de ENCENDIDO -> APAGADO y viceversa
 
                 // ENCENDIDO
@@ -757,7 +763,7 @@ void loop() {
             }
             else {
                 // actualizo el valor de la temperatura en el MOSFET
-                if(wasTempUpdated && isPowerOn){
+                if(wasTempUpdated && !firstTime){
                     lcd_printTemperature(mosfetTemp);
                     wasTempUpdated = false;
                 }
@@ -768,7 +774,7 @@ void loop() {
                         lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds(), COLOR_WB);
                     }
                     else{
-                        //lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds());
+                        lcd_printTime(clock_get_hours(), clock_get_minutes(), clock_get_seconds());
                     }
                     isPrintTime = false;
                 }
@@ -779,12 +785,12 @@ void loop() {
             }
 
             if(forceRePrint){   // Reimprimir toda la pantalla
-                if(isPowerOn){
-                    lcd_printBaseFrame(controlMode);
-                    paramNumber = 1;
+                if(firstTime){
+                    lcd_printSelectBaseFrame(controlMode);
                 }
                 else{
-                    lcd_printSelectBaseFrame(controlMode);
+                    lcd_printBaseFrame(controlMode);
+                    paramNumber = 1;
                 }
                 // Resaltar Parámetro a modificar
                 lcd_printSelectedParam(paramNumber, controlMode, COLOR_WB); 
@@ -809,15 +815,7 @@ void loop() {
             }
 
             // Imprimo los Watts-Hora y Ampere-Hora, o Modo de Operación 
-            if(isPowerOn){
-                if(wasXhUpdated){      
-                    lcd_printWattHour(totalWh);
-                    lcd_printAmpHour(totalmAh);
-
-                    wasXhUpdated = false;
-                }
-            }
-            else{
+            if(firstTime){
                 if(wasCtrlModeUpdated){
                     if(paramNumber == 2){
                         lcd_printOpMode(controlMode, actualColor);
@@ -827,6 +825,14 @@ void loop() {
                     }
                     if(!modifyParameter)
                         wasCtrlModeUpdated = false;
+                }
+            }
+            else{
+                if(wasXhUpdated){      
+                    lcd_printWattHour(totalWh);
+                    lcd_printAmpHour(totalmAh);
+
+                    wasXhUpdated = false;
                 }
             }
 
