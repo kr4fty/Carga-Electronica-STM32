@@ -75,27 +75,12 @@ void setup() {
         calibration_readParameters();
     }
 
-    vLimit = V_0V;
+    vLimit = V_0V;              // 0 Volt
     controlMode; // Por default esta en C_CONST_MODE
-    switch (controlMode){
-        case C_CONST_MODE:
-            ampereSetpoint = C_1A;  // 1 Ampere
-            powerSetpoint = 0.0;    // 0 Watt
-            resistanceSetpoint = R_10R;// 0 Ohm
-            break;
-        case P_CONST_MODE:
-            ampereSetpoint = 0.0;   // 0 Ampere
-            powerSetpoint = P_1W;   // 1 Watt
-            resistanceSetpoint = R_10R;// 0 Ohm
-            break;
-        case R_CONST_MODE:
-            ampereSetpoint = 0.0;   // 0 Ampere
-            powerSetpoint = 0.0;    // 1 Watt
-            resistanceSetpoint = R_10R;// 10 Ohms
-            break;
-        default:
-            break;
-    }
+    
+    ampereSetpoint = C_1A;      // 1 Ampere
+    powerSetpoint = P_1W;       // 1 Watt
+    resistanceSetpoint = R_10R; // 10 Ohm
 
     //lcd_printBaseFrame(controlMode);
     lcd_printSelectBaseFrame();
@@ -187,7 +172,17 @@ void loop() {
     if(controlMode==P_CONST_MODE || controlMode==R_CONST_MODE){
         if(vIn != vInOld && isPowerOn){
             // Actualizo valores
-            ampereSetpoint = modes_handleEncoderChange(vIn, showMenu?oldEncoderValue:encoderValue, controlMode);
+            switch (controlMode)
+            {
+                case P_CONST_MODE:
+                    ampereSetpoint =  powerSetpoint/vIn; // Cálculo de la corriente necesaria
+                    break;
+                case R_CONST_MODE:
+                    ampereSetpoint = vIn/resistanceSetpoint; // Cálculo de la corriente necesaria
+                break;
+                default:
+                    break;
+            }
 
             Output2 = ampereToDutycycle(ampereSetpoint*.5, MOSFET2);
             
@@ -267,7 +262,7 @@ void loop() {
         newValue = true; // Evento finalizado, hay nuevo valor
     }
     if(eventStartTime && modifyParameter && (millis()-eventEndTime)>2000){
-        // Estando apagado, se termino el tiempo de espera para la edición del parámetro
+        // Se termino el tiempo de espera para la edición del parámetro
         eventStartTime = 0;
         modifyParameter = false; // Ya no estoy en modo edición
 
@@ -581,28 +576,10 @@ void loop() {
 
                 if(oldControlMode != controlMode){ // Nuevo modo seteado
                     // Inicializo el setpoint por defecto para cada modo
-                    switch (controlMode){
-                        case C_CONST_MODE:
-                            encoder_setBasicParameters(0, 1000, false, C_1A*100);
-                            ampereSetpoint = C_1A;  // 1 Ampere
-                            powerSetpoint = 0.0;    // 0 Watt
-                            resistanceSetpoint = 0.0;// 0 Ohms
-                            break;
-                        case P_CONST_MODE:
-                            encoder_setBasicParameters(0, 1000, false, P_1W*10);
-                            ampereSetpoint = 0.0;   // 0 Ampere
-                            powerSetpoint = P_1W;   // 1 Watt
-                            resistanceSetpoint = 0.0;// 0 Ohms
-                            break;
-                        case R_CONST_MODE:
-                            encoder_setBasicParameters(0, 1000, false, R_10R*10);
-                            ampereSetpoint = 0.0;   // 0 Ampere
-                            powerSetpoint = 0.0;    // 1 Watt
-                            resistanceSetpoint = R_10R;// 10 Ohms
-                            break;
-                        default:
-                            break;
-                    }
+                    vLimit = V_0V;              // 0 Volt
+                    ampereSetpoint = C_1A;      // 1 Ampere
+                    powerSetpoint = P_1W;       // 1 Watt
+                    resistanceSetpoint = R_10R; // 10 Ohm
 
                     oldControlMode = controlMode;
                 }
