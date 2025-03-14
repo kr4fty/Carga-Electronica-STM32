@@ -583,9 +583,19 @@ void loop() {
 
                     oldControlMode = controlMode;
                 }
-                else{ // No se configuro nuevo modo. Continuo sin cambios
-                    // Recupero el valor del Encoder antes de entrar al Menú
-                    encoder_setBasicParameters(0, 1000, false, oldEncoderValue);
+                
+                switch (controlMode){
+                    case C_CONST_MODE:
+                        encoder_setBasicParameters(0, 1000, false, ampereSetpoint*100, 100);
+                        break;
+                    case P_CONST_MODE:
+                        encoder_setBasicParameters(0, 1000, false, powerSetpoint*10, 100);
+                        break;
+                    case R_CONST_MODE:
+                        encoder_setBasicParameters(0, 1000, false, resistanceSetpoint*10, 100);
+                        break;
+                    default:
+                        break;
                 }
                 
                 // Vuelvo a calcular el Setpoint para el modo seleccionado
@@ -780,7 +790,7 @@ void loop() {
                 else{
                     printTinySetpoint = true;
                 }
-                if(isPowerOn){
+                if(!firstTime){
                     isPrintTime = true;
                     wasTempUpdated = true;
                 }
