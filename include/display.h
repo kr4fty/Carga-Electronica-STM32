@@ -14,7 +14,7 @@
 #define MAX_DISPLAYED_ITEMS 5   // Cantidad simultanea máxima de Items que se pueden mostrar en el LCD
 
 Adafruit_PCD8544 lcd = Adafruit_PCD8544(LCD_SCLK_PIN, LCD_DIN_PIN, LCD_DC_PIN, LCD_CS_PIN, LCD_RST_PIN);
-#define DISPLAY_UPDATE_WINDOW 200 // Actualizo cada 200 mili segundos
+#define DISPLAY_UPDATE_WINDOW 20 // Actualizo cada 20 mili segundos
 
 bool updateDisplay = false;
 char _buff[20];

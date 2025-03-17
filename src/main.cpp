@@ -130,6 +130,7 @@ bool newValue; // True: si hubo un cambio, admitido, en el encoder
 bool modifyParameter; // True: se entro en modo edición del parámetro seleccionado
 bool actualColor; // Color actual del parámetro
 bool firstTime=true; // True: para ejecutar acciones solo en el arranque
+uint8_t colorCount; // Contador para indicar el cambio del color, modo edición
 
 void loop() {
     /***************************************************************************/
@@ -726,13 +727,20 @@ void loop() {
     /*                            Refresco la Pantalla                         */
     /***************************************************************************/
     if(!showMenu){
+        // Se refresca cada 20mseg
         if(millis()>timeToUpdateDisplay && !isTheSetpointUpdated){
-            if(modifyParameter){
-                actualColor? actualColor=COLOR_WB: actualColor=COLOR_BW;
+            // Manejo del parpadeo, en el valor del parámetro, en modo edición
+            colorCount ++;
+            if(colorCount == 20){// Parpadeo cada 20*20mS=400mseg                
+                colorCount = 0;
+                if(modifyParameter){
+                    actualColor? actualColor=COLOR_WB: actualColor=COLOR_BW;
+                }
+                else{
+                    actualColor = COLOR_BW;
+                }
             }
-            else{
-                actualColor = COLOR_BW;
-            }
+
             if(newNotification){
                 if(notification_hasExpired()){
                     // Fuerzo reimprimir toda la pantalla
@@ -907,7 +915,7 @@ void loop() {
 
             lcd_display();
             
-            timeToUpdateDisplay = millis()+DISPLAY_UPDATE_WINDOW;
+            timeToUpdateDisplay = millis()+DISPLAY_UPDATE_WINDOW; // Cada 20ms
         }
     }
     // FIN UPDATE DISPLAY
