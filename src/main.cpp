@@ -582,6 +582,8 @@ void loop() {
                     powerSetpoint = P_1W;       // 1 Watt
                     resistanceSetpoint = R_10R; // 10 Ohm
 
+                    isPowerOn = false; // Forzar apagado
+
                     oldControlMode = controlMode;
                 }
                 
